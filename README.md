@@ -2,6 +2,11 @@
 
 Velocitex is a Windows 3D momentum-puzzle game built with Godot 4.7 .NET and C#. You control a candy through a 28-room candy-machine world where slopes, surface materials, launches, and deliberate turns determine whether you reach the exit.
 
+## Demo video
+
+Watch the Velocitex demo video:  
+[Watch the public demo video](https://youtu.be/zOM79yaOCXk)
+
 ## Play the Windows build
 
 The downloadable Windows build is distributed through the [GitHub Releases page](https://github.com/AlonTsur1601/Velocitex/releases/latest). Once a release is published, use the latest release asset below.
