@@ -4,7 +4,7 @@ Velocitex is a Windows 3D momentum-puzzle game built with Godot 4.7 .NET and C#.
 
 ## Play the Windows build
 
-The downloadable Windows build is published through the [GitHub Releases page](https://github.com/AlonTsur1601/Velocitex/releases/latest).
+The downloadable Windows build is distributed through the [GitHub Releases page](https://github.com/AlonTsur1601/Velocitex/releases/latest). Once a release is published, use the latest release asset below.
 
 1. Download `Velocitex_Windows.zip` from the latest release.
 2. Extract the entire ZIP to a writable local folder.
