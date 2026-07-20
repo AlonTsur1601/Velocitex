@@ -4,7 +4,7 @@ Velocitex is a Windows 3D momentum-puzzle game built with Godot 4.7 .NET and C#.
 
 ## Demo video
 
-Watch the Velocitex demo video:  
+Watch the Velocitex demo video on YouTube:  
 [Watch the public demo video](https://youtu.be/zOM79yaOCXk)
 
 ## Play the Windows build
