@@ -2669,7 +2669,7 @@ public partial class AppRoot : Node
             MuteSfxForRoomTransfer();
         }
         EvaluateRoomCompletionAdvancements();
-        _pendingCompletionSnapshot = SaveCurrentSnapshot(SnapshotKind.RoomComplete);
+        _pendingCompletionSnapshot = new CampaignSnapshot { RoomId = _currentRoom.RoomId, RoomName = _currentRoom.RoomDisplayName, RoomNumber = _currentRoom.RoomNumber, Kind = SnapshotKind.RoomComplete, CampaignElapsedSeconds = _campaignElapsedSeconds };
         GetTree().Paused = true;
         ApplyCameraSettings(inputEnabled: false, applyDefaultMode: false);
         SetRoomCompleteDialog(_currentRoom.RoomNumber, _currentRoom.RoomDisplayName, snapshotSaved: true);
@@ -2821,7 +2821,7 @@ public partial class AppRoot : Node
         int nextRoomNumber = completed.RoomNumber + 1;
         if (RoomCatalog.Find(nextRoomNumber) is not null)
         {
-            StartRoom(nextRoomNumber, saveRoomStart: false, completed.CampaignElapsedSeconds);
+            StartRoom(nextRoomNumber, saveRoomStart: true, completed.CampaignElapsedSeconds);
             return;
         }
 
@@ -2868,7 +2868,7 @@ public partial class AppRoot : Node
         TimeSpan elapsed = TimeSpan.FromSeconds(snapshot.CampaignElapsedSeconds);
         Label metadata = new()
         {
-            Text = $"ROOM COMPLETE   |   {snapshot.SavedAtUtc.ToLocalTime():yyyy-MM-dd HH:mm}\nPLAY TIME {elapsed:hh\\:mm\\:ss}",
+            Text = $"ROOM START   |   {snapshot.SavedAtUtc.ToLocalTime():yyyy-MM-dd HH:mm}\nPLAY TIME {elapsed:hh\\:mm\\:ss}",
         };
         metadata.AddThemeColorOverride("font_color", new Color("8f9ba3"));
         Button load = new()

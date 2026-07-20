@@ -72,7 +72,7 @@ public static class CampaignSaveService
         {
             if (TryLoadPath(path, out CampaignSnapshot? snapshot, out string? error) && snapshot is not null)
             {
-                if (snapshot.Kind == SnapshotKind.RoomComplete) snapshots.Add(snapshot);
+                if (snapshot.Kind == SnapshotKind.RoomStart) snapshots.Add(snapshot);
             }
             else
             {
@@ -206,9 +206,9 @@ public static class CampaignSaveService
             return $"Room number {snapshot.RoomNumber} is out of range.";
         }
 
-        if (snapshot.Kind != SnapshotKind.RoomComplete)
+        if (snapshot.Kind != SnapshotKind.RoomStart)
         {
-            return "Only completed-room snapshots are supported.";
+            return "Only room-start snapshots are supported.";
         }
 
         if (string.IsNullOrWhiteSpace(snapshot.RoomId) || string.IsNullOrWhiteSpace(snapshot.RoomName))
