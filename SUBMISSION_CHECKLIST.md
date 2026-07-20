@@ -23,10 +23,10 @@ Last verified: 2026-07-20 (Asia/Jerusalem). Sources: OpenAI Build Week page, Dev
   - Primary submission ID: `019f5659-1238-7ce2-927c-da0d7c36a4cc`
   - Additional major-thread IDs for README/evidence: `019f78f6-08f5-70a0-9302-28f446158ff7`, `019f7f4b-9c5e-7272-8eb9-545b3d9d4af0`
 - [ ] Create evidence that accurately distinguishes pre-existing work from work completed during the Submission Period.
-  - Status: **BLOCKED - the local repository currently has no recorded commits; all visible project files are untracked. Do not claim a commit history unless an external repository or archive is provided.**
+  - Status: prepared in `submission/evidence/build_week_changes.md`. The repository's initial snapshot was committed on July 20, 2026, so it is not evidence of when the pre-existing project was first created. Use the dated implementation record and Codex-session evidence; do not present the initial snapshot as pre-period source history.
 - [ ] Document specific, truthful examples of how Codex accelerated implementation, testing, design, and engineering decisions.
 - [ ] Document specific, truthful examples of meaningful GPT-5.6 use during the Submission Period.
-  - Status: **BLOCKED pending verifiable session evidence and the primary `/feedback` Session ID.**
+  - Status: prepared in `submission/evidence/codex_and_gpt56_evidence.md`; final claims must remain limited to the cited session IDs, dated implementation record, scripts, and test results.
 - [ ] Reference the same evidence in the README, Devpost text, and video narration.
 
 ## Submission form and judging access
