@@ -1,0 +1,47 @@
+1
+00:00:00,000 --> 00:00:03,000
+Velocitex is a 3D momentum puzzle game.
+
+2
+00:00:03,000 --> 00:00:06,000
+You guide a candy through a machine,
+
+3
+00:00:06,000 --> 00:00:10,000
+using slopes, bounce, grip, braking, and timing to reach the cup.
+
+4
+00:00:10,000 --> 00:00:13,000
+Early rooms teach one idea at a time.
+
+5
+00:00:13,000 --> 00:00:20,000
+Later rooms combine rails, pressure plates, moving platforms, cannons, and magnets into harder routes.
+
+6
+00:00:20,000 --> 00:00:23,000
+It is a playable Windows game with candy customization,
+
+7
+00:00:23,000 --> 00:00:29,000
+achievements, accessibility settings, room-start saves, and Room Select.
+
+8
+00:00:29,000 --> 00:00:34,000
+Codex helped turn design decisions into Godot and C# code,
+
+9
+00:00:34,000 --> 00:00:39,000
+investigate movement and saving issues, and build repeatable tests.
+
+10
+00:00:39,000 --> 00:00:45,000
+GPT-5.6, used through Codex, helped reason through mechanics,
+
+11
+00:00:45,000 --> 00:00:50,000
+edge cases, and test coverage.
+
+12
+00:00:50,000 --> 00:00:57,000
+Download Velocitex for Windows, and see how far your momentum can take you.
