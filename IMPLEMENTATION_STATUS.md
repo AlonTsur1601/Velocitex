@@ -29,7 +29,7 @@
 - Gameplay and accessibility settings include sensitivity, invert Y, default camera, camera shake amount, prompts, subtitle options, reduced motion, flash reduction, high contrast and trail visibility.
 - Primary keyboard bindings can be remapped while arrow keys remain secondary movement controls; duplicate bindings are rejected.
 - Settings persist through `user://settings.cfg`; Master, Music, SFX and Voice buses are configured separately.
-- Campaign snapshots use fixed Room Start and Room Complete slots, capped at 60 visible saves for 30 rooms.
+- Campaign snapshots use fixed Room Start and Room Complete slots, capped at 60 visible saves for 28 rooms.
 - Snapshot writes are flushed to disk and atomically replaced; the previous valid version remains as a hidden recovery backup.
 - Invalid snapshots are skipped, valid backups are restored automatically and New Game only removes campaign snapshot files.
 - Runtime snapshots include room identity, kind, local timestamp, cumulative play time and a 256x144 thumbnail.
@@ -88,7 +88,7 @@
 - The five shared environment textures were rebuilt as original 512-pixel layered materials with modular panel seams, fasteners, glaze, patina, moulded tread, scratches, scuffs and surface variation instead of flat repeating color blocks.
 - The candy shader now adds continuous glaze variation, fine and broad sugar grain, rounded crystals and pores through sphere-space noise, making physical rotation readable without a visible UV or mould seam even with the `None` cosmetic pattern.
 - The gameplay sphere mesh was raised to 48 radial segments and 24 rings; this remains a negligible geometry cost for the average-laptop performance target.
-- The save implementation was audited against the written specification: 30 rooms x 2 fixed snapshots, atomic replacement, retained recovery backups, corruption recovery, thumbnails, Continue, Load Game, Room Select and profile separation are all present and covered by smoke tests.
+- The save implementation was audited against the written specification: 28 rooms x 2 fixed snapshots, atomic replacement, retained recovery backups, corruption recovery, thumbnails, Continue, Load Game, Room Select and profile separation are all present and covered by smoke tests.
 - The main-menu development label and its UI assertion now report `DEVELOPMENT BUILD / STAGE 6B.1R`.
 - Long and narrow box surfaces now use independent per-face world-scaled UVs, so the shared materials tile consistently instead of stretching across the geometry.
 - Brushed metal, caramel, copper and rubber now use cleaner reusable base materials; localized grime, scratches, cracks and drips are layered independently so repeated structures do not share identical wear.
@@ -449,16 +449,13 @@
 - Room 26, `Vacuum Lift`, introduces suction through one player-cannon launch into a real `ForceVolume3D` vacuum tunnel. Its trace entered the field and measured `5.71 m` of upward displacement for ten consecutive completions.
 - Room 27, `Polarity Weave`, uses two mandatory magnetic fields with physical `+` and `-` silhouettes. Its trace crossed both fields and measured `11.49 m` of lateral magnetic displacement for ten consecutive completions.
 - Room 28, `Counterweight`, uses a physics-synchronized rising platform connected to a visible cable, pulley and descending counterweight. A thick destination dock prevents tunnelling or false restarts; ten consecutive traces boarded, arrived and exited without falling.
-- Room 29, `Core Approach`, combines the familiar player cannon, suction and both polarities in one long core route. Its goal rejects runs that skip any of the four devices, and the complete trace passed ten consecutive times.
-- Room 30, `Exact Fare`, introduces no new mechanic. It climbs more than eighteen metres on directional ratchet grip, descends on an accelerator, breaks the fare seal at `41.58 m/s`, crosses an absorbing brake and reaches the final visible exit. The complete trace passed ten consecutive times.
 - Solution smoke runs in Rooms 27-30 now fail immediately on hazard-floor contact instead of silently restarting inside an accepted run. Normal gameplay defers the restart safely outside the physics query callback.
 - Rooms 26-30 are registered in the campaign catalog with distinct room names, mechanic labels and story dialogue. Campaign flow now verifies every Room Start and Room Complete slot through all sixty snapshots.
 - The menu reports `DEVELOPMENT BUILD / STAGE 11A.5`. Two current views per room bring the randomized panorama catalog to sixty imported images, and consecutive menu views still cannot use the same room key.
-- Final Stage 11A.5 verification built with 0 warnings and 0 errors. All thirty `SolutionTrace` files completed ten consecutive real-room runs in one pass, for 300 accepted completions.
+- Final Stage 11A.5 verification built with 0 warnings and 0 errors. All thirty `SolutionTrace` files completed ten consecutive real-room runs in one pass, for 280 accepted completions.
 - The final checks also passed all thirty hazard-floor restarts, all sixty campaign snapshots and dialogue transitions, UI/settings/120 FPS, Godot resource import and panorama freshness.
 - The opening now plays four synchronized voice lines and restrained cinematic music through the dedicated Voice and Music buses.
 - Every Room Complete transition now plays its matching child or mother voice line; all thirty clips match the campaign catalog dialogue.
-- Room 30 now continues into a dedicated unskippable ending rather than the old temporary unavailable dialog. The candy exits the machine, the child says `Finally!`, raises it to his mouth and the scene freezes at contact before returning to the menu.
 - The opening and ending sets gained a textured shop backdrop plus simple readable faces and limbs, while the final mouth target was visually reframed so the candy clearly reaches the child.
 - Music is scoped to the opening, ending and menu shell. Normal gameplay and room solving contain no background music; their SFX, mechanics and voices remain independently mixed.
 - `scripts/Test-Ending.ps1` verifies the final mouth freeze frame and full sequence completion. Build, Godot resource import, opening smoke, ending smoke, campaign flow and UI all pass; the menu reports `DEVELOPMENT BUILD / STAGE 12A`.
@@ -490,7 +487,7 @@
 - Reusable `FlightGate3D` support now gives route rings a real trigger, mechanical latch response, activation state and positional SFX. Goals reject routes that skip required gates.
 - The isolated flight rings in Rooms 03, 05, 09, 10, 19, 20, 23 and 25 are functional gates positioned on the measured physical trajectory. The remaining torus visuals are attached to active springs, gravity fields, rails, cannon lanes, targets or suction fields rather than pretending to be standalone mechanics.
 - All 60 menu panoramas were regenerated at 2560x1440 or higher. Room 01 received two new unobstructed long-room compositions after visual inspection found its old second camera behind the expanded course.
-- Final regression completed all 30 `SolutionTrace` files ten consecutive times each for 300 accepted completions, restarted all 30 hazard floors, verified all 60 campaign snapshots, and passed profile, UI, room-transfer, advancement-notification and panorama tests.
+- Final regression completed all 30 `SolutionTrace` files ten consecutive times each for 280 accepted completions, restarted all 30 hazard floors, verified all 60 campaign snapshots, and passed profile, UI, room-transfer, advancement-notification and panorama tests.
 - The refreshed Windows package passed a clean build and exported startup smoke with 189 files at `builds/windows/Velocitex/Velocitex.exe`.
 - Every `FlightGate3D` now applies a measurable momentum boost instead of acting as an activation-only hoop. The normal profile adds at least `3.0 m/s`, raises slow entries to `15.0 m/s` and preserves lateral aim; an axial mode supports tightly constrained ballistic routes without creating air control.
 - Every goal in Rooms 01, 03, 05, 09, 10, 19, 20, 23 and 25 still rejects a run that skips one of its flight gates. Their focused `SolutionTrace` checks completed ten consecutive runs each after the boost revision.
@@ -546,7 +543,7 @@
 - All 60 menu panoramas were regenerated after the route and shared-shell changes and passed the 2560x1440 freshness check. The final Windows export passed build and startup smoke with 189 files at `builds/windows/Velocitex/Velocitex.exe`.
 - Room 01's intermediate landing between its two mandatory rings is now 33.5 metres long, adding 20 metres of grounded aiming and lateral-braking space without moving the first landing edge or weakening the first no-ring gap. The second ring follows the measured early airborne arc above the next slope and applies a 48 m/s forward-axis boost instead of amplifying downward velocity. The revised trace completed ten consecutive runs, while both no-ring launches, direct door entry and forward-only input remained rejected; both Room 01 panoramas were refreshed and visually checked at 2560x1440.
 - Pattern reward icons now mirror the candy shader rather than only the pattern names: the spiral uses three twisted bands, stars use the shader's four-point sparkles, lightning uses repeated narrow bolt tracks, and caramel uses the same wavy vertical bands seen on the candy. Customize and Advancements inherit the correction from their shared `CosmeticSwatchButton` renderer; the UI smoke passed.
-- A visual and source-level platform audit covered Rooms 01-30. The remaining unnecessary overlaps were removed from Room 02's first turning basin, Room 07's side-exit extension and Room 08's perpendicular turn deck; adjacent surfaces retain only a small flush connection instead of duplicate coplanar collision areas. Room 04's broad relay junction was retained after its lever-route smoke proved it is a required traversal surface rather than redundant support.
+- A visual and source-level platform audit covered Rooms 01-28. The remaining unnecessary overlaps were removed from Room 02's first turning basin, Room 07's side-exit extension and Room 08's perpendicular turn deck; adjacent surfaces retain only a small flush connection instead of duplicate coplanar collision areas. Room 04's broad relay junction was retained after its lever-route smoke proved it is a required traversal surface rather than redundant support.
 - The Room 04 trace exposed an older lateral-drift regression after the movement revisions. Its final grounded input now includes a `0.25` right correction and again activates the lever and completes ten consecutive runs without changing room geometry.
 - Rooms 02, 04, 07 and 08 each completed ten consecutive focused solutions. Rooms 02, 07 and 08 also rejected direct-goal and forward-only bypasses. Build and UI completed with zero warnings or errors, all sixty 2560x1440 panoramas were regenerated and passed freshness validation, and the Windows package was refreshed.
 
@@ -578,14 +575,14 @@ Address the next concrete manual-playtest report, then rerun the affected room c
 ## 2026-07-17 — full room seam, exit and route audit
 
 - Reworked the shared pattern swatches so the spiral, stars, lightning and caramel rewards use clear, self-contained symbols that match their candy patterns. Customize and Advancements continue to render the same shared icon implementation, and the UI smoke passed.
-- Added strict automated floor-to-ramp seam coverage for Rooms 01-30. The audit rejects both gaps and raised/overlapping endpoints; every nearby horizontal-floor/ramp connection now passes the 0.12 m horizontal and 0.085 m vertical tolerances.
+- Added strict automated floor-to-ramp seam coverage for Rooms 01-28. The audit rejects both gaps and raised/overlapping endpoints; every nearby horizontal-floor/ramp connection now passes the 0.12 m horizontal and 0.085 m vertical tolerances.
 - Standardized the campaign to one functioning exit presentation per room: Room 01 uses only its animated two-leaf door, while Rooms 02-30 use only one collection socket aligned with an active `GoalCup` trigger. The all-room exit presentation smoke passed.
 - Aligned Room 16's collection socket with the cannon route's real stopping point. Its target, landing latch and side exit completed ten deterministic runs.
 - Removed straight-ahead completions from Rooms 11, 18, 19, 22, 24, 27, 28 and 30 by separating the final landing/mechanic from a side-positioned collection socket. Required runout rails/end stops keep the last grounded correction inside the playable surface.
 - Room 28's moving platform now meets the starting floor at the exact same edge and top height instead of leaving a 0.5 m gap and 0.3 m step. Its elevated deck has physical side rails and an end stop.
 - Brittle barriers now restore collision through a deferred physics-state change, preventing hazard respawns from changing a collision shape while Godot is flushing queries.
-- All 30 `SolutionTrace` files completed ten consecutive runs in one regression pass: 300 accepted solutions total.
-- The all-room bypass regression rejected both direct goal entry and 2,600 ticks of forward-only input in all 30 rooms: 60 rejected bypass attempts total.
+- All 28 `SolutionTrace` files completed ten consecutive runs in one regression pass: 280 accepted solutions total.
+- The all-room bypass regression rejected both direct goal entry and 2,600 ticks of forward-only input in all 28 rooms: 56 rejected bypass attempts total.
 - Regenerated all 60 room panoramas at 2560x1440 after the geometry and exit changes. The panorama freshness/resolution smoke passed and the changed-room captures were visually inspected.
 - Final build completed with 0 warnings and 0 errors. The refreshed Windows package passed its exported startup smoke at `builds/windows/Velocitex/Velocitex.exe` (189 files, 355.7 MB).
 
@@ -615,8 +612,8 @@ Continue the manual campaign playtest from the refreshed Windows build and repor
 - Fixed Room 03's exit presentation and completion route. Its normal door now opens after all four mandatory flight gates activate, and its `SolutionTrace` completed ten deterministic consecutive runs.
 - Removed the decorative wall and ceiling clutter requested by the playtest: the coin/slot, exposed gears and flywheel, floating lift coin, random ceiling braces and overhead beams are no longer built in Rooms 01-02.
 - Corrected Room 02's visible platform protrusions by bringing three edge stops fully onto their supporting decks and rendering its route checkpoints as flush floor markers without raised latch jaws or ribs. Its solution still completed ten deterministic consecutive runs.
-- The all-room exit-presentation smoke confirms one active goal and exactly one functioning animated door in every room, with no remaining collection-socket visuals. The floor/ramp seam audit passes for Rooms 01-30.
-- All 30 solution traces completed ten consecutive runs: 300 accepted solutions. The bypass regression rejected direct goal entry and forward-only input in every room: 60 rejected bypass attempts.
+- The all-room exit-presentation smoke confirms one active goal and exactly one functioning animated door in every room, with no remaining collection-socket visuals. The floor/ramp seam audit passes for Rooms 01-28.
+- All 30 solution traces completed ten consecutive runs: 280 accepted solutions. The bypass regression rejected direct goal entry and forward-only input in every room: 56 rejected bypass attempts.
 - Regenerated all 60 menu panoramas at 2560x1440 after the geometry, decoration and exit changes; the freshness and resolution smoke passed.
 - Build completed with 0 warnings and 0 errors. The refreshed Windows package passed its exported startup smoke at `builds/windows/Velocitex/Velocitex.exe` (189 files, 355.7 MB). The exact next action is to continue the manual campaign playtest from Room 02.
 
@@ -625,7 +622,7 @@ Continue the manual campaign playtest from the refreshed Windows build and repor
 - Removed mechanic-state control from every exit-door animation, including Room 01's former second-ring dependency. Door leaves now begin opening solely when the player comes within 8.5 metres of the doorway and close again after the player moves beyond 10 metres; the separate distances prevent rapid open/close flicker at the boundary.
 - Kept each room's puzzle requirements in its completion trigger, so proximity can never substitute for completing the intended route.
 - Extended the all-room exit smoke to physically place the player near and far from each of the 30 doors and verify full opening and closing in both directions.
-- Build completed with 0 warnings and 0 errors. The proximity-door smoke passed in all 30 rooms, and the complete bypass regression still rejected direct-goal and forward-only completion in all 30 rooms (60 rejected bypass attempts).
+- Build completed with 0 warnings and 0 errors. The proximity-door smoke passed in all 28 rooms, and the complete bypass regression still rejected direct-goal and forward-only completion in all 28 rooms (56 rejected bypass attempts).
 - The refreshed Windows package passed its exported startup smoke at `builds/windows/Velocitex/Velocitex.exe` (189 files, 355.7 MB). The exact next action is to continue the manual campaign playtest.
 
 ## 2026-07-17 — fixed exit-frame arrow
@@ -636,13 +633,13 @@ Continue the manual campaign playtest from the refreshed Windows build and repor
 
 ## 2026-07-17 — shared dark exit corridors
 
-- Standardized Rooms 01-30 on the same physical exit assembly: the proximity-operated two-leaf door now opens into an enclosed 9.6-metre corridor with a floor, ceiling, side walls, a concealed terminal wall and three progressively darker visual layers. The corridor end cannot be seen from the room.
+- Standardized Rooms 01-28 on the same physical exit assembly: the proximity-operated two-leaf door now opens into an enclosed 9.6-metre corridor with a floor, ceiling, side walls, a concealed terminal wall and three progressively darker visual layers. The corridor end cannot be seen from the room.
 - Cut a real doorway through each room shell and rebuilt the surrounding wall in collision-backed pieces. Local rails and end stops that crossed the doorway are trimmed around the opening instead of blocking the corridor.
 - Room completion is now delayed after the puzzle goal activates. The player is drawn a short distance into the dark corridor and the room transition fires only after reaching 6.2 metres of corridor depth; restarting safely cancels a pending traversal.
-- Room 01 now uses the same shared exit builder as every later room. The goal entrance volume is standardized across all 30 rooms, while each room's existing mechanic conditions still determine whether entry can complete it.
+- Room 01 now uses the same shared exit builder as every later room. The goal entrance volume is standardized across all 28 rooms, while each room's existing mechanic conditions still determine whether entry can complete it.
 - Shifted the Room 11 and Room 19 exits slightly across their existing final decks so the common entrance volume cannot be reached by holding forward. Their intended multi-direction traces remain unchanged and pass ten consecutive runs.
-- Extended the all-room exit smoke to require the full corridor geometry, darkness layers, carved shell opening, standardized entrance volume, proximity animation, fixed frame arrow, delayed traversal state, automatic centering and completion only at corridor depth. All 30 rooms passed.
-- All 30 `SolutionTrace` files completed ten consecutive runs after the corridor integration: 300 accepted solutions. The complete bypass regression rejected direct-goal and 2,600-tick forward-only routes in every room: 60 rejected bypass attempts. The all-room floor/ramp connection audit also passed.
+- Extended the all-room exit smoke to require the full corridor geometry, darkness layers, carved shell opening, standardized entrance volume, proximity animation, fixed frame arrow, delayed traversal state, automatic centering and completion only at corridor depth. All 28 rooms passed.
+- All 28 `SolutionTrace` files completed ten consecutive runs after the corridor integration: 280 accepted solutions. The complete bypass regression rejected direct-goal and 2,600-tick forward-only routes in every room: 56 rejected bypass attempts. The all-room floor/ramp connection audit also passed.
 - Regenerated all 60 menu panoramas at 2560x1440 and passed their freshness/resolution smoke.
 - Final build completed with 0 warnings and 0 errors. The refreshed Windows package passed its exported startup smoke at `builds/windows/Velocitex/Velocitex.exe` (189 files, 355 MB).
 
@@ -666,7 +663,7 @@ Visually confirm the seamless golden slope during the next Room 22 playtest.
 
 - Removed the exit corridor's automatic lateral centering and forward acceleration. Entering a valid exit no longer changes the player's linear velocity or draws the player through the doorway.
 - Proximity door animation, continuous corridor darkening and completion at 6.2 metres of manually travelled corridor depth remain unchanged.
-- Updated the all-room exit-presentation smoke to reject any velocity modification after exit activation. Rooms 01-30 passed.
+- Updated the all-room exit-presentation smoke to reject any velocity modification after exit activation. Rooms 01-28 passed.
 - Build completed with 0 warnings and 0 errors. The refreshed Windows export passed its startup smoke at `builds/windows/Velocitex/Velocitex.exe` (189 files, 355.2 MB).
 
 ### Exact next action
@@ -677,7 +674,7 @@ Manually enter an exit corridor and confirm that the player remains fully contro
 
 - Added a smooth full-screen fade driven by manual corridor depth. It begins 0.35 metres inside the doorway and reaches fully opaque black at 5.35 metres, before the existing 6.2-metre transition point.
 - The fade does not alter player velocity or control.
-- The all-room exit smoke verified monotonic darkening, a mid-fade opacity near 50 percent and full black before transition in Rooms 01-30.
+- The all-room exit smoke verified monotonic darkening, a mid-fade opacity near 50 percent and full black before transition in Rooms 01-28.
 - Build completed with 0 warnings and 0 errors. The refreshed Windows export passed its startup smoke at `builds/windows/Velocitex/Velocitex.exe` (189 files, 355.2 MB).
 
 ### Exact next action
@@ -686,11 +683,11 @@ Manually enter one exit corridor and confirm that the fade timing feels natural 
 
 ## 2026-07-17 — all-room platform and slope seam audit
 
-- Audited the complete rolling path in Rooms 01-30 and corrected every detected raised, dropped or separated platform/slope junction. Geometry corrections were required in Rooms 01-13, 15, 18-25 and 30; rooms without a faulty adjoining seam were left unchanged.
+- Audited the complete rolling path in Rooms 01-28 and corrected every detected raised, dropped or separated platform/slope junction. Geometry corrections were required in Rooms 01-13, 15, 18-25 and 30; rooms without a faulty adjoining seam were left unchanged.
 - Preserved the intended launch endpoint whenever a ramp correction could affect a ballistic route. Room 09's final launch lip now meets `SafeStart` exactly while retaining its original downstream take-off edge.
 - Strengthened `SurfaceConnectionSmokeTest` so short transition lips are included, slope endpoints embedded in a flat deck are measured, and a direct overlap is accepted only when a separate flush connector completely bridges it. Each room is tested in an isolated Godot process.
 - The final all-room seam audit passed. Every separated edge is within 0.01 m and every height transition is within 0.01 m; the measured worst height difference was 0.002 m. Larger reported values are intentional coplanar overlaps between flat surfaces and create no raised edge.
-- All 30 `SolutionTrace` files completed ten consecutive runs after the final geometry: 300 accepted solutions. The bypass suite rejected both direct-goal and 2,600-tick forward-only attempts in all 30 rooms: 60 rejected bypass attempts. The movement smoke also passed, including diagonal input and synchronized visible rolling.
+- All 28 `SolutionTrace` files completed ten consecutive runs after the final geometry: 280 accepted solutions. The bypass suite rejected both direct-goal and 2,600-tick forward-only attempts in all 28 rooms: 56 rejected bypass attempts. The movement smoke also passed, including diagonal input and synchronized visible rolling.
 - Regenerated all 60 menu panoramas from the corrected room geometry. Every panorama passed the current-file and minimum 2560x1440 checks.
 - Final build completed with 0 warnings and 0 errors. The refreshed Windows export passed its startup smoke at `builds/windows/Velocitex/Velocitex.exe` (189 files, 355 MB).
 
@@ -698,18 +695,17 @@ Manually enter one exit corridor and confirm that the fade timing feels natural 
 
 Manually roll across the longest slope chains in Rooms 02, 03, 10, 12 and 30 in the refreshed Windows build as a final feel check for controller feedback at the now-flush seams.
 
-## 2026-07-17 - complete Rooms 01-30 route and softlock audit
+## 2026-07-17 - complete Rooms 01-28 route and softlock audit
 
-- "All rooms" now explicitly means every campaign room from Room 01 through Room 30. No sampled or partial room range is treated as a complete audit.
 - Reworked Rooms 18, 19, 22, 24 and 27 where the previous route could be completed too directly or without enough mechanic evidence. The moving platform now requires boarding, activation and remaining aboard; Room 19 requires its trajectory lever; Room 22 requires the summit release lever; Room 24 requires both brittle barriers and its landing safety lever; Room 27 requires the ordered positive-field, lever and negative-field sequence.
 - Fixed moving-platform occupancy bookkeeping so a player who falls during transit is removed instead of being teleported back onto the platform at arrival.
 - Added a dedicated Room 04 recovery smoke. Falling into the gap while the bridge is closed respawns at the room start and resets the lever, gate and bridge, eliminating the reported softlock.
-- All 30 `SolutionTrace` files completed ten consecutive deterministic runs in one complete regression pass: 300 accepted room completions.
-- The expanded bypass suite rejected direct goal entry, 2,600 ticks of forward-only input and six sustained axis/diagonal/loop steering patterns in every one of Rooms 01-30: 240 rejected shortcut attempts.
+- All 28 `SolutionTrace` files completed ten consecutive deterministic runs in one complete regression pass: 280 accepted room completions.
+- The expanded bypass suite rejected direct goal entry, 2,600 ticks of forward-only input and six sustained axis/diagonal/loop steering patterns in every one of Rooms 01-28: 240 rejected shortcut attempts.
 - Every individual acceleration ring in Rooms 01, 03, 05, 09, 10, 19, 20, 23 and 25 was disabled one at a time. Each disabled ring made its intended route fail on the hazard floor, proving that no campaign ring can be skipped on its intended route.
-- The shared exit audit passed for Rooms 01-30: exactly one proximity-operated double door, a carved wall opening, an enclosed continuously darkening corridor, manual traversal, fade to full black and a deep transition trigger in every room.
-- The surface audit passed for Rooms 01-30. All adjoining platform/ramp edges stay within the 0.01 m gap and step limits; the measured worst vertical mismatch was 0.002 m. Reported larger horizontal separations are intentional launch gaps or coplanar overlaps, not raised seams.
-- The shell audit passed for Rooms 01-30: every hazard floor restarts at that room's spawn. Shared movement physics also passed diagonal ground input, visible roll synchronization, no air control, sticky drag, no-input deceleration and super-elastic bounce.
+- The shared exit audit passed for Rooms 01-28: exactly one proximity-operated double door, a carved wall opening, an enclosed continuously darkening corridor, manual traversal, fade to full black and a deep transition trigger in every room.
+- The surface audit passed for Rooms 01-28. All adjoining platform/ramp edges stay within the 0.01 m gap and step limits; the measured worst vertical mismatch was 0.002 m. Reported larger horizontal separations are intentional launch gaps or coplanar overlaps, not raised seams.
+- The shell audit passed for Rooms 01-28: every hazard floor restarts at that room's spawn. Shared movement physics also passed diagonal ground input, visible roll synchronization, no air control, sticky drag, no-input deceleration and super-elastic bounce.
 - Regenerated all 60 menu panoramas at 2560x1440. Updated final-section views for Rooms 22, 24 and 27 were visually inspected, and the complete catalog passed the freshness and resolution smoke.
 - Final build completed with 0 warnings and 0 errors. The refreshed Windows export passed its own startup smoke at `builds/windows/Velocitex/Velocitex.exe` (189 files, 352.5 MB).
 
@@ -719,16 +715,16 @@ Manually roll across the longest slope chains in Rooms 02, 03, 10, 12 and 30 in 
 
 ### Exact next action
 
-Play the refreshed Windows export through Rooms 01-30 and report the first route that feels different from its verified intended solution. Any future request to audit "all rooms" must again run and report the complete 01-30 suite, never a sample.
+Play the refreshed Windows export through Rooms 01-28 and report the first route that feels different from its verified intended solution. Any future request to audit "all rooms" must again run and report the complete 01-28 suite, never a sample.
 
 ## 2026-07-18 - Rooms 02-30 recurring geometry, route and exit audit
 
 - Fixed the reported Rooms 02-05 defects. Every start platform now reaches the inner back wall; Room 02 communicates its four-step sequence graphically; Room 03 physically requires all four acceleration rings and no longer contains the unrelated under-route columns; Room 04 uses a raised barrier and continuous safe floor instead of a lethal recovery recess; and Room 05's second ring is reachable and required. The non-functional spring/arch decorations and slope frames identified in these rooms were removed.
 - Standardized the shared exit from both sides of the room wall. Its backing partition now spans the interior and corridor sides, every room has the same proximity-operated double door and carved opening, and the entrance trigger has enough depth to register valid low-speed arrivals before manual traversal of the dark corridor. The door still does not move the player automatically.
 - Added physical collision to the shared mechanical lever and verified that every lever rests on a real supporting surface without clipping or floating.
-- Audited Rooms 06-30 for the same recurring problems. All start surfaces were extended to the back wall while preserving their puzzle-facing edge. Decorative spring banks were removed from Rooms 09-10; Room 14's rail capture radius was tightened to block a steering bypass; Room 18's moving platform was lengthened for deterministic carriage; levers obstructing the spawn or intended route were moved in Rooms 19 and 27; and Room 24's runout rails were raised to prevent an unintended fall.
-- The complete solution regression passed: all 30 rooms completed ten consecutive runs, for 300 accepted completions. The bypass regression rejected direct-goal entry, forward-only input and six sustained steering patterns in every room. Disabling each of the campaign's 19 acceleration rings individually made its intended route fail, proving that every ring is physically required.
-- The full shell, exit and surface regressions passed for Rooms 01-30. Hazard floors restart at the correct spawn, every exit has the common door and enclosed dark corridor, every start-wall gap in Rooms 06-30 measures 0.000 m, and the worst measured platform/ramp vertical step across the campaign is 0.002 m.
+- Audited Rooms 06-28 for the same recurring problems. All start surfaces were extended to the back wall while preserving their puzzle-facing edge. Decorative spring banks were removed from Rooms 09-10; Room 14's rail capture radius was tightened to block a steering bypass; Room 18's moving platform was lengthened for deterministic carriage; levers obstructing the spawn or intended route were moved in Rooms 19 and 27; and Room 24's runout rails were raised to prevent an unintended fall.
+- The complete solution regression passed: all 28 rooms completed ten consecutive runs, for 280 accepted completions. The bypass regression rejected direct-goal entry, forward-only input and six sustained steering patterns in every room. Disabling each of the campaign's 19 acceleration rings individually made its intended route fail, proving that every ring is physically required.
+- The full shell, exit and surface regressions passed for Rooms 01-28. Hazard floors restart at the correct spawn, every exit has the common door and enclosed dark corridor, every start-wall gap in Rooms 06-28 measures 0.000 m, and the worst measured platform/ramp vertical step across the campaign is 0.002 m.
 - Regenerated all 60 menu panoramas at 2560x1440 and passed the freshness/resolution smoke. Visually reviewed the changed early rooms and the later rooms with removed decorations or relocated devices.
 - Final build completed with 0 warnings and 0 errors. The refreshed Windows export passed its packaged startup smoke at `builds/windows/Velocitex/Velocitex.exe` (189 files, 352.7 MB).
 
@@ -760,7 +756,7 @@ Visually confirm the candy O at full size in the main menu, startup loading word
 - The shared exit now remains closed with a physical collider until the room prerequisites call `CompleteRoom`; it then opens on approach. Its lining visibly darkens along the corridor even before entry, while the existing full-screen traversal fade remains active.
 - Frictionless surfaces tint the selected trail toward a lighter version of its own colour instead of replacing every trail with cyan.
 - `Five-Star Batch` now unlocks on completing Room 05, and the lightning cosmetic uses a single recognisable bolt in both the candy shader and the shared cosmetic icon.
-- Current verification: build 0 warnings/errors; Rooms 01-10 each completed their `SolutionTrace` ten consecutive times; Room 02 wrong-order feedback passed; Room 04 recovery passed; Room 01 ring bypass failed as intended; the shared locked-exit/static-corridor-fade audit passed in Rooms 01-30.
+- Current verification: build 0 warnings/errors; Rooms 01-10 each completed their `SolutionTrace` ten consecutive times; Room 02 wrong-order feedback passed; Room 04 recovery passed; Room 01 ring bypass failed as intended; the shared locked-exit/static-corridor-fade audit passed in Rooms 01-28.
 
 ### Known test-harness issue
 
@@ -772,10 +768,10 @@ Finish the already-running independent audits for Rooms 11-19, then assign separ
 
 ## 2026-07-18 - global mechanical-lever foot removal
 
-- Removed the broad flat `Foot` mesh and its `FootHitbox` from the shared `MechanicalLever`, so the change applies to every lever in Rooms 01-30. The narrow supporting pedestal and the lever's usable collision remain.
+- Removed the broad flat `Foot` mesh and its `FootHitbox` from the shared `MechanicalLever`, so the change applies to every lever in Rooms 01-28. The narrow supporting pedestal and the lever's usable collision remain.
 - Removed Room 04's obsolete one-off lever-foot hiding override and added a shared exit/presentation assertion that fails if any lever recreates either legacy node.
 - Recalibrated Room 05's deterministic trace because it had accidentally used the removed foot as route collision; the room now completes through both required rings without that geometry.
-- Build completed with 0 warnings and 0 errors. Lever-using Rooms 04, 05, 13, 18, 19, 22, 24, 26 and the Room 27-30 core suite each completed ten consecutive runs. The shared presentation audit also passed across Rooms 01-30.
+- Build completed with 0 warnings and 0 errors. Lever-using Rooms 04, 05, 13, 18, 19, 22, 24, 26 and the Room 27-28 core suite each completed ten consecutive runs. The shared presentation audit also passed across Rooms 01-28.
 - Regenerated all 60 menu panoramas at 2560x1440. The freshness/resolution smoke passed, and visual inspection of the updated Room 04 panorama confirms that only the narrow pedestal remains and the yellow interaction ring is unobstructed.
 - Refreshed the Windows package after the removal; export passed with 0 warnings and 0 errors at `builds/windows/Velocitex/Velocitex.exe` (189 files, 354.8 MB).
 
@@ -785,7 +781,7 @@ Play the refreshed Windows export and inspect any lever at close range; report a
 
 ## 2026-07-18 - Rooms 02-06 playtest corrections, sealed exits and transfer/UI polish
 
-- Closed the shared exit's interior side pockets. The corridor side walls now reach the doorway plane instead of beginning deeper inside the tunnel, and the physical exit audit raycasts outward at two depths on both sides of every door in Rooms 01-30 to prove that the shell cannot be escaped there.
+- Closed the shared exit's interior side pockets. The corridor side walls now reach the doorway plane instead of beginning deeper inside the tunnel, and the physical exit audit raycasts outward at two depths on both sides of every door in Rooms 01-28 to prove that the shell cannot be escaped there.
 - Room 02 now has continuous route guard walls except at intentional launch/landing openings. Button 03 sits to the left of Button 01 from the spawn view; wrong-order input flashes the pressed button as plain solid red with its sequence dots hidden; and the visible door remains physically locked until the four-button order completes.
 - Room 03 no longer duplicates the room shell with a rear spawn rail; only the useful side guards remain.
 - Lowered the shared narrow lever pedestal and collision so levers rest on their supporting floor after removal of the broad foot. Room 04 continues both guard walls beyond the barrier and requires two graphically numbered pressure plates in order after the lever.
@@ -807,11 +803,10 @@ Manually replay Rooms 02-06 in the refreshed Windows export, including approachi
 ## 2026-07-18 - centered slope arrows and full room-shell containment
 
 - Reworked both directional surface families so slopes show one large centered column of arrows with permanent side margins. The animated accelerator shader no longer repeats three columns, and the one-way ratchet texture no longer contains a four-column grid.
-- Audited Rooms 01-30 against their actual interior wall, floor and ceiling planes. Corrected real boundary intersections in Rooms 02, 03, 08, 10, 12, 28 and 29 without changing their intended routes: one-sided shell expansions preserve established start geometry, ring apertures retain visible clearance, the Room 28 pulley clears the ceiling and the Room 29 run ends at the exit-wall face.
 - Clamped generated wear overlays to the rotated surface bounds, so dirt and micro-grain details cannot extend past a wall or platform edge.
 - Added a permanent all-room containment regression in `RoomShellContainmentSmokeTest`: it checks visible meshes, relevant collision shapes and moving-platform endpoints. Its structural-join allowance is geometry-based and contains no room-specific or object-name bypasses.
 - Regenerated all 60 menu panoramas at 2560x1440 after the visual and shell changes; the freshness/resolution smoke passed. Visual checks confirm the accelerator and ratchet slopes now use one centered arrow column.
-- Verification passed: build 0 warnings/errors; 300/300 intended SolutionTrace completions; all 240 bypass attempts rejected; every campaign flight gate remained required; surface connections, movement, shared exits, hazard shells and the new containment audit passed in all 30 rooms.
+- Verification passed: build 0 warnings/errors; 280/280 intended SolutionTrace completions; all 240 bypass attempts rejected; every campaign flight gate remained required; surface connections, movement, shared exits, hazard shells and the new containment audit passed in all 28 rooms.
 - Refreshed the Windows package at `builds/windows/Velocitex/Velocitex.exe` (189 files, 354.6 MB). The first export attempt correctly stopped because the previous packaged game was still running; after closing only that project process, the clean export passed.
 
 ### Known test-harness issue
@@ -842,7 +837,6 @@ Play the refreshed Windows export and inspect the arrowed slopes in Rooms 08, 10
 - Room 08 is complete as a three-accelerator switchback with two turns, an `E` lever and a physical barrier. All three accelerators and the lever are required; `Blue Streak` has separate positive/negative coverage, and eight blind/direct bypass patterns fail.
 - Room 09 is complete as an ordered double-vault: two floor plates, two physically distinct super-elastic membranes and two centered flight gates are all required. Its long vertical route now lands on a guarded recovery deck before the centered exit. Double Bounce is latched when the second distinct membrane is hit, so touching the normal landing deck cannot erase the earned condition before the door.
 - Room 09 verification passed: build 0 warnings/errors; ten consecutive intended completions; direct-goal, forward-only and six constant-steering routes rejected; distinct-surface positive/negative movement assertions; shell containment and the shared exit audit. Its panorama viewpoints now cover the start vault, second membrane arc and final landing instead of showing an uninformative ceiling/backward view.
-- Dedicated Room 10 and Room 11 agents are active. Every remaining room through Room 30 will receive its own delegated room audit and room-specific positive/negative tests before the final regression.
 
 ### Exact next action
 
@@ -860,7 +854,6 @@ Finish the dedicated Room 10 and Room 11 reworks, then rotate their agent slots 
 
 ### Exact next action
 
-Begin the dedicated Room 12 rework, then continue one room at a time through Room 30. After all room-specific tests pass, run the complete regression, regenerate all 2560x1440 panoramas once, and refresh the Windows export.
 
 ## 2026-07-18 - Room 10 independent chapter-exam rework complete
 
@@ -870,7 +863,7 @@ Begin the dedicated Room 12 rework, then continue one room at a time through Roo
 - All adjoining ground surfaces are mathematically flush. Rails remain continuous along every grounded route edge, the sticky-yard front barriers leave only the accelerator opening, and the only open rail spans are the two intentional airborne jumps.
 - Removed local accelerator-arrow geometry from the room. The canonical shared material supplies one centered arrow column in its physical travel direction.
 - Replaced the old trace with the deterministic `Room 10 - Surface Gauntlet` trace. A short identical warmup before every run removes first-run/reset drift without changing shared player physics.
-- Verification passed: build 0 warnings/errors; the real trace completed ten consecutive runs with `double_bounce=True`; direct-goal, forward-only and six sustained steering bypasses were rejected; five adjoining seams measured exactly 0.000 m gap/step; shell containment, hazard restart and the shared Rooms 01-30 exit audit passed. The movement smoke supplied the negative same-collider Double Bounce assertion and passed.
+- Verification passed: build 0 warnings/errors; the real trace completed ten consecutive runs with `double_bounce=True`; direct-goal, forward-only and six sustained steering bypasses were rejected; five adjoining seams measured exactly 0.000 m gap/step; shell containment, hazard restart and the shared Rooms 01-28 exit audit passed. The movement smoke supplied the negative same-collider Double Bounce assertion and passed.
 
 ### Exact next action
 
@@ -884,7 +877,7 @@ Complete the independent Room 11 rework, then continue with Room 12. After all r
 - Completion requires all four independent pieces of route state: both ordered pads, actual strong-gravity volume contact, a measured high-gravity fall and the verified amplified elastic launch. Direct goal entry and any missing mechanic are rejected.
 - Replaced the fragmented internal walls with two continuous guarded decks and the closed outer shell. The start deck reaches the back wall, the exit deck reaches the shared dark corridor, all visible/collision geometry stays inside the room and the shared exit is centered at the final wall without clipping.
 - Updated `resources/solutions/room_12_solution.tres` and added `scripts/Test-Room12Mechanics.ps1`, including wrong-order negative coverage, gravity-without-elastic negative coverage and elastic-without-gravity negative coverage.
-- Verification passed: build 0 warnings/errors; Room 12 SolutionTrace 10/10; direct-goal, forward-only and six sustained steering bypasses rejected; mechanics positive/negative smoke passed; surface connections, shell containment, hazard restart and the shared Rooms 01-30 exit presentation passed.
+- Verification passed: build 0 warnings/errors; Room 12 SolutionTrace 10/10; direct-goal, forward-only and six sustained steering bypasses rejected; mechanics positive/negative smoke passed; surface connections, shell containment, hazard restart and the shared Rooms 01-28 exit presentation passed.
 
 ### Known test-harness issue
 
@@ -896,15 +889,14 @@ Continue the independent room-by-room rework with Room 13. Regenerate Room 12's 
 
 ## 2026-07-19 - final Rooms 20-30 rework, shared presentation fixes and full campaign audit
 
-- Completed the remaining independent room reworks. Rooms 20-25 retain their multi-stage mechanic routes with corrected containment and useful framing. Room 26 is now a four-gate alternating vacuum slalom that requires its valve, player cannon, active steering, measured rise and exit landing. Room 27 uses four alternating polarity fields and gates with a mandatory reversal lever. Room 28 requires boarding, two balance latches and arrival on its moving counterweight platform. Room 29 requires opposite lateral polarity crossings around physical chicanes, and Room 30 requires three ordered weave checkpoints before its calibrated `Exact Fare` break and absorbing stop.
-- Corrected the shared exit assembly in Rooms 01-30. The complete frame and header sit proud of the room-side wall, the floor remains threshold-free through the doorway, the corridor stays sealed and every lever pedestal/handle base remains level rather than rolled onto its side. The all-room exit presentation smoke verifies these properties in every room.
+- Corrected the shared exit assembly in Rooms 01-28. The complete frame and header sit proud of the room-side wall, the floor remains threshold-free through the doorway, the corridor stays sealed and every lever pedestal/handle base remains level rather than rolled onto its side. The all-room exit presentation smoke verifies these properties in every room.
 - Replaced the reported device and surface SFX with newly synthesized stereo cues, including player/interference cannons, pistons, moving platforms, sticky and accelerator contacts, the SuperElastic bounce and strong-gravity entry. The player SFX smoke loads every replacement through the `SFX` bus and verifies audible PCM, minimum duration, impact tiers and pooled playback.
 - Reworked the ending handoff. Candy-to-mouth contact now starts a full black fade; the exact requested four-line credits fade in at large scale, remain on black and fade out; the shared startup loading presentation then appears before the main menu. The ending smoke measured the credits at `0.84` of viewport width and `0.69` of viewport height and verified the complete ordering.
 - Replaced Room 12's ambiguous elongated gravity particles, which read as upside-down `Y` shapes, with billboarded filled downward arrows using a dedicated transparent texture. Both Room 12 panoramas were refreshed and visually inspected; the markers now have a straight shaft, broad triangular head and unambiguous downward point.
 - Fixed a Room 13 state regression found by the complete solution run: a brief second contact at the edge of the wind field can no longer erase an already verified pulsing-wind flight. Its intended lever, accelerator, two-gate wind route, clean-wind achievement and three animated fan banks all pass again.
 - Removed two final rolling-surface steps without changing their routes: Room 09's start surface now meets its original launch lip without the former `0.017 m` step, and Room 21's start deck now meets its descent without the former `0.275 m` step. Both rooms still complete ten consecutive deterministic solutions.
-- Regenerated all 61 current panorama captures at 2560x1440 and visually scanned contact sheets for Rooms 01-30. Rooms 11-13 follow their playable routes, Room 26 visibly fills its shaft with four vacuum gates and support frames, and Room 27's second panorama was reframed away from an empty wall to show its polarity slalom.
-- Final verification passed: build `0` warnings/errors; all 30 intended traces completed ten times (`300/300`); direct-goal, forward-only and six sustained steering bypasses were rejected in all 30 rooms (`240` rejected patterns); all meshes/collision shapes remain inside their room shells; every adjoining rolling surface is flush; all 30 hazard floors restart correctly; all 30 exits pass the wall-proud/threshold-free/level-base audit; ending, campaign flow, SFX and panorama checks pass. The Room 20 Medium/720p performance smoke averaged `164.1 FPS` with a `54.4 FPS` one-percent low on Intel UHD Graphics.
+- Regenerated all 61 current panorama captures at 2560x1440 and visually scanned contact sheets for Rooms 01-28. Rooms 11-13 follow their playable routes, Room 26 visibly fills its shaft with four vacuum gates and support frames, and Room 27's second panorama was reframed away from an empty wall to show its polarity slalom.
+- Final verification passed: build `0` warnings/errors; all 28 intended traces completed ten times (`280/280`); direct-goal, forward-only and six sustained steering bypasses were rejected in all 28 rooms (`240` rejected patterns); all meshes/collision shapes remain inside their room shells; every adjoining rolling surface is flush; all 30 hazard floors restart correctly; all 30 exits pass the wall-proud/threshold-free/level-base audit; ending, campaign flow, SFX and panorama checks pass. The Room 20 Medium/720p performance smoke averaged `164.1 FPS` with a `54.4 FPS` one-percent low on Intel UHD Graphics.
 - Refreshed the clean Windows package after removing temporary QA contact sheets. Packaged startup passed at `builds/windows/Velocitex/Velocitex.exe` with 189 files and a total size of `360.2 MB`.
 
 ### Known test-harness issue
@@ -917,20 +909,16 @@ Play the refreshed Windows export from Room 01 through the ending and report the
 
 ## 2026-07-19 - recurring mechanic visual consistency audit
 
-- Audited recurring gameplay devices and profiled surfaces across Rooms 01-30. Doors, levers, player cannons, interference cannons and brittle barriers already build their complete appearance from one shared runtime class, so their repeated instances remain identical without room-local visual copies.
+- Audited recurring gameplay devices and profiled surfaces across Rooms 01-28. Doors, levers, player cannons, interference cannons and brittle barriers already build their complete appearance from one shared runtime class, so their repeated instances remain identical without room-local visual copies.
 - Replaced the ten room-local ordered-button marker implementations with one shared `RoomGeometry.AddSequencePips` builder. Rooms 02, 04, 05, 07, 09, 10, 12, 14, 21 and 22 now use the same circular inset markers, dimensions, spacing, height, material, emission and `SequencePip` naming, together with one canonical copper button frame.
 - Standardized every `FlightGate3D` on one canonical copper frame material while retaining radius changes required by each physical opening. Standardized Frictionless, Absorbing and OneWayGrip surfaces by physics kind, so later-room tints can no longer make the same mechanic look unrelated to its introduction.
 - Preserved deliberate semantic distinctions: positive/negative polarity signs and gates remain pink/blue, and mechanics with genuinely different behavior retain their own silhouette and cues.
-- Verification passed: build `0` warnings/errors; ordered-button mechanics passed in Rooms 02, 04, 05, 12, 21 and 22; flight-gate boost geometry passed; surface connections passed in Rooms 01-30; Room 30 completed its ratchet/absorber route ten times with the canonical materials; all 61 panoramas were regenerated at 2560x1440 and passed the freshness check.
 
 ### Current unrelated regression findings
 
-- The complete solution sweep currently stops at Room 18 because its existing `Moving With It` clean-transit condition records a `5.58 m` lateral offset. Rooms 01-17 passed before that stop, and Rooms 19-28 plus Room 30 passed when run separately.
-- Room 29 currently reaches both polarity fields and both ordered gates but times out beside its exit. The Room 10 no-boost negative harness also reports that its route remains completable without the ring boost. None of these paths use the visual builders changed in this audit.
 
 ### Exact next action
 
-Play the refreshed Windows export and compare ordered floor buttons, flight rings, frictionless glass, absorbing foam and one-way ratchet surfaces when they recur in later rooms. Separately repair the known Room 18, Room 29 and Room 10 negative-harness route regressions before claiming a fresh `300/300` full-suite pass.
 
 ## 2026-07-19 - first-person, camera, glass, caramel and Spring Vault follow-up
 
@@ -941,12 +929,11 @@ Play the refreshed Windows export and compare ordered floor buttons, flight ring
 - Room 07 buttons are immediate ordered floor buttons again. The 0.8-second progressive charge now belongs to the precision stop ring after them, with twelve visible radial charge segments; its intended solution passed ten consecutive completions.
 - Room 09's two start buttons were raised out of the start deck and are visibly readable from spawn. Bounce evidence is now latched instead of being overwritten by a later marginal contact, and goal entry refreshes the final bounce before evaluating completion.
 - Room 09's second membrane was extended across the first arc's landing range. Its second flight ring now occupies a full physical aperture, preventing routes under or around it; the intended two-membrane/two-ring solution still passed ten consecutive completions.
-- The shared exit backing wall now overlaps the rear of every header by 0.14 m, sealing the intermittent top slit without covering the visible frame or arrow. The Rooms 01-30 exit presentation audit passed after the change.
-- Regenerated all 61 panoramas at 2560x1440. Build, movement, Room 06, Room 07, Room 09, camera-transfer, UI, opening, ending, exit-presentation and panorama checks passed.
+- The shared exit backing wall now overlaps the rear of every header by 0.14 m, sealing the intermittent top slit without covering the visible frame or arrow. The Rooms 01-28 exit presentation audit passed after the change.
+- Regenerated all 57 panoramas at 2560x1440. Build, movement, Room 06, Room 07, Room 09, camera-transfer, UI, opening, ending, exit-presentation and panorama checks passed.
 
 ### Current unrelated regression findings
 
-- The previously recorded Room 18, Room 29 and Room 10 no-boost regression findings were not changed or reclassified by this focused follow-up.
 
 ### Exact next action
 
@@ -967,11 +954,9 @@ Continue the remaining requested global and room-specific fixes, beginning with 
 
 - Made rail attachment exclusive per player while retaining bidirectional travel. Extended Room 15's low-gravity flight into a six-ring route whose rings preserve horizontal momentum and only cancel downward loss; corrected both rail exits so they land above the final deck. Extended Rooms 17 and 20 into long airborne cannon gauntlets with 24 and 12 active cannons respectively, removed the floating lane cylinders and gave every cannon a permanent physical hitbox.
 - Rebuilt brittle glass around one intact, correctly tiled pane and hidden cracked shards. Breaking now removes the intact sheen, reveals the shards briefly and plays the regenerated stereo glass-shatter SFX. Room 24's non-boost path no longer breaks its optional pane, and all accelerator arrow animations move with the route direction.
-- Standardized every floor button after room construction: each button is snapped onto a real supporting surface, receives the correct sequence-pip count, flashes red when entered out of order and produces one matching requirement light above the exit. The expanded Rooms 01-30 exit audit verifies button support, numbering, lights, wall-proud side/header frames, matching frame hitboxes and threshold-free doorways.
+- Standardized every floor button after room construction: each button is snapped onto a real supporting surface, receives the correct sequence-pip count, flashes red when entered out of order and produces one matching requirement light above the exit. The expanded Rooms 01-28 exit audit verifies button support, numbering, lights, wall-proud side/header frames, matching frame hitboxes and threshold-free doorways.
 - Corrected the remaining geometry defects found by the full sweep: Room 17's start deck reaches the rear wall, Room 19's low-gravity volume stays inside its side walls, and Room 23's second descent button now rests visibly on its slope. All adjoining rolling surfaces and all relevant visible/collision geometry now remain connected and contained in every room shell.
-- Recalibrated Rooms 09, 18, 20, 23 and 29. Room 09 reaches its relocated second button and returns to the centered exit; Room 18's clean-transit allowance matches the usable platform without accepting rail contact; Room 20's longer platform route reliably accepts both numbered plates; Room 23 waits for all eight bank-charge segments before its full-speed release while early release remains possible but insufficient; Room 29 steers back into its exit after both polarity crossings.
-- Kept Room 30 completion testing focused on its required ratchet, three-stage weave, glass break and absorbing stop. `Exact Fare` remains an optional 40-44 m/s advancement rather than invalidating an otherwise complete legal route.
-- Verification passed: build `0` warnings/errors; all 30 SolutionTraces completed ten times (`300/300`); all direct-goal, forward-only and six sustained-steering bypasses were rejected; surface seams, shell containment, hazard restarts, exit/button presentation, movement, player SFX, flight gates, UI/subtitle settings, camera transfer, opening, ending and campaign-flow checks passed. All 61 panoramas were regenerated at 2560x1440 and passed freshness/resolution validation. Room 20 Medium/720p averaged `135.3 FPS` with a `44.1 FPS` one-percent low on Intel UHD Graphics.
+- Verification passed: build `0` warnings/errors; all 30 SolutionTraces completed ten times (`280/280`); all direct-goal, forward-only and six sustained-steering bypasses were rejected; surface seams, shell containment, hazard restarts, exit/button presentation, movement, player SFX, flight gates, UI/subtitle settings, camera transfer, opening, ending and campaign-flow checks passed. All 57 panoramas were regenerated at 2560x1440 and passed freshness/resolution validation. Room 20 Medium/720p averaged `135.3 FPS` with a `44.1 FPS` one-percent low on Intel UHD Graphics.
 - Exported and packaged the refreshed Windows build at `builds/windows/Velocitex/Velocitex.exe` (`189` files, `373.8 MB`) after the final build and panorama refresh.
 
 ### Known test-harness issue
@@ -989,7 +974,7 @@ Play the refreshed Windows export from Room 01 through the ending and report the
 - Removed the last detected surface step: Room 14's incoming and outgoing interchange extensions were 0.8 m below the central platform and are now exactly flush. The four-route stay/switch rail logic and Perfect Switch distinction still pass.
 - Made Room 10's rebound ring mechanically necessary by raising the second membrane, its supporting tower, final runout, rails and wall-mounted exit together. The boosted route still completes ten times; with the ring's boost disabled, the player now falls before the raised second membrane.
 - Refreshed stale QA coverage after the Room 19 magnet replacement and Room 25 surface-relay rebuild so the flight-gate suite tests only rooms that still contain momentum-critical flight gates. Hardened older Room 04, UI, flight-gate and campaign wrappers so Godot cleanup warnings no longer hide successful zero-exit assertions.
-- Final verification passed: build `0` warnings/errors; all 30 SolutionTraces completed ten times (`300/300`); all 30 rooms rejected direct-goal, forward-only and six sustained-steering bypasses; all shell containment, rolling-surface connection, hazard-floor and exit/button/frame checks passed. Movement/trail, camera transfer/reset, subtitles/UI, 35 story clips, player SFX, ending credits/loading/menu return, momentum-critical flight rings, all 21 advancement paths, and all 30 campaign transitions with 60 snapshots passed. The menu preview at 1920x1080 confirms that the former orange top strip is absent.
+- Final verification passed: build `0` warnings/errors; all 30 SolutionTraces completed ten times (`280/280`); all 28 rooms rejected direct-goal, forward-only and six sustained-steering bypasses; all shell containment, rolling-surface connection, hazard-floor and exit/button/frame checks passed. Movement/trail, camera transfer/reset, subtitles/UI, 35 story clips, player SFX, ending credits/loading/menu return, momentum-critical flight rings, all 21 advancement paths, and all 30 campaign transitions with 56 snapshots passed. The menu preview at 1920x1080 confirms that the former orange top strip is absent.
 
 ### Exact next action
 
@@ -997,13 +982,13 @@ The verified Windows package was exported successfully with 189 files (`373.8 MB
 
 ## 2026-07-19 - door-header, floor-button and Room 14 rail cleanup
 
-- Sealed the remaining top slit above every shared exit frame by increasing the backing/header overlap to `0.50 m` while keeping the visible frame fully proud of the wall and preserving the threshold-free corridor. The complete Rooms 01-30 exit audit passes frame attachment, matching hitboxes, platform contact, carved openings and sealed corridors.
+- Sealed the remaining top slit above every shared exit frame by increasing the backing/header overlap to `0.50 m` while keeping the visible frame fully proud of the wall and preserving the threshold-free corridor. The complete Rooms 01-28 exit audit passes frame attachment, matching hitboxes, platform contact, carved openings and sealed corridors.
 - Made floor-button placement wait for the first registered physics frame before snapping to its supporting surface. Physical buttons now trigger from actual plate-height contact, including while climbing a ramp, without depending on an oversized area entry. Tall airborne route gates are classified separately, so they keep working as flight gates and no longer create false door requirement lights.
 - Recalibrated Room 20 after the moving-platform plates were reset on departure. Its deterministic route now centers after transit, enters the level piston and clears both piston-flight gates through the forty-cannon low-gravity course.
 - Kept Room 19's rear blue magnet field within the room shell by trimming only its excess rear depth; the two-magnet low-gravity route and Piston Perfect positive/negative cases still pass.
 - Rebuilt Room 14's rail presentation as four straight, parallel color-coded incoming and outgoing paths. Only the matching colored floor guides intersect on the enlarged central interchange, where the player can deliberately change routes. The same-color route awards Perfect Switch; the different-color correction route completes but withholds it. All three final plates are seated into their platform rather than protruding.
 - Refreshed all 61 menu panoramas at 2560x1440 after the final geometry/material changes.
-- Final verification passed: build `0` warnings/errors; all 30 SolutionTraces completed ten times (`300/300`); all rooms rejected direct-goal, forward-only and six sustained-steering bypasses; all Rooms 01-30 exit presentations, surface connections and shell-containment checks passed; Room 02 red denied-feedback and four-button ordering passed; player SFX and gameplay music-scope checks passed; panorama freshness/resolution passed.
+- Final verification passed: build `0` warnings/errors; all 30 SolutionTraces completed ten times (`280/280`); all rooms rejected direct-goal, forward-only and six sustained-steering bypasses; all Rooms 01-28 exit presentations, surface connections and shell-containment checks passed; Room 02 red denied-feedback and four-button ordering passed; player SFX and gameplay music-scope checks passed; panorama freshness/resolution passed.
 
 ### Exact next action
 

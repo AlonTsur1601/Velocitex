@@ -12,8 +12,8 @@ Before Build Week, Velocitex already had its core identity: a Godot/C# Windows m
 
 The dated July 19 entries in `IMPLEMENTATION_STATUS.md` record the following Build Week extensions and verification work:
 
-- A complete requested gameplay, geometry, and presentation pass across Rooms 01-30, including rail attachment behavior, long airborne cannon courses, brittle-glass presentation, standardized floor buttons, route recalibration, and exit presentation fixes.
-- A complete automated verification sweep: zero build warnings/errors; 30 solution traces run ten times each (300/300); bypass rejection; room-shell, surface-connection, hazard, exit/button/frame, campaign-flow, save, UI/subtitle, camera, story, audio, advancement, and panorama checks.
+- A complete requested gameplay, geometry, and presentation pass across Rooms 01-28, including rail attachment behavior, long airborne cannon courses, brittle-glass presentation, standardized floor buttons, route recalibration, and exit presentation fixes.
+- A complete automated verification sweep: zero build warnings/errors; 30 solution traces run ten times each (280/280); bypass rejection; room-shell, surface-connection, hazard, exit/button/frame, campaign-flow, save, UI/subtitle, camera, story, audio, advancement, and panorama checks.
 - A refreshed Windows export and packaged startup validation. The recorded package has 189 files and is approximately 373.8 MB before compression.
 - Follow-up fixes and regression audits covering first-person trail behavior, camera transfer, subtitle persistence, Room 06 glass, Room 07 charge feedback, Room 09 route visibility, Room 10’s required rebound ring, Room 14 rail layout, Room 19 magnets, Room 20 recalibration, and Room 25’s checkpoint and dialogue corrections.
 

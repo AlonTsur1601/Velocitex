@@ -1,6 +1,6 @@
 # Velocitex
 
-Velocitex is a Windows 3D momentum-puzzle game built with Godot 4.7 .NET and C#. You control a candy through a 30-room candy-machine world where slopes, surface materials, launches, and deliberate turns determine whether you reach the exit.
+Velocitex is a Windows 3D momentum-puzzle game built with Godot 4.7 .NET and C#. You control a candy through a 28-room candy-machine world where slopes, surface materials, launches, and deliberate turns determine whether you reach the exit.
 
 ## Play the Windows build
 
@@ -93,7 +93,7 @@ Additional major development-thread IDs:
 
 GPT-5.6 was used through Codex as a substantial part of the development workflow: translating design constraints into C# and Godot changes, reasoning through momentum and collision issues, generating and refining repeatable verification coverage, and helping evaluate room progression, UI flow, accessibility, and release-readiness decisions. The documented implementation and verification milestones in `IMPLEMENTATION_STATUS.md`, together with the listed Codex session IDs, are the project evidence for that workflow.
 
-Product, design, and engineering decisions remained under the creator's direction. Examples include the no-checkpoint-within-a-room recovery rule, surface language that does not rely only on color, the 30-room progression, camera behavior, and the focus on real build and smoke-test verification rather than build success alone.
+Product, design, and engineering decisions remained under the creator's direction. Examples include the no-checkpoint-within-a-room recovery rule, surface language that does not rely only on color, the 28-room progression, camera behavior, and the focus on real build and smoke-test verification rather than build success alone.
 
 ## Project history and Build Week evidence
 

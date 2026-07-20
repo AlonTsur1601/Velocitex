@@ -16,7 +16,7 @@ Apps for Your Life
 
 ## Short description
 
-Velocitex is a Windows 3D momentum-puzzle game in which you guide a candy through a 30-room candy-machine world. Every slope, surface, launch, turn, and stop is a physical decision.
+Velocitex is a Windows 3D momentum-puzzle game in which you guide a candy through a 28-room candy-machine world. Every slope, surface, launch, turn, and stop is a physical decision.
 
 ## Full description
 

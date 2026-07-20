@@ -70,7 +70,6 @@ $sources = @(
     "resources\force_volumes\low_gravity.tres",
     "resources\force_volumes\strong_gravity.tres",
     "resources\force_volumes\crosswind.tres",
-    "resources\force_volumes\suction_tunnel.tres",
     "src\Gameplay\Physics\ProfiledSurfaceBody.cs",
     "src\Gameplay\Player\PlayerBall.cs",
     "src\Core\Physics\SurfaceProfile.cs",

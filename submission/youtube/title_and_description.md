@@ -6,7 +6,7 @@ Velocitex | A 3D Momentum Puzzle Game Built with Codex and GPT-5.6
 
 ## Description
 
-Velocitex is a Windows 3D momentum-puzzle game set inside a candy machine. Guide a candy through 30 rooms where slopes, surfaces, launches, turns, and stopping distance all matter.
+Velocitex is a Windows 3D momentum-puzzle game set inside a candy machine. Guide a candy through 28 rooms where slopes, surfaces, launches, turns, and stopping distance all matter.
 
 This Build Week demo shows real gameplay from the Windows build, including the escalating momentum mechanics, customization, advancements, saves, and accessibility settings.
 
