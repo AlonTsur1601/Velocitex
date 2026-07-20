@@ -1611,8 +1611,7 @@ public partial class AppRoot : Node
 
         _continueButton.Disabled = snapshots.Count == 0;
         _loadButton.Disabled = snapshots.Count == 0;
-        _roomSelectButton.Disabled = !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot)
-            .Any(roomNumber => RoomCatalog.Find(roomNumber) is not null);
+        _roomSelectButton.Disabled = false;
     }
 
     private void StartNewGame()
@@ -1640,6 +1639,12 @@ public partial class AppRoot : Node
 
     private void LoadSnapshot(CampaignSnapshot snapshot)
     {
+        if (snapshot.Kind == SnapshotKind.RoomStart)
+        {
+            StartRoomWithCandyHandoff(snapshot.RoomNumber, saveRoomStart: false, snapshot.CampaignElapsedSeconds);
+            return;
+        }
+
         _pendingCompletionSnapshot = snapshot;
         SetRoomCompleteDialog(snapshot.RoomNumber, snapshot.RoomName, snapshotSaved: false);
         if (IsAutomatedSmokeRun())
@@ -1682,16 +1687,15 @@ public partial class AppRoot : Node
         _browserOrigin = MenuOrigin.Main;
         _browserHeader.Text = "ROOM SELECT";
         ClearBrowserRows();
-        IReadOnlySet<int> completed = CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot);
         int rowCount = 0;
-        foreach (RoomCatalogEntry room in RoomCatalog.All.Where(room => completed.Contains(room.Number)))
+        foreach (RoomCatalogEntry room in RoomCatalog.All)
         {
             AddRoomSelectRow(room);
             rowCount++;
         }
 
         _browserEmptyLabel.Visible = rowCount == 0;
-        _browserEmptyLabel.Text = "Complete a room to unlock it here.";
+        _browserEmptyLabel.Text = "No rooms are available.";
         _playMenu.Hide();
         _browserMenu.Show();
     }
