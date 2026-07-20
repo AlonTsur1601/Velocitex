@@ -8,7 +8,7 @@ namespace Velocitex.Core.Save;
 public static class CampaignSaveService
 {
     public const int MaximumRoomCount = 28;
-    public const int MaximumSnapshotCount = MaximumRoomCount * 2;
+    public const int MaximumSnapshotCount = 5;
     public const string DefaultRoot = "user://campaign";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -33,7 +33,7 @@ public static class CampaignSaveService
         {
             string absoluteRoot = ResolveRoot(root);
             Directory.CreateDirectory(absoluteRoot);
-            string stem = GetStem(snapshot.RoomNumber, snapshot.Kind);
+            string stem = GetStem(snapshot);
 
             if (thumbnail is not null)
             {
@@ -45,6 +45,7 @@ public static class CampaignSaveService
 
             string finalPath = Path.Combine(absoluteRoot, $"{stem}.json");
             AtomicWrite(finalPath, JsonSerializer.Serialize(snapshot, JsonOptions));
+            PruneOldestSnapshots(absoluteRoot);
             return true;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
@@ -67,16 +68,11 @@ public static class CampaignSaveService
             return snapshots;
         }
 
-        foreach (string path in Directory.EnumerateFiles(absoluteRoot, "room-??-*.json"))
+        foreach (string path in Directory.EnumerateFiles(absoluteRoot, "*.json"))
         {
-            if (snapshots.Count >= MaximumSnapshotCount)
-            {
-                break;
-            }
-
             if (TryLoadPath(path, out CampaignSnapshot? snapshot, out string? error) && snapshot is not null)
             {
-                snapshots.Add(snapshot);
+                if (snapshot.Kind == SnapshotKind.RoomComplete) snapshots.Add(snapshot);
             }
             else
             {
@@ -202,9 +198,9 @@ public static class CampaignSaveService
             return $"Room number {snapshot.RoomNumber} is out of range.";
         }
 
-        if (!Enum.IsDefined(snapshot.Kind))
+        if (snapshot.Kind != SnapshotKind.RoomComplete)
         {
-            return "Snapshot kind is invalid.";
+            return "Only completed-room snapshots are supported.";
         }
 
         if (string.IsNullOrWhiteSpace(snapshot.RoomId) || string.IsNullOrWhiteSpace(snapshot.RoomName))
@@ -265,10 +261,19 @@ public static class CampaignSaveService
             fileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string GetStem(int roomNumber, SnapshotKind kind)
+    private static string GetStem(CampaignSnapshot snapshot)
     {
-        string suffix = kind == SnapshotKind.RoomStart ? "start" : "complete";
-        return $"room-{roomNumber:D2}-{suffix}";
+        return $"complete-{snapshot.SavedAtUtc.UtcTicks:D19}-{snapshot.RoomNumber:D2}";
+    }
+
+    private static void PruneOldestSnapshots(string root)
+    {
+        CampaignSnapshot[] old = LoadAll(out _, root).Skip(MaximumSnapshotCount).ToArray();
+        foreach (CampaignSnapshot snapshot in old)
+        {
+            string stem = Path.Combine(root, GetStem(snapshot));
+            foreach (string suffix in new[] { ".json", ".json.bak", ".jpg" }) if (File.Exists(stem + suffix)) File.Delete(stem + suffix);
+        }
     }
 
     private static string ResolveRoot(string root)

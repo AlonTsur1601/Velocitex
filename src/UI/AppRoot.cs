@@ -1227,10 +1227,6 @@ public partial class AppRoot : Node
                 await FinishLoadingScreenAsync();
             }
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-            if (saveRoomStart && !_runSaveSmoke)
-            {
-                SaveCurrentSnapshot(SnapshotKind.RoomStart);
-            }
 
             // The opaque handoff has ended. Restore gameplay audio before
             // returning input so the room-title card cannot overlap a silent
@@ -1644,12 +1640,6 @@ public partial class AppRoot : Node
 
     private void LoadSnapshot(CampaignSnapshot snapshot)
     {
-        if (snapshot.Kind == SnapshotKind.RoomStart)
-        {
-            StartRoomWithCandyHandoff(snapshot.RoomNumber, saveRoomStart: false, snapshot.CampaignElapsedSeconds);
-            return;
-        }
-
         _pendingCompletionSnapshot = snapshot;
         SetRoomCompleteDialog(snapshot.RoomNumber, snapshot.RoomName, snapshotSaved: false);
         if (IsAutomatedSmokeRun())
@@ -2636,7 +2626,6 @@ public partial class AppRoot : Node
             return;
         }
 
-        SaveCurrentSnapshot(SnapshotKind.RoomStart);
     }
 
     private CampaignSnapshot? SaveCurrentSnapshot(SnapshotKind kind)
@@ -2832,7 +2821,7 @@ public partial class AppRoot : Node
         int nextRoomNumber = completed.RoomNumber + 1;
         if (RoomCatalog.Find(nextRoomNumber) is not null)
         {
-            StartRoom(nextRoomNumber, saveRoomStart: true, completed.CampaignElapsedSeconds);
+            StartRoom(nextRoomNumber, saveRoomStart: false, completed.CampaignElapsedSeconds);
             return;
         }
 
@@ -2876,11 +2865,10 @@ public partial class AppRoot : Node
             Text = $"ROOM {snapshot.RoomNumber:00} - {snapshot.RoomName}",
         };
         title.AddThemeFontSizeOverride("font_size", 20);
-        string kind = snapshot.Kind == SnapshotKind.RoomStart ? "ROOM START" : "ROOM COMPLETE";
         TimeSpan elapsed = TimeSpan.FromSeconds(snapshot.CampaignElapsedSeconds);
         Label metadata = new()
         {
-            Text = $"{kind}   |   {snapshot.SavedAtUtc.ToLocalTime():yyyy-MM-dd HH:mm}\nPLAY TIME {elapsed:hh\\:mm\\:ss}",
+            Text = $"ROOM COMPLETE   |   {snapshot.SavedAtUtc.ToLocalTime():yyyy-MM-dd HH:mm}\nPLAY TIME {elapsed:hh\\:mm\\:ss}",
         };
         metadata.AddThemeColorOverride("font_color", new Color("8f9ba3"));
         Button load = new()
@@ -2916,7 +2904,7 @@ public partial class AppRoot : Node
 
     private void StartRoomFromRoomSelect(int roomNumber)
     {
-        StartRoomWithCandyHandoff(roomNumber, saveRoomStart: true, elapsedSeconds: _campaignElapsedSeconds);
+        StartRoomWithCandyHandoff(roomNumber, saveRoomStart: false, elapsedSeconds: _campaignElapsedSeconds);
     }
 
     private void StartRoomWithCandyHandoff(int roomNumber, bool saveRoomStart, double elapsedSeconds)
