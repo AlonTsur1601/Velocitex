@@ -36,7 +36,7 @@ Paste the public YouTube URL only after the video is published as Public.
 
 ## Test build URL
 
-Paste the GitHub Release URL only after `Velocitex_Windows.zip` is uploaded and the download has been tested from the published release.
+Paste the GitHub Release URL only after `Velocitex.zip` is uploaded and the download has been tested from the published release.
 
 ## Codex /feedback Session ID
 
@@ -48,7 +48,7 @@ Codex was used throughout Velocitex’s implementation and verification workflow
 
 ## Testing instructions
 
-1. Download `Velocitex_Windows.zip` from the published GitHub Release.
+1. Download `Velocitex.zip` from the published GitHub Release.
 2. Extract the entire archive to a writable local folder.
 3. Run `Velocitex.exe` without moving it away from `Velocitex.pck` or `data_Velocitex_windows_x86_64`.
 4. Start a new campaign and complete Room 01 by following the slope and acceleration rings to the collection cup.
