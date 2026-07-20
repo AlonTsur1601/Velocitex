@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <pattern id="copper" width="256" height="256" patternUnits="userSpaceOnUse">
+      <rect width="256" height="256" fill="#bd826c"/>
+      <circle cx="0" cy="88" r="76" fill="#e0a087" opacity=".035"/>
+      <circle cx="256" cy="88" r="76" fill="#e0a087" opacity=".035"/>
+      <circle cx="130" cy="203" r="101" fill="#795349" opacity=".035"/>
+    </pattern>
+    <pattern id="grain" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M3 8h44M19 27h46M6 44h32" stroke="#f6bea1" stroke-width="1" opacity=".04"/>
+      <path d="M12 13h44M2 32h35M29 48h36" stroke="#583e39" stroke-width="1.2" opacity=".055"/>
+      <circle cx="55" cy="17" r="3" fill="#4c7a72" opacity=".045"/>
+    </pattern>
+    <pattern id="micro" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M4 8h26m9 0h22M13 23h48M2 39h33m11 0h15M8 57h53" stroke="#f2b195" stroke-width="1.4" opacity=".24"/>
+      <path d="M7 13h42m6 0h6M2 31h59M16 48h45M5 63h36m11 0h9" stroke="#49332f" stroke-width="1.6" opacity=".27"/>
+      <circle cx="19" cy="18" r="3.4" fill="#3f776f" opacity=".4"/>
+      <circle cx="56" cy="52" r="4.4" fill="#579084" opacity=".34"/>
+      <circle cx="37" cy="58" r="2.7" fill="#f7c1a7" opacity=".38"/>
+      <path d="M24 43l17-7m5 26l15-6M4 62l12-4" stroke="#513834" stroke-width="2.2" opacity=".35"/>
+    </pattern>
+    <pattern id="oxidation" width="256" height="256" patternUnits="userSpaceOnUse">
+      <path d="M-18 96c34-31 64-14 91-30 36-21 67 4 92-14 31-23 65-8 109-2" fill="none" stroke="#3f857b" stroke-width="13" opacity=".085"/>
+      <ellipse cx="183" cy="203" rx="61" ry="36" fill="#315f59" opacity=".075"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="url(#copper)"/>
+  <rect width="512" height="512" fill="url(#grain)"/>
+  <rect width="512" height="512" fill="url(#micro)"/>
+  <rect width="512" height="512" fill="url(#oxidation)"/>
+</svg>

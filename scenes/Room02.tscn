@@ -1,0 +1,61 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/Gameplay/Rooms/Room02Runtime.cs" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3_camera"]
+
+[sub_resource type="Environment" id="Environment_room02"]
+background_mode = 1
+background_color = Color(0.23, 0.29, 0.275, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.78, 0.94, 0.9, 1)
+ambient_light_energy = 2.15
+reflected_light_source = 2
+tonemap_exposure = 1.46
+
+[node name="Room02" type="Node3D"]
+script = ExtResource("1_room")
+RoomNumber = 2
+RoomId = "room-02"
+RoomDisplayName = "The Copper Bend"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_room02")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
+rotation_degrees = Vector3(-52, 32, 0)
+light_color = Color(0.72, 0.93, 0.86, 1)
+light_energy = 2.55
+shadow_enabled = true
+
+[node name="CopperGlow" type="OmniLight3D" parent="."]
+position = Vector3(18, 10.8, -18)
+light_color = Color(1, 0.48, 0.25, 1)
+light_energy = 3.4
+omni_range = 24.0
+
+[node name="LiftGlow" type="OmniLight3D" parent="."]
+position = Vector3(-7.5, 9.0, -8)
+light_color = Color(0.32, 0.86, 0.78, 1)
+light_energy = 2.6
+omni_range = 18.0
+
+[node name="RoomFill" type="OmniLight3D" parent="."]
+position = Vector3(6, 14, -8)
+light_color = Color(0.82, 0.94, 0.89, 1)
+light_energy = 6.8
+omni_range = 52.0
+shadow_enabled = false
+
+[node name="ExitAreaFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 13.0, -38)
+light_color = Color(0.88, 0.95, 0.91, 1)
+light_energy = 4.5
+omni_range = 24.0
+shadow_enabled = false
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.4, 30)
+
+[node name="CameraRig" parent="." instance=ExtResource("3_camera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.65, 30)

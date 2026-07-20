@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SurfaceProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Physics/SurfaceProfile.cs" id="1_profile"]
+
+[resource]
+resource_name = "Directional Pulse Conveyor"
+script = ExtResource("1_profile")
+Kind = 3
+Friction = 0.78
+LinearDrag = 0.0
+BounceMultiplier = 1.0
+Acceleration = Vector3(0, 0, -18)
+GripDirection = Vector3(0, 0, -1)

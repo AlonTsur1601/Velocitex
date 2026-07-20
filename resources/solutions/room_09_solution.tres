@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1_trace"]
+
+[resource]
+resource_name = "Room 09 - Ordered Double Vault"
+script = ExtResource("1_trace")
+RoomId = "room-09"
+PhysicsTicksPerSecond = 60
+MoveInputs = Array[Vector2]([Vector2(-1, -0.4), Vector2(1, 0), Vector2(-0.15, -1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 0), Vector2(-1, 0)])
+ActionFlags = PackedByteArray(0, 0, 0, 0, 0, 0, 0)
+MoveDurationsTicks = PackedInt32Array(36, 105, 90, 500, 55, 90, 180)
+HoldLastInput = true

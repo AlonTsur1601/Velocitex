@@ -1,0 +1,61 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/Gameplay/Rooms/Room03Runtime.cs" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3_camera"]
+
+[sub_resource type="Environment" id="Environment_room03"]
+background_mode = 1
+background_color = Color(0.255, 0.27, 0.25, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.9, 0.91, 0.84, 1)
+ambient_light_energy = 2.25
+reflected_light_source = 2
+tonemap_exposure = 1.5
+
+[node name="Room03" type="Node3D"]
+script = ExtResource("1_room")
+RoomNumber = 3
+RoomId = "room-03"
+RoomDisplayName = "The Open Chute"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_room03")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
+rotation_degrees = Vector3(-55, -26, 0)
+light_color = Color(0.94, 0.87, 0.72, 1)
+light_energy = 2.7
+shadow_enabled = true
+
+[node name="LandingGlow" type="OmniLight3D" parent="."]
+position = Vector3(0, 9.5, -24)
+light_color = Color(0.33, 0.92, 0.82, 1)
+light_energy = 3.2
+omni_range = 30.0
+
+[node name="ArcGlow" type="OmniLight3D" parent="."]
+position = Vector3(0, 4.5, -61)
+light_color = Color(1, 0.58, 0.22, 1)
+light_energy = 2.7
+omni_range = 34.0
+
+[node name="RoomFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 15, -32)
+light_color = Color(0.9, 0.91, 0.84, 1)
+light_energy = 7.1
+omni_range = 78.0
+shadow_enabled = false
+
+[node name="ExitAreaFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 7.0, -92)
+light_color = Color(0.92, 0.92, 0.86, 1)
+light_energy = 4.6
+omni_range = 28.0
+shadow_enabled = false
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18.9, 34)
+
+[node name="CameraRig" parent="." instance=ExtResource("3_camera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 19.15, 34)

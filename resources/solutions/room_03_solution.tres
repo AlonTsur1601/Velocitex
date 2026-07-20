@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1_trace"]
+
+[resource]
+resource_name = "Room 03 - Four Committed Flight Lines"
+script = ExtResource("1_trace")
+RoomId = "room-03"
+PhysicsTicksPerSecond = 60
+MoveInputs = Array[Vector2]([Vector2(0, -1), Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1), Vector2(1, 0), Vector2(0, 0), Vector2(0, 0), Vector2(-1, 0), Vector2(0, -1), Vector2(0, 0), Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1)])
+ActionFlags = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+MoveDurationsTicks = PackedInt32Array(140, 0, 6, 84, 5, 45, 15, 15, 70, 5, 14, 4, 700)
+HoldLastInput = true

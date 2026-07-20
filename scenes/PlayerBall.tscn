@@ -1,0 +1,74 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://src/Gameplay/Player/PlayerBall.cs" id="1_player"]
+[ext_resource type="Shader" path="res://resources/shaders/candy_preview.gdshader" id="2_shader"]
+[ext_resource type="Script" path="res://src/Gameplay/Player/PlayerAudioController.cs" id="3_audio"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_player"]
+friction = 1.0
+bounce = 0.12
+
+[sub_resource type="SphereMesh" id="SphereMesh_player"]
+radius = 0.6
+height = 1.2
+radial_segments = 48
+rings = 24
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_player"]
+shader = ExtResource("2_shader")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcess_trail"]
+direction = Vector3(0, 0, 0)
+spread = 0.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.0
+initial_velocity_max = 0.0
+scale_min = 0.45
+scale_max = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Material_trail"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.33, 0.84, 0.9, 0.6)
+emission_enabled = true
+emission = Color(0.33, 0.84, 0.9, 1)
+emission_energy_multiplier = 1.25
+
+[sub_resource type="SphereMesh" id="Mesh_trail"]
+material = SubResource("Material_trail")
+radius = 0.11
+height = 0.22
+radial_segments = 12
+rings = 6
+
+[sub_resource type="SphereShape3D" id="SphereShape_player"]
+radius = 0.6
+
+[node name="Player" type="RigidBody3D" groups=["player_ball"]]
+mass = 1.0
+physics_material_override = SubResource("PhysicsMaterial_player")
+linear_damp_mode = 1
+linear_damp = 0.0
+continuous_cd = 1
+contact_monitor = true
+max_contacts_reported = 8
+can_sleep = false
+script = ExtResource("1_player")
+
+[node name="Visual" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_player")
+material_override = SubResource("ShaderMaterial_player")
+
+[node name="Trail" type="GPUParticles3D" parent="."]
+emitting = false
+amount = 30
+lifetime = 0.72
+local_coords = false
+process_material = SubResource("ParticleProcess_trail")
+draw_pass_1 = SubResource("Mesh_trail")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape_player")
+
+[node name="Audio" type="Node" parent="."]
+script = ExtResource("3_audio")

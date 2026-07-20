@@ -1,0 +1,76 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/Story/OpeningSequence.cs" id="1_script"]
+
+[sub_resource type="Environment" id="Environment_opening"]
+background_mode = 1
+background_color = Color(0.045, 0.065, 0.082, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.7, 0.8, 0.85, 1)
+ambient_light_energy = 0.86
+reflected_light_source = 2
+
+[node name="OpeningSequence" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_opening")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+position = Vector3(5.2, 3.2, 7.2)
+current = true
+fov = 50.0
+
+[node name="KeyLight" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
+rotation_degrees = Vector3(-48, -30, 0)
+light_color = Color(1, 0.84, 0.64, 1)
+light_energy = 1.55
+shadow_enabled = true
+
+[node name="FillLight" type="OmniLight3D" parent="."]
+position = Vector3(-3, 4, 3)
+light_color = Color(0.42, 0.78, 0.88, 1)
+light_energy = 4.7
+omni_range = 10.0
+
+[node name="Voice" type="AudioStreamPlayer" parent="."]
+bus = &"Voice"
+volume_db = -1.5
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+bus = &"Music"
+volume_db = -13.0
+
+[node name="Ui" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="Subtitles" type="CenterContainer" parent="Ui"]
+offset_left = 260.0
+offset_top = 560.0
+offset_right = 1020.0
+offset_bottom = 690.0
+
+[node name="Panel" type="PanelContainer" parent="Ui/Subtitles"]
+custom_minimum_size = Vector2(720, 104)
+layout_mode = 2
+
+[node name="Layout" type="VBoxContainer" parent="Ui/Subtitles/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Speaker" type="Label" parent="Ui/Subtitles/Panel/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.61, 0.34, 1)
+theme_override_font_sizes/font_size = 15
+text = "CHILD"
+horizontal_alignment = 1
+
+[node name="Line" type="Label" parent="Ui/Subtitles/Panel/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.96, 0.9, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 22
+text = "Mom, can I get one?"
+horizontal_alignment = 1

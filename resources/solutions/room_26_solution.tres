@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1"]
+
+[resource]
+resource_name = "Room 26 - Four-Gate Vacuum Slalom"
+script = ExtResource("1")
+RoomId = "room-26"
+PhysicsTicksPerSecond = 60
+MoveInputs = Array[Vector2]([Vector2(0, 0), Vector2(0, -1), Vector2(0, 0), Vector2(-1, -1), Vector2(1, -1), Vector2(-1, -1), Vector2(1, -1), Vector2(0, -1), Vector2(0, -1), Vector2(-1, -1)])
+ActionFlags = PackedByteArray(1, 0, 1, 0, 0, 0, 0, 0, 0, 0)
+MoveDurationsTicks = PackedInt32Array(1, 58, 1, 50, 55, 35, 45, 150, 220, 180)
+HoldLastInput = true

@@ -1,0 +1,41 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/UI/Visual/CandyPreview3D.cs" id="1_script"]
+[ext_resource type="Shader" path="res://resources/shaders/candy_preview.gdshader" id="2_shader"]
+[ext_resource type="Texture2D" path="res://assets/textures/brushed_metal.png" id="3_metal"]
+
+[sub_resource type="ShaderMaterial" id="Material_candy"]
+shader = ExtResource("2_shader")
+
+[sub_resource type="SphereMesh" id="Mesh_candy"]
+radius = 0.9
+height = 1.8
+radial_segments = 48
+rings = 24
+
+[sub_resource type="StandardMaterial3D" id="Material_platform"]
+albedo_texture = ExtResource("3_metal")
+metallic = 0.58
+roughness = 0.46
+
+[sub_resource type="CylinderMesh" id="Mesh_platform"]
+material = SubResource("Material_platform")
+top_radius = 1.45
+bottom_radius = 1.65
+height = 0.24
+radial_segments = 32
+
+[node name="CandyPreview3D" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Ball" type="MeshInstance3D" parent="."]
+position = Vector3(0.35, 0.18, 0)
+mesh = SubResource("Mesh_candy")
+material_override = SubResource("Material_candy")
+
+[node name="TrailRoot" type="Node3D" parent="."]
+position = Vector3(0.15, 0.18, 0)
+
+[node name="Platform" type="MeshInstance3D" parent="."]
+position = Vector3(0.2, -1.02, 0)
+mesh = SubResource("Mesh_platform")

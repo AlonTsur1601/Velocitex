@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SurfaceProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Physics/SurfaceProfile.cs" id="1_profile"]
+
+[resource]
+resource_name = "Viscous Caramel"
+script = ExtResource("1_profile")
+Kind = 2
+Friction = 0.9
+LinearDrag = 2.4
+BounceMultiplier = 1.0
+Acceleration = Vector3(0, 0, 0)
+GripDirection = Vector3(0, 0, -1)

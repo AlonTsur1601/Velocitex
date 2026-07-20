@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1_trace"]
+[resource]
+resource_name = "Room 23 - Timed Flywheel Vault"
+script = ExtResource("1_trace")
+RoomId = "room-23"
+PhysicsTicksPerSecond = 60
+MoveInputs = Array[Vector2]([Vector2(-0.65, -0.76), Vector2(0, -1), Vector2(0, 1), Vector2(1, 0), Vector2(0, -1), Vector2(0, 1), Vector2(-1, 0), Vector2(0.7, -0.3), Vector2(-0.75, -0.66), Vector2(0.75, -0.66), Vector2(0, 0), Vector2(0, 0), Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1)])
+ActionFlags = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)
+MoveDurationsTicks = PackedInt32Array(45, 85, 45, 65, 100, 45, 55, 55, 75, 85, 330, 1, 45, 60, 260)
+HoldLastInput = true

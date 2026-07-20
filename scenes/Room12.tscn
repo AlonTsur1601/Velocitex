@@ -1,0 +1,63 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/Gameplay/Rooms/Room12Runtime.cs" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3_camera"]
+
+[sub_resource type="Environment" id="Environment_room12"]
+background_mode = 1
+background_color = Color(0.19, 0.145, 0.13, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.96, 0.84, 0.74, 1)
+ambient_light_energy = 3.05
+reflected_light_source = 2
+tonemap_exposure = 1.5
+
+[node name="Room12" type="Node3D"]
+script = ExtResource("1_room")
+RoomNumber = 12
+RoomId = "room-12"
+RoomDisplayName = "Heavy Drop"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_room12")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
+rotation_degrees = Vector3(-58, -20, 0)
+light_color = Color(0.98, 0.86, 0.75, 1)
+light_energy = 1.7
+shadow_enabled = true
+
+[node name="RoomFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 16, -2)
+light_color = Color(0.92, 0.72, 0.58, 1)
+light_energy = 11.0
+omni_range = 43.0
+shadow_enabled = false
+
+[node name="StartFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 24, 22)
+light_color = Color(0.98, 0.94, 0.84, 1)
+light_energy = 4.5
+omni_range = 15.0
+shadow_enabled = false
+
+[node name="DropFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 11, 0)
+light_color = Color(0.78, 0.5, 0.34, 1)
+light_energy = 5.0
+omni_range = 20.0
+shadow_enabled = false
+
+[node name="ExitFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 11, -34)
+light_color = Color(0.96, 0.9, 0.78, 1)
+light_energy = 5.0
+omni_range = 15.0
+shadow_enabled = false
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22.85, 36.8)
+
+[node name="CameraRig" parent="." instance=ExtResource("3_camera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 23.1, 36.8)

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1"]
+[resource]
+resource_name="Room 25 - Surface Relay"
+script=ExtResource("1")
+RoomId="room-25"
+PhysicsTicksPerSecond=60
+MoveInputs=Array[Vector2]([Vector2(-0.65,-0.76),Vector2(0,-1),Vector2(1,0.2),Vector2(0,-1),Vector2(-1,-0.2),Vector2(1,-0.45),Vector2(0,-1),Vector2(-1,0),Vector2(1,-1)])
+ActionFlags=PackedByteArray(0,0,0,0,0,0,0,0,0)
+MoveDurationsTicks=PackedInt32Array(45,125,100,40,140,100,380,80,300)
+HoldLastInput=true

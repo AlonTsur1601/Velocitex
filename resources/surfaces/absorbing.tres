@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SurfaceProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Physics/SurfaceProfile.cs" id="1_profile"]
+
+[resource]
+resource_name = "Momentum Absorbing Foam"
+script = ExtResource("1_profile")
+Kind = 5
+Friction = 0.22
+LinearDrag = 3.4
+BounceMultiplier = 0.15
+Acceleration = Vector3(0, 0, 0)
+GripDirection = Vector3(0, 0, -1)

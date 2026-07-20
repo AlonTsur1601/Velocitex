@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ForceVolumeProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Physics/ForceVolumeProfile.cs" id="1_profile"]
+
+[resource]
+resource_name = "Low Gravity Cell"
+script = ExtResource("1_profile")
+Kind = 0
+Direction = Vector3(0, -1, 0)
+Strength = 2.4
+FalloffExponent = 0.0
+AirControlAcceleration = 18.0
+AirControlMaximumSpeed = 8.5

@@ -1,0 +1,12 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://resources/shaders/sticky_caramel.gdshader" id="1_shader"]
+
+[resource]
+resource_name = "Sticky Caramel"
+shader = ExtResource("1_shader")
+shader_parameter/base_color = Color(0.34, 0.11, 0.035, 1)
+shader_parameter/light_caramel = Color(0.72, 0.31, 0.075, 1)
+shader_parameter/deep_caramel = Color(0.12, 0.025, 0.012, 1)
+shader_parameter/motion_scale = 1.0
+shader_parameter/detail_strength = 0.72

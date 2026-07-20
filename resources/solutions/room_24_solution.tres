@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1_trace"]
+[resource]
+resource_name="Room 24 - Split Break Point"
+script=ExtResource("1_trace")
+RoomId="room-24"
+PhysicsTicksPerSecond=60
+MoveInputs=Array[Vector2]([Vector2(0,-1),Vector2(0,1),Vector2(-1,-0.25),Vector2(0,0),Vector2(1,-0.35),Vector2(0,-1),Vector2(0,1),Vector2(0,-1)])
+ActionFlags=PackedByteArray(0,0,0,1,0,0,0,0)
+MoveDurationsTicks=PackedInt32Array(150,45,55,25,85,150,35,400)
+HoldLastInput=true

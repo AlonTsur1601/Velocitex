@@ -1,0 +1,52 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/Gameplay/TestRoom/MovementTestRoom.cs" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3_camera"]
+
+[sub_resource type="Environment" id="Environment_room"]
+background_mode = 1
+background_color = Color(0.29, 0.265, 0.235, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.96, 0.9, 0.82, 1)
+ambient_light_energy = 2.25
+reflected_light_source = 2
+tonemap_exposure = 1.5
+
+[node name="MovementTestRoom" type="Node3D"]
+script = ExtResource("1_room")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_room")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
+rotation_degrees = Vector3(-52, -28, 0)
+light_color = Color(1, 0.91, 0.78, 1)
+light_energy = 2.65
+shadow_enabled = true
+
+[node name="CoinGlow" type="OmniLight3D" parent="."]
+position = Vector3(4.7, 8.6, 16.8)
+light_color = Color(1, 0.56, 0.25, 1)
+light_energy = 3.0
+omni_range = 8.5
+
+[node name="RoomFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 11.5, -8)
+light_color = Color(0.94, 0.89, 0.8, 1)
+light_energy = 7.0
+omni_range = 62.0
+shadow_enabled = false
+
+[node name="ExitAreaFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 5.2, -44.5)
+light_color = Color(0.94, 0.9, 0.83, 1)
+light_energy = 4.2
+omni_range = 24.0
+shadow_enabled = false
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10.9, 31)
+
+[node name="CameraRig" parent="." instance=ExtResource("3_camera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.15, 31)

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1_trace"]
+[resource]
+resource_name = "Room 14 - Perfect Direct Switch"
+script = ExtResource("1_trace")
+RoomId = "room-14"
+PhysicsTicksPerSecond = 60
+MoveInputs = Array[Vector2]([Vector2(0, -1), Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1), Vector2(-1, -1), Vector2(1, -1), Vector2(0, 0), Vector2(0, -1)])
+ActionFlags = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+MoveDurationsTicks = PackedInt32Array(145, 25, 25, 360, 55, 110, 140, 80, 260, 160, 50, 250)
+HoldLastInput = true

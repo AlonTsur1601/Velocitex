@@ -1,0 +1,1312 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Script" path="res://src/UI/AppRoot.cs" id="1_app"]
+[ext_resource type="PackedScene" path="res://scenes/MovementTestRoom.tscn" id="2_gameplay"]
+[ext_resource type="PackedScene" path="res://scenes/MenuBackground.tscn" id="3_menu"]
+[ext_resource type="Texture2D" path="res://assets/ui/logo_ball.png" id="4_logo_ball"]
+[ext_resource type="PackedScene" path="res://scenes/CandyPreview3D.tscn" id="5_candy_preview"]
+[ext_resource type="PackedScene" path="res://scenes/OpeningSequence.tscn" id="6_opening"]
+[ext_resource type="PackedScene" path="res://scenes/EndingSequence.tscn" id="7_ending"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/menu_motion.wav" id="8_menu_music"]
+
+[sub_resource type="Environment" id="Environment_customize"]
+background_mode = 1
+background_color = Color(0.055, 0.076, 0.094, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.7, 0.8, 0.84, 1)
+ambient_light_energy = 0.88
+reflected_light_source = 2
+
+[sub_resource type="StyleBoxFlat" id="Style_panel"]
+bg_color = Color(0.055, 0.073, 0.095, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.43, 0.31, 0.2, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 30.0
+content_margin_top = 26.0
+content_margin_right = 30.0
+content_margin_bottom = 26.0
+
+[sub_resource type="StyleBoxFlat" id="Style_button"]
+bg_color = Color(0.12, 0.15, 0.18, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.31, 0.36, 0.4, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="Style_button_hover"]
+bg_color = Color(0.2, 0.19, 0.16, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.83, 0.59, 0.31, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+content_margin_left = 13.0
+content_margin_top = 9.0
+content_margin_right = 13.0
+content_margin_bottom = 9.0
+
+[sub_resource type="StyleBoxFlat" id="Style_button_pressed"]
+bg_color = Color(0.34, 0.23, 0.13, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.72, 0.42, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+content_margin_left = 13.0
+content_margin_top = 9.0
+content_margin_right = 13.0
+content_margin_bottom = 9.0
+
+[sub_resource type="StyleBoxFlat" id="Style_focus"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.98, 0.79, 0.5, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxEmpty" id="Style_check_focus"]
+
+[sub_resource type="StyleBoxFlat" id="Style_separator"]
+bg_color = Color(0.35, 0.29, 0.22, 1)
+content_margin_top = 1.0
+content_margin_bottom = 1.0
+
+[sub_resource type="Theme" id="Theme_velocitex"]
+default_font_size = 17
+Button/colors/font_color = Color(0.92, 0.91, 0.86, 1)
+Button/colors/font_hover_color = Color(1, 0.86, 0.62, 1)
+Button/colors/font_pressed_color = Color(1, 0.91, 0.75, 1)
+Button/font_sizes/font_size = 18
+Button/styles/normal = SubResource("Style_button")
+Button/styles/hover = SubResource("Style_button_hover")
+Button/styles/pressed = SubResource("Style_button_pressed")
+Button/styles/focus = SubResource("Style_focus")
+CheckButton/colors/font_color = Color(0.88, 0.89, 0.88, 1)
+CheckButton/colors/font_hover_color = Color(0.88, 0.89, 0.88, 1)
+CheckButton/colors/font_hover_pressed_color = Color(0.88, 0.89, 0.88, 1)
+CheckButton/colors/font_pressed_color = Color(0.88, 0.89, 0.88, 1)
+CheckButton/styles/normal = SubResource("Style_button")
+CheckButton/styles/hover = SubResource("Style_button")
+CheckButton/styles/hover_pressed = SubResource("Style_button")
+CheckButton/styles/pressed = SubResource("Style_button")
+CheckButton/styles/focus = SubResource("Style_check_focus")
+Label/colors/font_color = Color(0.88, 0.89, 0.88, 1)
+OptionButton/styles/normal = SubResource("Style_button")
+OptionButton/styles/hover = SubResource("Style_button_hover")
+OptionButton/styles/pressed = SubResource("Style_button_pressed")
+OptionButton/styles/focus = SubResource("Style_focus")
+PanelContainer/styles/panel = SubResource("Style_panel")
+VSeparator/styles/separator = SubResource("Style_separator")
+
+[node name="App" type="Node"]
+script = ExtResource("1_app")
+GameplayScene = ExtResource("2_gameplay")
+OpeningScene = ExtResource("6_opening")
+EndingScene = ExtResource("7_ending")
+
+[node name="SceneContainer" type="Node" parent="."]
+
+[node name="RoomDialogueVoice" type="AudioStreamPlayer" parent="."]
+process_mode = 3
+bus = &"Voice"
+volume_db = -1.5
+
+[node name="MenuMusic" type="AudioStreamPlayer" parent="."]
+process_mode = 3
+stream = ExtResource("8_menu_music")
+volume_db = -40.0
+bus = &"Music"
+
+[node name="MenuBackground" parent="." instance=ExtResource("3_menu")]
+
+[node name="Ui" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="MainMenu" type="Control" parent="Ui"]
+layout_mode = 3
+layout_direction = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_velocitex")
+
+[node name="Backdrop" type="ColorRect" parent="Ui/MainMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.015, 0.023, 0.031, 0.32)
+
+[node name="Center" type="CenterContainer" parent="Ui/MainMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_right = -360.0
+
+[node name="Panel" type="PanelContainer" parent="Ui/MainMenu/Center"]
+custom_minimum_size = Vector2(440, 505)
+layout_mode = 2
+
+[node name="Layout" type="VBoxContainer" parent="Ui/MainMenu/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Logo" type="HBoxContainer" parent="Ui/MainMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+layout_direction = 2
+theme_override_constants/separation = -3
+alignment = 1
+
+[node name="Vel" type="Label" parent="Ui/MainMenu/Center/Panel/Layout/Logo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.91, 0.78, 1)
+theme_override_font_sizes/font_size = 45
+text = "VEL"
+vertical_alignment = 1
+
+[node name="BallO" type="TextureRect" parent="Ui/MainMenu/Center/Panel/Layout/Logo"]
+custom_minimum_size = Vector2(39, 39)
+layout_mode = 2
+texture = ExtResource("4_logo_ball")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightSpacing" type="Control" parent="Ui/MainMenu/Center/Panel/Layout/Logo"]
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Citex" type="Label" parent="Ui/MainMenu/Center/Panel/Layout/Logo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.91, 0.78, 1)
+theme_override_font_sizes/font_size = 45
+text = "CITEX"
+vertical_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="Ui/MainMenu/Center/Panel/Layout"]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="Ui/MainMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="Ui/MainMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "PLAY"
+
+[node name="CustomizeButton" type="Button" parent="Ui/MainMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "CUSTOMIZE"
+
+[node name="AdvancementsButton" type="Button" parent="Ui/MainMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "ADVANCEMENTS"
+
+[node name="SettingsButton" type="Button" parent="Ui/MainMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "SETTINGS"
+
+[node name="QuitButton" type="Button" parent="Ui/MainMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "QUIT GAME"
+
+[node name="Version" type="Label" parent="Ui/MainMenu"]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -190.0
+offset_top = -42.0
+offset_right = -24.0
+offset_bottom = -18.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.7, 0.74, 0.76, 1)
+theme_override_colors/font_shadow_color = Color(0.02, 0.03, 0.04, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+text = ""
+horizontal_alignment = 2
+
+[node name="PlayMenu" type="Control" parent="Ui"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_velocitex")
+
+[node name="Backdrop" type="ColorRect" parent="Ui/PlayMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.025, 0.035, 0.047, 1)
+
+[node name="Center" type="CenterContainer" parent="Ui/PlayMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Ui/PlayMenu/Center"]
+custom_minimum_size = Vector2(460, 470)
+layout_mode = 2
+
+[node name="Layout" type="VBoxContainer" parent="Ui/PlayMenu/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 13
+
+[node name="Header" type="Label" parent="Ui/PlayMenu/Center/Panel/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.91, 0.78, 1)
+theme_override_font_sizes/font_size = 32
+text = "PLAY"
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="Ui/PlayMenu/Center/Panel/Layout"]
+layout_mode = 2
+
+[node name="ContinueButton" type="Button" parent="Ui/PlayMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "CONTINUE"
+
+[node name="LoadButton" type="Button" parent="Ui/PlayMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "LOAD GAME"
+
+[node name="RoomSelectButton" type="Button" parent="Ui/PlayMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "ROOM SELECT"
+
+[node name="NewGameButton" type="Button" parent="Ui/PlayMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "NEW GAME"
+
+[node name="BackButton" type="Button" parent="Ui/PlayMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "BACK"
+
+[node name="BrowserMenu" type="Control" parent="Ui"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_velocitex")
+
+[node name="Dim" type="ColorRect" parent="Ui/BrowserMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.015, 0.021, 0.029, 0.97)
+
+[node name="Center" type="CenterContainer" parent="Ui/BrowserMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Ui/BrowserMenu/Center"]
+custom_minimum_size = Vector2(920, 650)
+layout_mode = 2
+
+[node name="Layout" type="VBoxContainer" parent="Ui/BrowserMenu/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="Label" parent="Ui/BrowserMenu/Center/Panel/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.91, 0.78, 1)
+theme_override_font_sizes/font_size = 30
+text = "LOAD GAME"
+
+[node name="EmptyLabel" type="Label" parent="Ui/BrowserMenu/Center/Panel/Layout"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.64, 0.67, 1)
+text = "No campaign snapshots are available."
+horizontal_alignment = 1
+
+[node name="Scroll" type="ScrollContainer" parent="Ui/BrowserMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 500)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="List" type="VBoxContainer" parent="Ui/BrowserMenu/Center/Panel/Layout/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="BackButton" type="Button" parent="Ui/BrowserMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(140, 44)
+layout_mode = 2
+size_flags_horizontal = 8
+text = "BACK"
+
+[node name="CustomizeMenu" type="Control" parent="Ui"]
+visible = false
+layout_mode = 3
+layout_direction = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_velocitex")
+
+[node name="Dim" type="ColorRect" parent="Ui/CustomizeMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.015, 0.021, 0.029, 0.97)
+
+[node name="Center" type="CenterContainer" parent="Ui/CustomizeMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Ui/CustomizeMenu/Center"]
+custom_minimum_size = Vector2(1030, 640)
+layout_mode = 2
+
+[node name="Layout" type="VBoxContainer" parent="Ui/CustomizeMenu/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="Label" parent="Ui/CustomizeMenu/Center/Panel/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.91, 0.78, 1)
+theme_override_font_sizes/font_size = 30
+text = "CUSTOMIZE YOUR CANDY"
+
+[node name="Body" type="HBoxContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 430)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 28
+
+[node name="PreviewFrame" type="MarginContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body"]
+custom_minimum_size = Vector2(430, 430)
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="Preview" type="SubViewportContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/PreviewFrame"]
+layout_mode = 2
+stretch = true
+
+[node name="Viewport" type="SubViewport" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/PreviewFrame/Preview"]
+handle_input_locally = false
+size = Vector2i(426, 426)
+own_world_3d = true
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/PreviewFrame/Preview/Viewport"]
+environment = SubResource("Environment_customize")
+
+[node name="Camera3D" type="Camera3D" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/PreviewFrame/Preview/Viewport"]
+position = Vector3(0, 0.2, 4.3)
+current = true
+fov = 45.0
+
+[node name="KeyLight" type="DirectionalLight3D" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/PreviewFrame/Preview/Viewport"]
+rotation_degrees = Vector3(-38, -32, 0)
+light_color = Color(1, 0.87, 0.7, 1)
+light_energy = 1.62
+shadow_enabled = true
+
+[node name="RimLight" type="OmniLight3D" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/PreviewFrame/Preview/Viewport"]
+position = Vector3(-2.4, 1.8, 2)
+light_color = Color(0.4, 0.8, 0.9, 1)
+light_energy = 4.7
+omni_range = 6.0
+
+[node name="CandyPreview3D" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/PreviewFrame/Preview/Viewport" instance=ExtResource("5_candy_preview")]
+
+[node name="ControlsScroll" type="ScrollContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Controls" type="VBoxContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="PrimaryLabel" type="Label" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+text = "PRIMARY COLOR"
+
+[node name="PrimaryGrid" type="GridContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+columns = 7
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="SecondaryLabel" type="Label" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+text = "SECONDARY COLOR"
+
+[node name="SecondaryGrid" type="GridContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+columns = 7
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="PatternLabel" type="Label" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+text = "PATTERN"
+
+[node name="PatternGrid" type="GridContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+columns = 7
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="TrailLabel" type="Label" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+text = "TRAIL"
+
+[node name="TrailGrid" type="GridContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+columns = 7
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="Status" type="Label" parent="Ui/CustomizeMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.48, 0.76, 0.68, 1)
+text = " "
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 2
+
+[node name="BackButton" type="Button" parent="Ui/CustomizeMenu/Center/Panel/Layout/Actions"]
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 2
+text = "BACK"
+
+[node name="SaveButton" type="Button" parent="Ui/CustomizeMenu/Center/Panel/Layout/Actions"]
+custom_minimum_size = Vector2(180, 40)
+layout_mode = 2
+text = "SAVE LOOK"
+
+[node name="AdvancementsMenu" type="Control" parent="Ui"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_velocitex")
+
+[node name="Dim" type="ColorRect" parent="Ui/AdvancementsMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.015, 0.021, 0.029, 0.97)
+
+[node name="Center" type="CenterContainer" parent="Ui/AdvancementsMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Ui/AdvancementsMenu/Center"]
+custom_minimum_size = Vector2(940, 650)
+layout_mode = 2
+
+[node name="Layout" type="VBoxContainer" parent="Ui/AdvancementsMenu/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="Label" parent="Ui/AdvancementsMenu/Center/Panel/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.91, 0.78, 1)
+theme_override_font_sizes/font_size = 30
+text = "ADVANCEMENTS"
+
+[node name="Progress" type="Label" parent="Ui/AdvancementsMenu/Center/Panel/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.54, 0.34, 1)
+theme_override_font_sizes/font_size = 15
+text = "0 / 20 COMPLETE"
+
+[node name="Scroll" type="ScrollContainer" parent="Ui/AdvancementsMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 490)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="List" type="VBoxContainer" parent="Ui/AdvancementsMenu/Center/Panel/Layout/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="BackButton" type="Button" parent="Ui/AdvancementsMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(140, 44)
+layout_mode = 2
+size_flags_horizontal = 8
+text = "BACK"
+
+[node name="PauseMenu" type="Control" parent="Ui"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_velocitex")
+
+[node name="Dim" type="ColorRect" parent="Ui/PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.01, 0.015, 0.02, 0.82)
+
+[node name="Center" type="CenterContainer" parent="Ui/PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Ui/PauseMenu/Center"]
+custom_minimum_size = Vector2(410, 410)
+layout_mode = 2
+
+[node name="Layout" type="VBoxContainer" parent="Ui/PauseMenu/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 13
+
+[node name="Header" type="Label" parent="Ui/PauseMenu/Center/Panel/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.91, 0.78, 1)
+theme_override_font_sizes/font_size = 32
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="Ui/PauseMenu/Center/Panel/Layout"]
+layout_mode = 2
+
+[node name="ResumeButton" type="Button" parent="Ui/PauseMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "RESUME"
+
+[node name="RestartButton" type="Button" parent="Ui/PauseMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "RESTART ROOM"
+
+[node name="AdvancementsButton" type="Button" parent="Ui/PauseMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "ADVANCEMENTS"
+
+[node name="SettingsButton" type="Button" parent="Ui/PauseMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "SETTINGS"
+
+[node name="MainMenuButton" type="Button" parent="Ui/PauseMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "RETURN TO MAIN MENU"
+
+[node name="SettingsMenu" type="Control" parent="Ui"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_velocitex")
+
+[node name="Dim" type="ColorRect" parent="Ui/SettingsMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.015, 0.021, 0.029, 0.97)
+
+[node name="Center" type="CenterContainer" parent="Ui/SettingsMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Ui/SettingsMenu/Center"]
+custom_minimum_size = Vector2(900, 680)
+layout_mode = 2
+
+[node name="Layout" type="VBoxContainer" parent="Ui/SettingsMenu/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.91, 0.78, 1)
+theme_override_font_sizes/font_size = 30
+text = "SETTINGS"
+
+[node name="Tabs" type="TabContainer" parent="Ui/SettingsMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(830, 500)
+layout_mode = 2
+current_tab = 0
+
+[node name="VIDEO" type="MarginContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Grid" type="GridContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 32
+theme_override_constants/v_separation = 12
+
+[node name="FpsLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+layout_mode = 2
+text = "Frame rate limit"
+
+[node name="FpsOption" type="OptionButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+
+[node name="ResolutionLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+layout_mode = 2
+text = "Resolution"
+
+[node name="ResolutionOption" type="OptionButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+
+[node name="WindowLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+layout_mode = 2
+text = "Window mode"
+
+[node name="WindowOption" type="OptionButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+
+[node name="PresetLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+layout_mode = 2
+text = "Graphics preset"
+
+[node name="PresetOption" type="OptionButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+
+[node name="RenderScaleLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+layout_mode = 2
+text = "3D render scale"
+
+[node name="RenderScaleSlider" type="HSlider" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+custom_minimum_size = Vector2(360, 30)
+layout_mode = 2
+min_value = 0.5
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="MsaaLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+layout_mode = 2
+text = "Anti-aliasing (MSAA)"
+
+[node name="MsaaOption" type="OptionButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+
+[node name="VsyncLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+layout_mode = 2
+text = "Vertical sync"
+
+[node name="VsyncCheck" type="CheckButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+layout_mode = 2
+text = "Enabled"
+
+[node name="ShadowsLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+layout_mode = 2
+text = "Dynamic shadows"
+
+[node name="ShadowsCheck" type="CheckButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/VIDEO/Grid"]
+layout_mode = 2
+button_pressed = true
+text = "Enabled"
+
+[node name="GAMEPLAY" type="MarginContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Grid" type="GridContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/GAMEPLAY"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 32
+theme_override_constants/v_separation = 16
+
+[node name="SensitivityLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/GAMEPLAY/Grid"]
+layout_mode = 2
+text = "Mouse sensitivity"
+
+[node name="SensitivitySlider" type="HSlider" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/GAMEPLAY/Grid"]
+custom_minimum_size = Vector2(360, 30)
+layout_mode = 2
+min_value = 0.001
+max_value = 0.006
+step = 0.0001
+value = 0.0025
+
+[node name="InvertYLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/GAMEPLAY/Grid"]
+layout_mode = 2
+text = "Invert camera Y"
+
+[node name="InvertYCheck" type="CheckButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/GAMEPLAY/Grid"]
+layout_mode = 2
+text = "Enabled"
+
+[node name="DefaultCameraLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/GAMEPLAY/Grid"]
+layout_mode = 2
+text = "Default camera"
+
+[node name="DefaultCameraOption" type="OptionButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/GAMEPLAY/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+
+[node name="CameraShakeLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/GAMEPLAY/Grid"]
+layout_mode = 2
+text = "Camera shake amount"
+
+[node name="CameraShakeSlider" type="HSlider" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/GAMEPLAY/Grid"]
+custom_minimum_size = Vector2(360, 30)
+layout_mode = 2
+max_value = 1.0
+step = 0.1
+value = 1.0
+
+[node name="InteractionPromptsLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/GAMEPLAY/Grid"]
+layout_mode = 2
+text = "Interaction prompts"
+
+[node name="InteractionPromptsCheck" type="CheckButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/GAMEPLAY/Grid"]
+layout_mode = 2
+button_pressed = true
+text = "Enabled"
+
+[node name="CONTROLS" type="MarginContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Layout" type="VBoxContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Note" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.64, 0.67, 1)
+text = "Select a binding, then press a key. Arrow keys remain secondary movement controls. Mouse-look and middle-button zoom remain fixed."
+autowrap_mode = 2
+
+[node name="Grid" type="GridContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 32
+theme_override_constants/v_separation = 7
+
+[node name="ForwardLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout/Grid"]
+layout_mode = 2
+text = "Move forward"
+
+[node name="ForwardButton" type="Button" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+text = "W"
+
+[node name="BackLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout/Grid"]
+layout_mode = 2
+text = "Move back"
+
+[node name="BackButton" type="Button" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+text = "S"
+
+[node name="LeftLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout/Grid"]
+layout_mode = 2
+text = "Move left"
+
+[node name="LeftButton" type="Button" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+text = "A"
+
+[node name="RightLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout/Grid"]
+layout_mode = 2
+text = "Move right"
+
+[node name="RightButton" type="Button" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+text = "D"
+
+[node name="CameraLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout/Grid"]
+layout_mode = 2
+text = "Toggle camera"
+
+[node name="CameraButton" type="Button" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+text = "C"
+
+[node name="InteractLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout/Grid"]
+layout_mode = 2
+text = "Interact"
+
+[node name="InteractButton" type="Button" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/CONTROLS/Layout/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+text = "E"
+
+[node name="AUDIO" type="MarginContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Grid" type="GridContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/AUDIO"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 32
+theme_override_constants/v_separation = 18
+
+[node name="MasterLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/AUDIO/Grid"]
+layout_mode = 2
+text = "Master"
+
+[node name="MasterSlider" type="HSlider" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/AUDIO/Grid"]
+custom_minimum_size = Vector2(360, 30)
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="MusicLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/AUDIO/Grid"]
+layout_mode = 2
+text = "Music"
+
+[node name="MusicSlider" type="HSlider" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/AUDIO/Grid"]
+custom_minimum_size = Vector2(360, 30)
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 0.8
+
+[node name="SfxLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/AUDIO/Grid"]
+layout_mode = 2
+text = "Sound effects"
+
+[node name="SfxSlider" type="HSlider" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/AUDIO/Grid"]
+custom_minimum_size = Vector2(360, 30)
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 0.9
+
+[node name="VoiceLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/AUDIO/Grid"]
+layout_mode = 2
+text = "Voice"
+
+[node name="VoiceSlider" type="HSlider" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/AUDIO/Grid"]
+custom_minimum_size = Vector2(360, 30)
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="ACCESSIBILITY" type="MarginContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Grid" type="GridContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 32
+theme_override_constants/v_separation = 14
+
+[node name="SubtitlesLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+text = "Subtitles"
+
+[node name="SubtitlesCheck" type="CheckButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+button_pressed = true
+text = "Enabled"
+
+[node name="SubtitleScaleLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+text = "Subtitle size"
+
+[node name="SubtitleScaleOption" type="OptionButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+custom_minimum_size = Vector2(360, 38)
+layout_mode = 2
+
+[node name="SubtitleBackgroundLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+text = "Subtitle background"
+
+[node name="SubtitleBackgroundCheck" type="CheckButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+button_pressed = true
+text = "Enabled"
+
+[node name="ReducedMotionLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+text = "Reduced motion"
+
+[node name="ReducedMotionCheck" type="CheckButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+text = "Enabled"
+
+[node name="DisableFlashesLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+text = "Disable flashes"
+
+[node name="DisableFlashesCheck" type="CheckButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+text = "Enabled"
+
+[node name="HighContrastLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+text = "High-contrast prompts"
+
+[node name="HighContrastCheck" type="CheckButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+text = "Enabled"
+
+[node name="TrailLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+text = "Player trail"
+
+[node name="TrailCheck" type="CheckButton" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/ACCESSIBILITY/Grid"]
+layout_mode = 2
+button_pressed = true
+text = "Enabled"
+
+[node name="Actions" type="HBoxContainer" parent="Ui/SettingsMenu/Center/Panel/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 2
+
+[node name="DefaultsButton" type="Button" parent="Ui/SettingsMenu/Center/Panel/Layout/Actions"]
+custom_minimum_size = Vector2(130, 44)
+layout_mode = 2
+text = "DEFAULTS"
+
+[node name="BackButton" type="Button" parent="Ui/SettingsMenu/Center/Panel/Layout/Actions"]
+custom_minimum_size = Vector2(130, 44)
+layout_mode = 2
+text = "BACK"
+
+[node name="ApplyButton" type="Button" parent="Ui/SettingsMenu/Center/Panel/Layout/Actions"]
+custom_minimum_size = Vector2(130, 44)
+layout_mode = 2
+text = "APPLY"
+
+[node name="LoadingOverlay" type="Control" parent="Ui"]
+visible = false
+layout_mode = 3
+layout_direction = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+theme = SubResource("Theme_velocitex")
+
+[node name="Dim" type="ColorRect" parent="Ui/LoadingOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.004, 0.005, 0.007, 1)
+
+[node name="Center" type="CenterContainer" parent="Ui/LoadingOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Layout" type="VBoxContainer" parent="Ui/LoadingOverlay/Center"]
+custom_minimum_size = Vector2(1040, 250)
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="Logo" type="Control" parent="Ui/LoadingOverlay/Center/Layout"]
+custom_minimum_size = Vector2(1040, 152)
+layout_mode = 2
+
+[node name="Vel" type="Label" parent="Ui/LoadingOverlay/Center/Layout/Logo"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -71.0
+offset_right = -33.0
+offset_bottom = 71.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.98, 0.91, 0.78, 1)
+theme_override_font_sizes/font_size = 90
+text = "VEL"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="BallO" type="TextureRect" parent="Ui/LoadingOverlay/Center/Layout/Logo"]
+custom_minimum_size = Vector2(78, 78)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -39.0
+offset_top = -39.0
+offset_right = 39.0
+offset_bottom = 39.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_logo_ball")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Citex" type="Label" parent="Ui/LoadingOverlay/Center/Layout/Logo"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 37.0
+offset_top = -71.0
+offset_right = 380.0
+offset_bottom = 71.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.98, 0.91, 0.78, 1)
+theme_override_font_sizes/font_size = 90
+text = "CITEX"
+vertical_alignment = 1
+
+[node name="RoomLabel" type="Label" parent="Ui/LoadingOverlay/Center/Layout"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.59, 0.34, 1)
+theme_override_font_sizes/font_size = 18
+text = "ROUTING TO THE NEXT CHAMBER"
+horizontal_alignment = 1
+
+[node name="Progress" type="ProgressBar" parent="Ui/LoadingOverlay/Center/Layout"]
+visible = false
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+value = 18.0
+show_percentage = false
+
+[node name="Hint" type="Label" parent="Ui/LoadingOverlay/Center/Layout"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.48, 0.54, 0.58, 1)
+theme_override_font_sizes/font_size = 14
+text = "ROUTING THROUGH THE CANDY MACHINE"
+horizontal_alignment = 1
+
+[node name="RoomIntroCard" type="Control" parent="Ui"]
+visible = false
+layout_mode = 3
+layout_direction = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = SubResource("Theme_velocitex")
+
+[node name="Panel" type="PanelContainer" parent="Ui/RoomIntroCard"]
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -370.0
+offset_top = 24.0
+offset_right = 370.0
+offset_bottom = 126.0
+grow_horizontal = 2
+
+[node name="Content" type="HBoxContainer" parent="Ui/RoomIntroCard/Panel"]
+layout_mode = 2
+layout_direction = 2
+theme_override_constants/separation = 22
+alignment = 1
+
+[node name="Number" type="Label" parent="Ui/RoomIntroCard/Panel/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.89, 0.64, 0.35, 1)
+theme_override_font_sizes/font_size = 20
+text = "ROOM 02 / 28"
+vertical_alignment = 1
+
+[node name="Separator" type="VSeparator" parent="Ui/RoomIntroCard/Panel/Content"]
+custom_minimum_size = Vector2(2, 50)
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Ui/RoomIntroCard/Panel/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.98, 0.91, 0.78, 1)
+theme_override_font_sizes/font_size = 30
+text = "THE COPPER BEND"
+vertical_alignment = 1
+
+[node name="QuitConfirmation" type="ConfirmationDialog" parent="Ui"]
+title = "Quit Velocitex?"
+dialog_text = "Unsaved room progress will be lost."
+ok_button_text = "QUIT"
+cancel_button_text = "CANCEL"
+
+[node name="NewGameConfirmation" type="ConfirmationDialog" parent="Ui"]
+title = "Start a new game?"
+dialog_text = "Campaign snapshots will be cleared. Settings, cosmetics and advancements will be kept."
+ok_button_text = "NEW GAME"
+cancel_button_text = "CANCEL"
+
+[node name="RoomCompleteDialog" type="AcceptDialog" parent="Ui"]
+exclusive = true
+title = "ROOM COMPLETE"
+dialog_text = "Snapshot saved."
+ok_button_text = "CONTINUE"
+
+[node name="UnavailableDialog" type="AcceptDialog" parent="Ui"]
+title = "NOTICE"
+dialog_text = "The requested action could not be completed."
+ok_button_text = "BACK"

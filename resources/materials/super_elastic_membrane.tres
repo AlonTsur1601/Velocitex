@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://resources/shaders/super_elastic_membrane.gdshader" id="1_shader"]
+
+[resource]
+resource_name = "Overdrive Spring Membrane Material"
+shader = ExtResource("1_shader")
+shader_parameter/rubber_color = Color(0.14, 0.08, 0.24, 1)
+shader_parameter/cell_color = Color(0.48, 0.24, 0.7, 1)
+shader_parameter/seam_color = Color(0.055, 0.025, 0.085, 1)
+shader_parameter/motion_scale = 1.0

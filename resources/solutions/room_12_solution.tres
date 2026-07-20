@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1_trace"]
+
+[resource]
+resource_name = "Room 12 - Armed Heavy Drop"
+script = ExtResource("1_trace")
+RoomId = "room-12"
+PhysicsTicksPerSecond = 60
+MoveInputs = Array[Vector2]([Vector2(-1, -0.25), Vector2(1, -0.75), Vector2(-0.45, -1), Vector2(0, -1), Vector2(0, 0), Vector2(0, -1)])
+ActionFlags = PackedByteArray(0, 0, 0, 0, 0, 0)
+MoveDurationsTicks = PackedInt32Array(48, 102, 48, 150, 75, 500)
+HoldLastInput = true

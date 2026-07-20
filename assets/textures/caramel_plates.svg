@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <pattern id="caramel" width="256" height="256" patternUnits="userSpaceOnUse">
+      <rect width="256" height="256" fill="#cf9363"/>
+      <circle cx="0" cy="56" r="74" fill="#f1bd80" opacity=".035"/>
+      <circle cx="256" cy="56" r="74" fill="#f1bd80" opacity=".035"/>
+      <circle cx="128" cy="181" r="96" fill="#825236" opacity=".035"/>
+    </pattern>
+    <pattern id="grain" width="64" height="64" patternUnits="userSpaceOnUse">
+      <circle cx="13" cy="16" r="3" fill="#f8ca91" opacity=".075"/>
+      <circle cx="47" cy="41" r="4" fill="#6d432f" opacity=".07"/>
+      <circle cx="31" cy="56" r="2" fill="#fff0c5" opacity=".08"/>
+      <path d="M4 31c14-8 27 8 42 0 7-4 12-4 18 0" fill="none" stroke="#78492f" stroke-width="2" opacity=".04"/>
+    </pattern>
+    <pattern id="micro" width="64" height="64" patternUnits="userSpaceOnUse">
+      <circle cx="9" cy="13" r="2.5" fill="#ffe0ad" opacity=".42"/>
+      <circle cx="28" cy="36" r="4.1" fill="#6d412d" opacity=".3"/>
+      <circle cx="58" cy="19" r="3.2" fill="#f8c084" opacity=".38"/>
+      <circle cx="54" cy="58" r="4.7" fill="#825039" opacity=".26"/>
+      <circle cx="15" cy="57" r="2.6" fill="#fff0c7" opacity=".36"/>
+      <path d="M2 49c13-7 24 5 36-1 9-5 17 1 24 0" fill="none" stroke="#6c402b" stroke-width="2.1" opacity=".21"/>
+      <path d="M17 24l15-5m18 22l12-4M35 61l10-4" stroke="#ffd69e" stroke-width="1.8" opacity=".26"/>
+    </pattern>
+    <pattern id="cooked" width="256" height="256" patternUnits="userSpaceOnUse">
+      <path d="M-24 181c51-28 83 13 125-5s74-42 171-4" fill="none" stroke="#6f412c" stroke-width="8" opacity=".095"/>
+      <ellipse cx="191" cy="58" rx="47" ry="28" fill="#f6c48d" opacity=".085"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="url(#caramel)"/>
+  <rect width="512" height="512" fill="url(#grain)"/>
+  <rect width="512" height="512" fill="url(#micro)"/>
+  <rect width="512" height="512" fill="url(#cooked)"/>
+</svg>

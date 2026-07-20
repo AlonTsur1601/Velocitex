@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://resources/shaders/accelerator_belt.gdshader" id="1_shader"]
+
+[resource]
+resource_name = "Directional Pulse Conveyor Material"
+shader = ExtResource("1_shader")
+shader_parameter/base_color = Color(0.035, 0.14, 0.17, 1)
+shader_parameter/groove_color = Color(0.015, 0.035, 0.04, 1)
+shader_parameter/pulse_color = Color(0.16, 0.72, 0.78, 1)
+shader_parameter/motion_scale = 1.0

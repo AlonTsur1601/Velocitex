@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="Script" path="res://src/Gameplay/Rooms/CoreRoomsRuntime.cs" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3"]
+[sub_resource type="Environment" id="e"]
+background_mode=1
+background_color=Color(0.11,0.14,0.12,1)
+ambient_light_source=3
+ambient_light_color=Color(0.72,0.92,0.76,1)
+ambient_light_energy=3.4
+tonemap_exposure=1.5
+[node name="Room28" type="Node3D"]
+script=ExtResource("1")
+RoomNumber=28
+RoomId="room-28"
+RoomDisplayName="Counterweight"
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment=SubResource("e")
+[node name="Light" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
+rotation_degrees=Vector3(-58,-20,0)
+light_energy=1.8
+shadow_enabled=true
+[node name="Fill" type="OmniLight3D" parent="."]
+position=Vector3(0,22,0)
+light_color=Color(0.58,0.92,0.68,1)
+light_energy=13
+omni_range=75
+[node name="Player" parent="." instance=ExtResource("2")]
+position=Vector3(0,5.1,42)
+[node name="CameraRig" parent="." instance=ExtResource("3")]
+position=Vector3(0,5.4,42)

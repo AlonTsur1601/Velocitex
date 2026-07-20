@@ -1,0 +1,56 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/Gameplay/Rooms/Room17Runtime.cs" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3_camera"]
+
+[sub_resource type="Environment" id="Environment_room17"]
+background_mode = 1
+background_color = Color(0.14, 0.17, 0.21, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.76, 0.82, 0.9, 1)
+ambient_light_energy = 3.15
+reflected_light_source = 2
+tonemap_exposure = 1.55
+
+[node name="Room17" type="Node3D"]
+script = ExtResource("1_room")
+RoomNumber = 17
+RoomId = "room-17"
+RoomDisplayName = "Crossfire"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_room17")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
+rotation_degrees = Vector3(-58, -24, 0)
+light_color = Color(0.86, 0.91, 1, 1)
+light_energy = 1.75
+shadow_enabled = true
+
+[node name="RoomFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 15, -7)
+light_color = Color(0.7, 0.82, 1, 1)
+light_energy = 10.5
+omni_range = 46.0
+shadow_enabled = false
+
+[node name="StartFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 10, 21)
+light_color = Color(0.95, 0.97, 1, 1)
+light_energy = 4.8
+omni_range = 16.0
+shadow_enabled = false
+
+[node name="ExitFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 13, -40)
+light_color = Color(0.96, 0.93, 0.86, 1)
+light_energy = 5.4
+omni_range = 17.0
+shadow_enabled = false
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.85, 23.1)
+
+[node name="CameraRig" parent="." instance=ExtResource("3_camera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.1, 23.1)

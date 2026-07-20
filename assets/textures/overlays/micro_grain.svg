@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <pattern id="grain" width="64" height="64" patternUnits="userSpaceOnUse">
+      <circle cx="7" cy="11" r="2.2" fill="#f4f4ed" opacity=".58"/>
+      <circle cx="23" cy="35" r="3.6" fill="#162027" opacity=".48"/>
+      <circle cx="51" cy="16" r="2.8" fill="#f8f6ec" opacity=".5"/>
+      <circle cx="57" cy="53" r="1.8" fill="#172229" opacity=".62"/>
+      <circle cx="12" cy="56" r="1.3" fill="#f2eee4" opacity=".46"/>
+      <circle cx="38" cy="7" r="1.7" fill="#1b262c" opacity=".54"/>
+      <path d="M3 26h17m9 0h29M14 47h41M2 61h22m10 0h25" stroke="#f5f2e8" stroke-width="1.4" opacity=".36"/>
+      <path d="M17 18l14-4m10 33l19-5M5 51l11-3" stroke="#172228" stroke-width="1.8" opacity=".46"/>
+    </pattern>
+    <pattern id="scatter" width="256" height="256" patternUnits="userSpaceOnUse">
+      <ellipse cx="58" cy="193" rx="41" ry="25" fill="#10191f" opacity=".12"/>
+      <ellipse cx="203" cy="62" rx="34" ry="19" fill="#f5f1e7" opacity=".09"/>
+      <path d="M21 219l69-20m24 15l88-29" stroke="#151f25" stroke-width="2.5" opacity=".26"/>
+      <path d="M37 72l54-13m82 117l48-11" stroke="#f4f1e8" stroke-width="1.8" opacity=".2"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="url(#grain)"/>
+  <rect width="512" height="512" fill="url(#scatter)"/>
+</svg>

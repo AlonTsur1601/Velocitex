@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SurfaceProfile" load_steps=2 format=3]
+[ext_resource type="Script" path="res://src/Core/Physics/SurfaceProfile.cs" id="1"]
+[resource]
+resource_name="Compressed Gelatin"
+script=ExtResource("1")
+Kind=8
+Friction=0.08
+LinearDrag=0.05
+BounceMultiplier=1.28
+Acceleration=Vector3(0,0,0)
+GripDirection=Vector3(0,0,-1)

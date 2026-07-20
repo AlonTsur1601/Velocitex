@@ -1,0 +1,63 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/Gameplay/Rooms/Room05Runtime.cs" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3_camera"]
+
+[sub_resource type="Environment" id="Environment_room05"]
+background_mode = 1
+background_color = Color(0.24, 0.25, 0.28, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.91, 0.92, 0.9, 1)
+ambient_light_energy = 3.0
+reflected_light_source = 2
+tonemap_exposure = 1.65
+
+[node name="Room05" type="Node3D"]
+script = ExtResource("1_room")
+RoomNumber = 5
+RoomId = "room-05"
+RoomDisplayName = "The Proof Run"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_room05")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
+rotation_degrees = Vector3(-55, -22, 0)
+light_color = Color(0.93, 0.91, 0.84, 1)
+light_energy = 1.8
+shadow_enabled = true
+
+[node name="RoomFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 7.5, -1.5)
+light_color = Color(0.88, 0.91, 0.94, 1)
+light_energy = 9.8
+omni_range = 34.0
+shadow_enabled = false
+
+[node name="StartFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 7, 12.5)
+light_color = Color(1, 0.78, 0.52, 1)
+light_energy = 2.4
+omni_range = 11.0
+shadow_enabled = false
+
+[node name="LandingFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 4.5, -8.5)
+light_color = Color(0.65, 0.84, 0.92, 1)
+light_energy = 5.2
+omni_range = 16.0
+shadow_enabled = false
+
+[node name="ExitFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 4.2, -17.5)
+light_color = Color(0.92, 0.92, 0.88, 1)
+light_energy = 5.6
+omni_range = 14.0
+shadow_enabled = false
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10.9, 31)
+
+[node name="CameraRig" parent="." instance=ExtResource("3_camera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.15, 31)

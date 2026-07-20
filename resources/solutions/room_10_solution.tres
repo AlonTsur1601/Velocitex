@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1_trace"]
+
+[resource]
+resource_name = "Room 10 - Surface Gauntlet"
+script = ExtResource("1_trace")
+RoomId = "room-10"
+PhysicsTicksPerSecond = 60
+MoveInputs = Array[Vector2]([Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0), Vector2(0.8, -0.6), Vector2(-0.55, -1), Vector2(0, -1)])
+ActionFlags = PackedByteArray(0, 0, 0, 0, 0, 0)
+MoveDurationsTicks = PackedInt32Array(230, 70, 145, 105, 70, 830)
+HoldLastInput = true

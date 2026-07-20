@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1_trace"]
+
+[resource]
+resource_name = "Room 19 - Piston Arc"
+script = ExtResource("1_trace")
+RoomId = "room-19"
+PhysicsTicksPerSecond = 60
+MoveInputs = Array[Vector2]([Vector2(-0.65, 0.7), Vector2(0.85, -0.35), Vector2(-0.4, -1), Vector2(-1, -1), Vector2(1, -1), Vector2(0, -1), Vector2(-0.35, -1)])
+ActionFlags = PackedByteArray(0, 0, 0, 1, 0, 0, 0)
+MoveDurationsTicks = PackedInt32Array(35, 80, 45, 50, 110, 150, 550)
+HoldLastInput = true

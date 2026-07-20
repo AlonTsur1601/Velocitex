@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="candy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e64a60"/>
+      <stop offset="0.44" stop-color="#ba263e"/>
+      <stop offset="0.72" stop-color="#d93650"/>
+      <stop offset="1" stop-color="#8f1b32"/>
+    </linearGradient>
+    <linearGradient id="cream" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff0cf"/>
+      <stop offset="0.55" stop-color="#e9c998"/>
+      <stop offset="1" stop-color="#cda777"/>
+    </linearGradient>
+    <radialGradient id="crystal" cx="35%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.92"/>
+      <stop offset="0.38" stop-color="#ffe9c8" stop-opacity="0.62"/>
+      <stop offset="1" stop-color="#a35458" stop-opacity="0.18"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#candy)"/>
+  <path d="M-76 54C30-32 96 122 203 45S363-20 588 72v88C375 68 314 139 210 214S36 91-76 183z" fill="url(#cream)" opacity="0.96"/>
+  <path d="M-82 290c112-91 184 69 291-10s164-63 381 28v74c-211-89-277-70-381 4S32 317-82 410z" fill="#f29aa2" opacity="0.78"/>
+  <path d="M-72 107C27 26 100 166 206 92S365 39 579 127M-70 342c107-83 176 63 281-10s162-59 373 30" fill="none" stroke="#fff8e9" stroke-width="12" opacity="0.24"/>
+
+  <g fill="#6f1730" opacity="0.24">
+    <circle cx="73" cy="242" r="8"/><circle cx="221" cy="23" r="6"/><circle cx="335" cy="248" r="7"/><circle cx="467" cy="461" r="9"/>
+    <circle cx="139" cy="411" r="5"/><circle cx="404" cy="116" r="5"/>
+  </g>
+  <g fill="url(#crystal)">
+    <path d="M34 38l8-16 13 13-6 17z"/><path d="M102 196l7-13 12 8-3 15z"/>
+    <path d="M179 72l9-17 15 12-7 18z"/><path d="M246 231l8-15 14 11-6 17z"/>
+    <path d="M315 51l7-14 13 10-5 16z"/><path d="M386 208l9-16 14 12-6 18z"/>
+    <path d="M472 74l7-13 12 9-4 15z"/><path d="M58 351l8-15 13 11-5 17z"/>
+    <path d="M158 470l9-17 14 12-6 18z"/><path d="M279 382l7-14 13 10-5 16z"/>
+    <path d="M369 446l9-16 14 12-6 17z"/><path d="M465 316l7-13 12 9-4 15z"/>
+  </g>
+  <g fill="none" stroke-linecap="round">
+    <path d="M25 269l63-21m45 10l91-31m62 45l69-23m36 17l91-32M28 483l74-26m38 20l93-29m54 42l78-26m32 8l82-25" stroke="#fff2d8" stroke-width="4" opacity="0.28"/>
+    <path d="M42 286l45-15m73 6l65-23m82 39l49-17m58 9l59-21M57 496l50-17m81 12l48-16m92 23l41-14" stroke="#69182f" stroke-width="5" opacity="0.2"/>
+  </g>
+</svg>

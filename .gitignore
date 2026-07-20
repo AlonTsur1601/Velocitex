@@ -1,0 +1,28 @@
+# Godot-generated state
+.godot/
+
+# Local portable toolchain and package caches
+.tools/
+.dotnet/
+.packages/
+
+# Build outputs
+bin/
+obj/
+builds/
+
+# Local editor files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Runtime logs and temporary files
+logs/
+*.tmp
+
+
+# Generated Godot and QA artifacts
+*.import
+tmp/
+output/

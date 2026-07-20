@@ -1,0 +1,20 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Gameplay/Camera/PlayerCameraRig.cs" id="1_camera"]
+
+[node name="CameraRig" type="Node3D"]
+script = ExtResource("1_camera")
+
+[node name="YawPivot" type="Node3D" parent="."]
+
+[node name="PitchPivot" type="Node3D" parent="YawPivot"]
+
+[node name="SpringArm3D" type="SpringArm3D" parent="YawPivot/PitchPivot"]
+spring_length = 5.5
+margin = 0.15
+
+[node name="Camera3D" type="Camera3D" parent="YawPivot/PitchPivot/SpringArm3D"]
+current = true
+fov = 70.0
+near = 0.05
+

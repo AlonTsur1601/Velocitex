@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1_trace"]
+
+[resource]
+resource_name = "Room 05 - Lever, Sequence and Double Flight"
+script = ExtResource("1_trace")
+RoomId = "room-05"
+PhysicsTicksPerSecond = 60
+MoveInputs = Array[Vector2]([Vector2(-1, 0), Vector2(0, 0), Vector2(1, 0), Vector2(0, 0), Vector2(-0.9, -1), Vector2(1, -0.4), Vector2(-0.5, -0.7), Vector2(-0.25, -1)])
+ActionFlags = PackedByteArray(0, 1, 0, 0, 0, 0, 0, 0)
+MoveDurationsTicks = PackedInt32Array(50, 1, 70, 60, 150, 160, 20, 565)
+HoldLastInput = true

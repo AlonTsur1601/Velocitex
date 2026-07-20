@@ -1,0 +1,76 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/Story/EndingSequence.cs" id="1_script"]
+
+[sub_resource type="Environment" id="Environment_ending"]
+background_mode = 1
+background_color = Color(0.045, 0.058, 0.072, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.74, 0.79, 0.82, 1)
+ambient_light_energy = 1.05
+reflected_light_source = 2
+
+[node name="EndingSequence" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ending")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+position = Vector3(8.2, 5.1, 11.2)
+current = true
+fov = 48.0
+
+[node name="KeyLight" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
+rotation_degrees = Vector3(-52, -32, 0)
+light_color = Color(1, 0.84, 0.64, 1)
+light_energy = 1.75
+shadow_enabled = true
+
+[node name="FillLight" type="OmniLight3D" parent="."]
+position = Vector3(-2, 3.5, 4)
+light_color = Color(0.46, 0.78, 0.9, 1)
+light_energy = 5.8
+omni_range = 12.0
+
+[node name="Voice" type="AudioStreamPlayer" parent="."]
+bus = &"Voice"
+volume_db = -1.5
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+bus = &"Music"
+volume_db = -11.0
+
+[node name="Ui" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="Subtitles" type="CenterContainer" parent="Ui"]
+offset_left = 260.0
+offset_top = 560.0
+offset_right = 1020.0
+offset_bottom = 690.0
+
+[node name="Panel" type="PanelContainer" parent="Ui/Subtitles"]
+custom_minimum_size = Vector2(720, 104)
+layout_mode = 2
+
+[node name="Layout" type="VBoxContainer" parent="Ui/Subtitles/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Speaker" type="Label" parent="Ui/Subtitles/Panel/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.61, 0.34, 1)
+theme_override_font_sizes/font_size = 15
+text = "CHILD"
+horizontal_alignment = 1
+
+[node name="Line" type="Label" parent="Ui/Subtitles/Panel/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.96, 0.9, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 22
+text = "Finally!"
+horizontal_alignment = 1

@@ -1,0 +1,63 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/Gameplay/Rooms/Room07Runtime.cs" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3_camera"]
+
+[sub_resource type="Environment" id="Environment_room07"]
+background_mode = 1
+background_color = Color(0.24, 0.17, 0.13, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.96, 0.84, 0.7, 1)
+ambient_light_energy = 3.0
+reflected_light_source = 2
+tonemap_exposure = 1.58
+
+[node name="Room07" type="Node3D"]
+script = ExtResource("1_room")
+RoomNumber = 7
+RoomId = "room-07"
+RoomDisplayName = "Caramel Brake"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_room07")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
+rotation_degrees = Vector3(-50, -20, 0)
+light_color = Color(1, 0.82, 0.64, 1)
+light_energy = 1.65
+shadow_enabled = true
+
+[node name="RoomFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 7.4, 0)
+light_color = Color(1, 0.83, 0.66, 1)
+light_energy = 9.2
+omni_range = 32.0
+shadow_enabled = false
+
+[node name="StickyFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 5.6, 0.3)
+light_color = Color(1, 0.49, 0.17, 1)
+light_energy = 0.9
+omni_range = 15.0
+shadow_enabled = false
+
+[node name="StartFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 7.0, 15)
+light_color = Color(0.95, 0.92, 0.81, 1)
+light_energy = 3.5
+omni_range = 12.0
+shadow_enabled = false
+
+[node name="ExitFill" type="OmniLight3D" parent="."]
+position = Vector3(0, 5.8, -11.5)
+light_color = Color(0.91, 0.91, 0.84, 1)
+light_energy = 5.0
+omni_range = 12.0
+shadow_enabled = false
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.65, 18.2)
+
+[node name="CameraRig" parent="." instance=ExtResource("3_camera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.9, 18.2)

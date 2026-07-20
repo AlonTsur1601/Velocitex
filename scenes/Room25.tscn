@@ -1,0 +1,34 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="Script" path="res://src/Gameplay/Rooms/Room25Runtime.cs" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3"]
+[sub_resource type="Environment" id="e"]
+background_mode=1
+background_color=Color(0.15,0.11,0.17,1)
+ambient_light_source=3
+ambient_light_color=Color(0.9,0.74,0.96,1)
+ambient_light_energy=3.45
+reflected_light_source=2
+tonemap_exposure=1.5
+[node name="Room25" type="Node3D"]
+script=ExtResource("1")
+RoomNumber=25
+RoomId="room-25"
+RoomDisplayName="Processing Line"
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment=SubResource("e")
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
+rotation_degrees=Vector3(-58,-24,0)
+light_color=Color(0.96,0.85,1,1)
+light_energy=1.8
+shadow_enabled=true
+[node name="RoomFill" type="OmniLight3D" parent="."]
+position=Vector3(0,25,-8)
+light_color=Color(0.88,0.6,1,1)
+light_energy=14
+omni_range=92
+shadow_enabled=false
+[node name="Player" parent="." instance=ExtResource("2")]
+transform=Transform3D(1,0,0,0,1,0,0,0,1,0,5.1,50)
+[node name="CameraRig" parent="." instance=ExtResource("3")]
+transform=Transform3D(1,0,0,0,1,0,0,0,1,0,5.4,50)

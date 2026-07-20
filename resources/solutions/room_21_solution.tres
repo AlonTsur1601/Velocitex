@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1_trace"]
+
+[resource]
+resource_name = "Room 21 - Absorber Slalom"
+script = ExtResource("1_trace")
+RoomId = "room-21"
+PhysicsTicksPerSecond = 60
+MoveInputs = Array[Vector2]([Vector2(0, -1), Vector2(-1, 0), Vector2(0.78, -0.63), Vector2(-0.75, -0.66), Vector2(0.55, -0.83), Vector2(0, 0), Vector2(0, -1)])
+ActionFlags = PackedByteArray(0, 0, 0, 0, 0, 0, 0)
+MoveDurationsTicks = PackedInt32Array(180, 170, 390, 360, 270, 100, 800)
+HoldLastInput = true
