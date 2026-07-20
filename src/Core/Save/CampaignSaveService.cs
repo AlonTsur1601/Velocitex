@@ -43,9 +43,9 @@ public static class CampaignSaveService
                 snapshot.ThumbnailPath = imageError == Error.Ok ? thumbnailPath : null;
             }
 
+            PruneOldestSnapshots(absoluteRoot);
             string finalPath = Path.Combine(absoluteRoot, $"{stem}.json");
             AtomicWrite(finalPath, JsonSerializer.Serialize(snapshot, JsonOptions));
-            PruneOldestSnapshots(absoluteRoot);
             return true;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
@@ -84,6 +84,7 @@ public static class CampaignSaveService
         return snapshots
             .OrderByDescending(snapshot => snapshot.SavedAtUtc)
             .ThenByDescending(snapshot => snapshot.RoomNumber)
+            .Take(MaximumSnapshotCount)
             .ToArray();
     }
 
@@ -268,7 +269,7 @@ public static class CampaignSaveService
 
     private static void PruneOldestSnapshots(string root)
     {
-        CampaignSnapshot[] old = LoadAll(out _, root).Skip(MaximumSnapshotCount).ToArray();
+        CampaignSnapshot[] old = LoadAll(out _, root).Skip(MaximumSnapshotCount - 1).ToArray();
         foreach (CampaignSnapshot snapshot in old)
         {
             string stem = Path.Combine(root, GetStem(snapshot));
