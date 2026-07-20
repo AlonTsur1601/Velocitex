@@ -95,9 +95,16 @@ public static class CampaignSaveService
 
     public static IReadOnlySet<int> GetCompletedRoomNumbers(string root = DefaultRoot)
     {
-        return LoadAll(out _, root)
-            .Where(snapshot => snapshot.Kind == SnapshotKind.RoomComplete)
-            .Select(snapshot => snapshot.RoomNumber)
+        string absoluteRoot = ResolveRoot(root);
+        if (!Directory.Exists(absoluteRoot))
+        {
+            return new HashSet<int>();
+        }
+
+        return Directory.EnumerateFiles(absoluteRoot, "*.json")
+            .Select(path => TryLoadPath(path, out CampaignSnapshot? snapshot, out _) ? snapshot : null)
+            .Where(snapshot => snapshot?.Kind == SnapshotKind.RoomComplete)
+            .Select(snapshot => snapshot!.RoomNumber)
             .ToHashSet();
     }
 
