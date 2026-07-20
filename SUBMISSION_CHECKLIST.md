@@ -19,8 +19,9 @@ Last verified: 2026-07-20 (Asia/Jerusalem). Sources: OpenAI Build Week page, Dev
 
 ## Required Codex and GPT-5.6 evidence
 
-- [ ] Add the `/feedback` Codex Session ID for the primary development thread where most core functionality was built.
-  - Status: **BLOCKED - not found in project documentation or relevant memory. User must provide it.**
+- [x] Add the `/feedback` Codex Session ID for the primary development thread where most core functionality was built.
+  - Primary submission ID: `019f5659-1238-7ce2-927c-da0d7c36a4cc`
+  - Additional major-thread IDs for README/evidence: `019f78f6-08f5-70a0-9302-28f446158ff7`, `019f7f4b-9c5e-7272-8eb9-545b3d9d4af0`
 - [ ] Create evidence that accurately distinguishes pre-existing work from work completed during the Submission Period.
   - Status: **BLOCKED - the local repository currently has no recorded commits; all visible project files are untracked. Do not claim a commit history unless an external repository or archive is provided.**
 - [ ] Document specific, truthful examples of how Codex accelerated implementation, testing, design, and engineering decisions.
