@@ -331,7 +331,7 @@ text = "LOAD GAME"
 [node name="RoomSelectButton" type="Button" parent="Ui/PlayMenu/Center/Panel/Layout"]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-text = "ROOM SELECT"
+text = "SELECT ROOM"
 
 [node name="NewGameButton" type="Button" parent="Ui/PlayMenu/Center/Panel/Layout"]
 custom_minimum_size = Vector2(0, 48)
@@ -1296,7 +1296,7 @@ cancel_button_text = "CANCEL"
 
 [node name="NewGameConfirmation" type="ConfirmationDialog" parent="Ui"]
 title = "Start a new game?"
-dialog_text = "Campaign snapshots will be cleared. Settings, cosmetics and advancements will be kept."
+dialog_text = "All campaign saves will be cleared. Settings, cosmetics and advancements will be kept."
 ok_button_text = "NEW GAME"
 cancel_button_text = "CANCEL"
 

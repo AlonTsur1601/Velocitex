@@ -108,6 +108,13 @@ public static class CampaignSaveService
             .ToHashSet();
     }
 
+    public static void MarkRoomCompleted(int roomNumber, string root = DefaultRoot)
+    {
+        string directory = ResolveRoot(root); Directory.CreateDirectory(directory);
+        string path = Path.Combine(directory, "completed_rooms.txt");
+        HashSet<int> rooms = File.Exists(path) ? File.ReadAllLines(path).Select(v => int.TryParse(v, out int n) ? n : 0).Where(n => n is >= 1 and <= MaximumRoomCount).ToHashSet() : new HashSet<int>();
+        rooms.Add(roomNumber); File.WriteAllLines(path, rooms.OrderBy(n => n).Select(n => n.ToString()));
+    }
     public static bool DeleteAll(out string? error, string root = DefaultRoot)
     {
         error = null;
@@ -126,6 +133,40 @@ public static class CampaignSaveService
                 {
                     File.Delete(path);
                 }
+            }
+
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            error = exception.Message;
+            return false;
+        }
+    }
+
+    public static bool DeleteSnapshotsAfter(
+        CampaignSnapshot snapshot,
+        out string? error,
+        string root = DefaultRoot)
+    {
+        error = null;
+        try
+        {
+            string absoluteRoot = ResolveRoot(root);
+            if (!Directory.Exists(absoluteRoot))
+            {
+                return true;
+            }
+
+            foreach (string path in Directory.EnumerateFiles(absoluteRoot, "*.json"))
+            {
+                if (!TryLoadPath(path, out CampaignSnapshot? candidate, out _) || candidate is null ||
+                    candidate.SavedAtUtc <= snapshot.SavedAtUtc)
+                {
+                    continue;
+                }
+
+                DeleteSnapshotFiles(path);
             }
 
             return true;
@@ -258,7 +299,13 @@ public static class CampaignSaveService
 
     private static bool IsCampaignFile(string fileName)
     {
-        if (!fileName.StartsWith("room-", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(fileName, "completed_rooms.txt", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (!fileName.StartsWith("room-", StringComparison.OrdinalIgnoreCase) &&
+            !fileName.StartsWith("complete-", StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
@@ -267,6 +314,21 @@ public static class CampaignSaveService
             fileName.EndsWith(".json.tmp", StringComparison.OrdinalIgnoreCase) ||
             fileName.EndsWith(".json.bak", StringComparison.OrdinalIgnoreCase) ||
             fileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void DeleteSnapshotFiles(string jsonPath)
+    {
+        string stem = Path.Combine(
+            Path.GetDirectoryName(jsonPath) ?? string.Empty,
+            Path.GetFileNameWithoutExtension(jsonPath));
+        foreach (string suffix in new[] { ".json", ".json.bak", ".jpg" })
+        {
+            string path = stem + suffix;
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
     }
 
     private static string GetStem(CampaignSnapshot snapshot)

@@ -1639,6 +1639,12 @@ public partial class AppRoot : Node
 
     private void LoadSnapshot(CampaignSnapshot snapshot)
     {
+        if (!CampaignSaveService.DeleteSnapshotsAfter(snapshot, out string? error, _campaignRoot))
+        {
+            ShowUnavailable("LOAD GAME FAILED", $"Later campaign saves could not be cleared.\n{error}");
+            return;
+        }
+
         if (snapshot.Kind == SnapshotKind.RoomStart)
         {
             StartRoomWithCandyHandoff(snapshot.RoomNumber, saveRoomStart: false, snapshot.CampaignElapsedSeconds);
@@ -1685,10 +1691,11 @@ public partial class AppRoot : Node
     private void ShowRoomSelectBrowser()
     {
         _browserOrigin = MenuOrigin.Main;
-        _browserHeader.Text = "ROOM SELECT";
+        _browserHeader.Text = "SELECT ROOM";
         ClearBrowserRows();
         int rowCount = 0;
-        foreach (RoomCatalogEntry room in RoomCatalog.All)
+        IReadOnlySet<int> completed = CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot);
+        foreach (RoomCatalogEntry room in RoomCatalog.All.Where(room => completed.Contains(room.Number)))
         {
             AddRoomSelectRow(room);
             rowCount++;
@@ -2668,6 +2675,7 @@ public partial class AppRoot : Node
         }
 
         _roomCompletionHandled = true;
+        CampaignSaveService.MarkRoomCompleted(_currentRoom.RoomNumber, _campaignRoot);
         if (!IsAutomatedSmokeRun())
         {
             MuteSfxForRoomTransfer();
@@ -2872,7 +2880,7 @@ public partial class AppRoot : Node
         TimeSpan elapsed = TimeSpan.FromSeconds(snapshot.CampaignElapsedSeconds);
         Label metadata = new()
         {
-            Text = $"ROOM START   |   {snapshot.SavedAtUtc.ToLocalTime():yyyy-MM-dd HH:mm}\nPLAY TIME {elapsed:hh\\:mm\\:ss}",
+            Text = $"{snapshot.SavedAtUtc.ToLocalTime():yyyy-MM-dd HH:mm}\nPLAY TIME {elapsed:hh\\:mm\\:ss}",
         };
         metadata.AddThemeColorOverride("font_color", new Color("8f9ba3"));
         Button load = new()
@@ -2945,79 +2953,65 @@ public partial class AppRoot : Node
             return;
         }
 
-        DateTimeOffset baseTime = DateTimeOffset.UtcNow.AddHours(-2);
-        for (int roomNumber = 1; roomNumber <= CampaignSaveService.MaximumRoomCount; roomNumber++)
+        DateTimeOffset baseTime = DateTimeOffset.UtcNow.AddMinutes(-5);
+        for (int roomNumber = 1; roomNumber <= CampaignSaveService.MaximumSnapshotCount; roomNumber++)
         {
-            foreach (SnapshotKind kind in Enum.GetValues<SnapshotKind>())
+            CampaignSnapshot snapshot = new()
             {
-                CampaignSnapshot snapshot = new()
-                {
-                    RoomId = $"room-{roomNumber:D2}",
-                    RoomName = $"Test Room {roomNumber:D2}",
-                    RoomNumber = roomNumber,
-                    Kind = kind,
-                    SavedAtUtc = baseTime.AddMinutes((roomNumber * 2) + (int)kind),
-                    CampaignElapsedSeconds = roomNumber * 60.0,
-                };
-                if (!CampaignSaveService.Save(snapshot, null, out string? saveError, testRoot))
-                {
-                    FailSaveSmoke($"Could not save room {roomNumber}: {saveError}");
-                    return;
-                }
+                RoomId = $"room-{roomNumber:D2}",
+                RoomName = $"Test Room {roomNumber:D2}",
+                RoomNumber = roomNumber,
+                Kind = SnapshotKind.RoomStart,
+                SavedAtUtc = baseTime.AddMinutes(roomNumber),
+                CampaignElapsedSeconds = roomNumber * 60.0,
+            };
+            if (!CampaignSaveService.Save(snapshot, null, out string? saveError, testRoot))
+            {
+                FailSaveSmoke($"Could not save room {roomNumber}: {saveError}");
+                return;
             }
         }
 
         IReadOnlyList<CampaignSnapshot> all = CampaignSaveService.LoadAll(out IReadOnlyList<string> loadErrors, testRoot);
         if (all.Count != CampaignSaveService.MaximumSnapshotCount || loadErrors.Count != 0)
         {
-            FailSaveSmoke($"Expected 60 valid snapshots, found {all.Count} with {loadErrors.Count} errors.");
+            FailSaveSmoke($"Expected five valid room-start snapshots, found {all.Count} with {loadErrors.Count} errors.");
             return;
         }
 
-        CampaignSnapshot overwritten = new()
+        CampaignSnapshot? selected = all.SingleOrDefault(snapshot => snapshot.RoomNumber == 3);
+        if (selected is null)
         {
-            RoomId = "room-01",
-            RoomName = "Test Room 01",
-            RoomNumber = 1,
-            Kind = SnapshotKind.RoomStart,
-            SavedAtUtc = DateTimeOffset.UtcNow,
-            CampaignElapsedSeconds = 999.0,
-        };
-        Image smokeThumbnail = Image.CreateEmpty(64, 36, false, Image.Format.Rgb8);
-        smokeThumbnail.Fill(new Color("7f5634"));
-        if (!CampaignSaveService.Save(overwritten, smokeThumbnail, out string? overwriteError, testRoot) ||
-            CampaignSaveService.LoadAll(out _, testRoot).Count != CampaignSaveService.MaximumSnapshotCount ||
-            CampaignSaveService.LoadLatest(testRoot)?.CampaignElapsedSeconds != 999.0 ||
-            !File.Exists(overwritten.ThumbnailPath))
-        {
-            FailSaveSmoke($"Slot overwrite or latest-save selection failed: {overwriteError}");
+            FailSaveSmoke("Room 03 save was not available for the load test.");
             return;
         }
 
-        string absoluteRoot = ProjectSettings.GlobalizePath(testRoot);
-        string recoveryPath = Path.Combine(absoluteRoot, "room-01-start.json");
-        if (!File.Exists(recoveryPath + ".bak"))
+        if (!CampaignSaveService.DeleteSnapshotsAfter(selected, out string? discardError, testRoot))
         {
-            FailSaveSmoke("Atomic overwrite did not retain a recovery backup.");
+            FailSaveSmoke($"Could not discard saves after Room 03: {discardError}");
             return;
         }
 
-        File.WriteAllText(recoveryPath, "{ broken json");
         all = CampaignSaveService.LoadAll(out loadErrors, testRoot);
-        if (all.Count != CampaignSaveService.MaximumSnapshotCount || loadErrors.Count != 0)
+        if (all.Count != 3 || loadErrors.Count != 0 ||
+            all.Any(snapshot => snapshot.RoomNumber > selected.RoomNumber) ||
+            CampaignSaveService.LoadLatest(testRoot)?.RoomNumber != selected.RoomNumber)
         {
-            FailSaveSmoke("Backup recovery did not restore the corrupted snapshot.");
+            FailSaveSmoke("Loading Room 03 did not discard every later campaign save.");
             return;
         }
+
+        CampaignSaveService.MarkRoomCompleted(1, testRoot);
 
         if (!CampaignSaveService.DeleteAll(out deleteError, testRoot) ||
-            CampaignSaveService.LoadAll(out _, testRoot).Count != 0)
+            CampaignSaveService.LoadAll(out _, testRoot).Count != 0 ||
+            CampaignSaveService.GetCompletedRoomNumbers(testRoot).Count != 0)
         {
-            FailSaveSmoke($"Test snapshots were not removed: {deleteError}");
+            FailSaveSmoke($"New Game did not remove every campaign save: {deleteError}");
             return;
         }
 
-        GD.Print("SAVE_SMOKE_PASS: 60 slots, atomic overwrite, latest selection and backup recovery work.");
+        GD.Print("SAVE_SMOKE_PASS: loading a save discards later saves and New Game clears all campaign saves.");
         GetTree().Quit(0);
     }
 
