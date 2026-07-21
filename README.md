@@ -4,8 +4,7 @@ Velocitex is a Windows 3D momentum-puzzle game built with Godot 4.7 .NET and C#.
 
 ## Demo video
 
-Watch the Velocitex demo video on YouTube:  
-[Watch the public demo video](https://youtu.be/zOM79yaOCXk)
+Watch the [Velocitex demo video](https://youtu.be/zOM79yaOCXk) on YouTube:  
 
 ## Play the Windows build
 
@@ -31,26 +30,6 @@ Do not move `Velocitex.exe` away from `Velocitex.pck` or the accompanying `data_
 - **Middle Mouse** - hold to zoom.
 - **E** - interact with a highlighted device.
 - **Esc** - open the pause menu; use **Restart Room** there to restart the current room.
-
-## What to try
-
-- Start a new campaign and follow the room-to-room loading cards.
-- Build speed on slopes, then preserve it through the exit route.
-- Learn how frictionless, sticky, elastic, absorbing, accelerator, and one-way surfaces change movement.
-- Use switches, levers, pressure plates, rails, cannons, force volumes, moving platforms, and momentum devices without relying on a persistent gameplay HUD.
-- Open **Customize**, **Advancements**, and **Settings** from the main menu. Settings include video, gameplay, controls, audio, and accessibility options.
-- Test campaign snapshots through **Play > Continue** or **Load Game**.
-
-## Judge testing path
-
-For a concise functional test, launch the Windows build and verify the following:
-
-1. In Room 01, roll down the initial slope, pass through the required acceleration rings, and reach the exit.
-2. Open the pause menu with **Esc**, then verify that the restart action returns the player to the room start.
-3. From the main menu, inspect **Customize**, **Advancements**, and **Settings**.
-4. Complete a room, return to the menu, and verify that campaign progress is available through Continue or Load Game.
-
-Automated verification recorded in `IMPLEMENTATION_STATUS.md` includes a clean build, packaged startup smoke, 30 solution traces completed ten times each (300 total completions), bypass rejection, campaign-flow checks, save checks, UI checks, and room-shell/surface checks. These automated checks do not replace the manual gameplay path above.
 
 ## Architecture
 
