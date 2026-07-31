@@ -42,7 +42,6 @@ try
             catch (IOException) when (attempt < maxAttempts) { Thread.Sleep(300 * attempt); }
         }
     }
-    File.WriteAllText(Path.Combine(install, "version.txt"), version);
     Process.Start(new ProcessStartInfo(launch) { UseShellExecute = true, WorkingDirectory = install });
 }
 catch (Exception error) { 
