@@ -5,7 +5,7 @@ if (-not $godot) {
     throw "Portable Godot console executable was not found."
 }
 
-$rooms = if ($args.Count -gt 0) { @($args | ForEach-Object { [int]$_ }) } else { @(1..28) }
+$rooms = if ($args.Count -gt 0) { @($args | ForEach-Object { [int]$_ }) } else { @(1..30) }
 foreach ($room in $rooms) {
     foreach ($mode in @("direct-goal-bypass", "forward-bypass", "steering-bypass")) {
         $quitAfter = if ($mode -eq "steering-bypass") { 20000 } else { 3200 }

@@ -5,6 +5,9 @@ public enum CosmeticKind
     Color,
     Pattern,
     Trail,
+    Finish,
+    TrailStyle,
+    Crown,
 }
 
 public sealed record CosmeticDefinition(
@@ -42,6 +45,7 @@ public static class CosmeticCatalog
         new("sky", CosmeticKind.Color, "Sky", "#79BCE8", false),
         new("steel", CosmeticKind.Color, "Steel", "#8796A3", false),
         new("copper", CosmeticKind.Color, "Copper", "#B66D3D", false),
+        new("silk-blue", CosmeticKind.Trail, "Red Trail", "#D12B3F", false),
         new("stars", CosmeticKind.Pattern, "Stars", "stars", false),
         new("lightning", CosmeticKind.Pattern, "Lightning", "lightning", false),
         new("caramel-drips", CosmeticKind.Pattern, "Caramel Drips", "caramel-drips", false),
@@ -50,6 +54,7 @@ public static class CosmeticCatalog
         new("target", CosmeticKind.Pattern, "Target", "target", false),
         new("cracks", CosmeticKind.Pattern, "Sugar Cracks", "cracks", false),
         new("pearl", CosmeticKind.Pattern, "Pearl Finish", "pearl", true),
+        new("inspection-grid", CosmeticKind.Pattern, "Inspection Grid", "inspection-grid", false),
         new("trail-cyan-glow", CosmeticKind.Trail, "Cyan Glow", "#63ECF4", false),
         new("trail-blue-sparks", CosmeticKind.Trail, "Blue Sparks", "#4C8DFF", false),
         new("trail-cloud", CosmeticKind.Trail, "Cloud", "#D8ECF0", false),
@@ -57,6 +62,21 @@ public static class CosmeticCatalog
         new("trail-amber-bolts", CosmeticKind.Trail, "Amber Bolts", "#FFB43D", false),
         new("trail-coins", CosmeticKind.Trail, "Coins", "#E8C54E", false),
         new("trail-vortex", CosmeticKind.Trail, "Vortex", "#956BD4", false),
+        new("normal", CosmeticKind.Finish, "Normal", "normal", true),
+        new("glossy", CosmeticKind.Finish, "Glossy", "glossy", false),
+        new("metal", CosmeticKind.Finish, "Metal", "metal", false),
+        new("frosted", CosmeticKind.Finish, "Frosted", "frosted", false),
+        new("candy-glaze", CosmeticKind.Finish, "Candy Glaze", "candy-glaze", false),
+        new("sparkling", CosmeticKind.Finish, "Sparkling", "sparkling", false),
+        new("normal", CosmeticKind.TrailStyle, "Normal", "normal", true),
+        new("solid-line", CosmeticKind.TrailStyle, "Solid Line", "solid", false),
+        new("dotted", CosmeticKind.TrailStyle, "Dotted", "dotted", false),
+        new("dashed", CosmeticKind.TrailStyle, "Dashed", "dashed", false),
+        new("pulse", CosmeticKind.TrailStyle, "Pulse", "pulse", false),
+        new("none-crown", CosmeticKind.Crown, "No Crown", "none", true),
+        new("bronze-crown", CosmeticKind.Crown, "Bronze Crown", "#B66D3D", false),
+        new("silver-crown", CosmeticKind.Crown, "Silver Crown", "#BCC4CC", false),
+        new("gold-crown", CosmeticKind.Crown, "Gold Crown", "#E5B93F", false),
     };
 
     public static IReadOnlyList<CosmeticDefinition> All => Definitions;

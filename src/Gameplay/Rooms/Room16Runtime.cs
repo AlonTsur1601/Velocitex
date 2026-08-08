@@ -25,7 +25,7 @@ public partial class Room16Runtime : RoomRuntime
     private PlayerCannon3D _cannon = null!;
     private RouteCheckpoint3D _landingLatch = null!;
     private FlightGate3D _accelerationRing = null!;
-    private MeshInstance3D _aimButton = null!;
+    private RouteCheckpoint3D _aimButton = null!;
     private StaticBody3D _landingDeck = null!;
     private ExitDoor3D _exitDoor = null!;
     private AudioStreamPlayer3D? _fireAudio;
@@ -464,7 +464,7 @@ public partial class Room16Runtime : RoomRuntime
         _cannon.ResetCannon();
         _accelerationRing.ResetGate();
         _cannon.Rotation = new Vector3(0.0f, Mathf.DegToRad(UncalibratedCannonYawDegrees), 0.0f);
-        _aimButton.Position = new Vector3(_aimButton.Position.X, 6.48f, _aimButton.Position.Z);
+        _aimButton.ResetCheckpoint();
         _landingLatch.ResetCheckpoint();
     }
 
@@ -498,8 +498,8 @@ public partial class Room16Runtime : RoomRuntime
 
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(this, $"StartRail{side}", new Vector3(0.36f, 1.4f, 16.775f), new Vector3(side * 6.18f, 6.75f, 23.3875f), Vector3.Zero, copper, frame, 0.42f, 0.58f);
-            RoomGeometry.AddBox(this, $"LandingRail{side}", new Vector3(0.36f, 1.45f, 19.55f), new Vector3(side * 4.93f, 10.75f, -34.0f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"StartRail{side}", new Vector3(0.36f, 1.4f, 16.775f), new Vector3(side * 6.18f, 6.75f, 23.3875f), Vector3.Zero, copper, frame, 0.42f, 0.58f);
+            RoomGeometry.AddWall(this, $"LandingRail{side}", new Vector3(0.36f, 1.45f, 19.55f), new Vector3(side * 4.93f, 10.75f, -34.0f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
         }
 
         _cannon = new PlayerCannon3D
@@ -517,9 +517,9 @@ public partial class Room16Runtime : RoomRuntime
         _landingLatch = new RouteCheckpoint3D
         {
             Name = "OffsetLandingLatch",
-            CheckpointIndex = 0,
+            CheckpointIndex = 1,
             Position = new Vector3(2.0f, 10.95f, -35.0f),
-            TriggerSize = new Vector3(2.0f, 3.0f, 14.0f),
+            TriggerSize = new Vector3(2.0f, 3.0f, 18.0f),
             FrameTint = new Color("8a6e58"),
             FlatFloorMarker = true,
         };
@@ -533,7 +533,7 @@ public partial class Room16Runtime : RoomRuntime
             }
             else if (player == _player)
             {
-                latch.FlashDenied();
+                return;
             }
         };
         AddChild(_landingLatch);
@@ -559,24 +559,6 @@ public partial class Room16Runtime : RoomRuntime
     private void AddAimCalibrationPad()
     {
         Vector3 padPosition = new(-4.0f, 6.3f, 25.5f);
-        Area3D pad = new()
-        {
-            Name = "OrangeAimControl",
-            Position = padPosition + Vector3.Up * 0.55f,
-            CollisionLayer = 0,
-            CollisionMask = 1,
-            Monitoring = true,
-        };
-        pad.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = new Vector3(3.0f, 1.2f, 3.0f) } });
-        pad.BodyEntered += body =>
-        {
-            if (body == _player)
-            {
-                ApplyAimCalibration();
-            }
-        };
-        AddChild(pad);
-
         StandardMaterial3D buttonMaterial = RoomGeometry.CreateMaterial(
             "res://assets/textures/copper_rivets.svg",
             new Color("d07835"),
@@ -589,8 +571,24 @@ public partial class Room16Runtime : RoomRuntime
             new Color("3b302b"),
             0.08f,
             0.9f);
-        RoomGeometry.AddVisualBox(this, "AimControlBase", new Vector3(3.0f, 0.12f, 3.0f), padPosition, Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, cableMaterial);
-        _aimButton = RoomGeometry.AddCylinder(this, "OrangeAimButton", new Vector3(padPosition.X, 6.48f, padPosition.Z), Vector3.Zero, 0.82f, 0.18f, buttonMaterial);
+        _aimButton = new RouteCheckpoint3D
+        {
+            Name = "OrangeAimButton",
+            CheckpointIndex = 0,
+            Position = padPosition + new Vector3(0.0f, 0.504f, 0.0f),
+            TriggerSize = new Vector3(3.0f, 1.2f, 3.0f),
+            FrameTint = new Color("d07835"),
+            FlatFloorMarker = true,
+        };
+        _aimButton.Entered += (button, player) =>
+        {
+            if (player == _player)
+            {
+                button.Activate();
+                ApplyAimCalibration();
+            }
+        };
+        AddChild(_aimButton);
         RoomGeometry.AddVisualBox(this, "AimCalibrationCable", new Vector3(0.16f, 0.02f, 7.63f), new Vector3(-2.0f, 6.305f, 22.25f), new Vector3(0.0f, Mathf.DegToRad(-31.6f), 0.0f), string.Empty, Colors.White, 0.0f, 1.0f, cableMaterial);
 
         for (int index = 0; index < 3; index++)
@@ -623,13 +621,11 @@ public partial class Room16Runtime : RoomRuntime
             _runAchievementPositiveSmoke || _runAchievementNegativeSmoke)
         {
             _cannon.Rotation = Vector3.Zero;
-            _aimButton.Position = new Vector3(_aimButton.Position.X, 6.39f, _aimButton.Position.Z);
             return;
         }
 
         _aimTween = CreateTween().SetParallel().SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
         _aimTween.TweenProperty(_cannon, "rotation:y", 0.0f, 0.55f);
-        _aimTween.TweenProperty(_aimButton, "position:y", 6.39f, 0.16f);
     }
 
     private void AddAccelerationRing()

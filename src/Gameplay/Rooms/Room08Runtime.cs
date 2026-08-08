@@ -473,24 +473,25 @@ public partial class Room08Runtime : RoomRuntime
             });
 
         AddTrackBox("SafeStart", new Vector3(6.0f, 0.5f, 10.525f), new Vector3(-10.0f, 4.8f, 29.5125f), metal, paleSteel);
-        AddAccelerator("Accelerator01", 0, new Vector3(6.0f, 0.5f, 14.0f), new Vector3(-10.0f, 4.8f, 17.25f), Vector3.Zero, acceleratorProfile, acceleratorMaterial);
-        AddTrackBox("TurnBasin01", new Vector3(10.0f, 0.5f, 8.0f), new Vector3(-8.0f, 4.8f, 6.25f), metal, paleSteel.Darkened(0.04f));
+        AddAccelerator("Accelerator01", 0, new Vector3(6.0f, 0.5f, 15.0f), new Vector3(-10.0f, 4.8f, 16.75f), Vector3.Zero, acceleratorProfile, acceleratorMaterial);
+        AddTrackBox("TurnBasin01", new Vector3(10.0f, 0.5f, 7.0f), new Vector3(-8.0f, 4.8f, 5.75f), metal, paleSteel.Darkened(0.04f));
         AddAccelerator("Accelerator02", 1, new Vector3(6.0f, 0.5f, 12.0f), new Vector3(3.0f, 4.8f, 6.25f), new Vector3(0.0f, -Mathf.Pi / 2.0f, 0.0f), acceleratorProfile, acceleratorMaterial);
-        AddTrackBox("TurnBasin02", new Vector3(6.0f, 0.5f, 7.0f), new Vector3(12.0f, 4.8f, 6.75f), metal, paleSteel.Darkened(0.08f));
+        AddTrackBox("TurnBasin02", new Vector3(6.0f, 0.5f, 6.0f), new Vector3(12.0f, 4.8f, 6.25f), metal, paleSteel.Darkened(0.08f));
         AddAccelerator("Accelerator03", 2, new Vector3(6.0f, 0.5f, 14.0f), new Vector3(12.0f, 4.8f, -3.75f), Vector3.Zero, acceleratorProfile, acceleratorMaterial);
         AddTrackBox("ExitRun", new Vector3(6.0f, 0.5f, 24.025f), new Vector3(12.0f, 4.8f, -22.7625f), metal, paleSteel.Darkened(0.06f));
 
         const float railHeight = 1.5f;
         const float railThickness = 0.34f;
         const float railY = 5.8f;
-        AddRail("WestContinuousRail", new Vector3(railThickness, railHeight, 32.525f), new Vector3(-13.17f, railY, 18.5125f), metal, darkFrame);
-        AddRail("StartEastRail", new Vector3(railThickness, railHeight, 24.525f), new Vector3(-6.83f, railY, 22.5125f), copper, copperTint.Darkened(0.12f));
+        AddRail("WestContinuousRail", new Vector3(railThickness, railHeight, 32.695f), new Vector3(-13.17f, railY, 18.4275f), metal, darkFrame);
+        AddRail("StartEastRail", new Vector3(railThickness, railHeight, 25.525f), new Vector3(-6.83f, railY, 22.0125f), copper, copperTint.Darkened(0.12f));
         AddRail("FirstTurnEndRail", new Vector3(10.0f, railHeight, railThickness), new Vector3(-8.0f, railY, 2.08f), copper, copperTint.Darkened(0.15f));
-        AddRail("FirstTurnNorthCap", new Vector3(4.0f, railHeight, railThickness), new Vector3(-5.0f, railY, 10.42f), metal, darkFrame);
+        AddRail("FirstTurnNorthCapRail", new Vector3(4.0f, railHeight, railThickness), new Vector3(-5.0f, railY, 9.42f), metal, darkFrame);
         AddRail("CrossLaneNorthRail", new Vector3(12.0f, railHeight, railThickness), new Vector3(3.0f, railY, 9.42f), metal, darkFrame);
         AddRail("CrossLaneSouthRail", new Vector3(12.0f, railHeight, railThickness), new Vector3(3.0f, railY, 3.08f), copper, copperTint.Darkened(0.12f));
-        AddRail("SecondTurnNorthRail", new Vector3(6.0f, railHeight, railThickness), new Vector3(12.0f, railY, 10.42f), metal, darkFrame);
-        AddRail("EastContinuousRail", new Vector3(railThickness, railHeight, 45.025f), new Vector3(15.17f, railY, -12.2625f), copper, copperTint.Darkened(0.15f));
+        AddRail("FirstSouthTransitionRail", new Vector3(railThickness, railHeight, 0.72f), new Vector3(-3.0f, railY, 2.58f), copper, copperTint.Darkened(0.12f));
+        AddRail("SecondTurnNorthRail", new Vector3(6.0f, railHeight, railThickness), new Vector3(12.0f, railY, 9.42f), metal, darkFrame);
+        AddRail("EastContinuousRail", new Vector3(railThickness, railHeight, 44.025f), new Vector3(15.17f, railY, -12.7625f), copper, copperTint.Darkened(0.15f));
         AddRail("FinalLaneWestRail", new Vector3(railThickness, railHeight, 33.25f), new Vector3(8.83f, railY, -13.375f), metal, darkFrame);
 
         _routeLever = new MechanicalLever
@@ -565,7 +566,7 @@ public partial class Room08Runtime : RoomRuntime
 
     private void AddRail(string name, Vector3 size, Vector3 position, string texture, Color tint)
     {
-        RoomGeometry.AddBox(this, name, size, position, Vector3.Zero, texture, tint, 0.42f, 0.62f);
+        RoomGeometry.AddWall(this, name, size, position, Vector3.Zero, texture, tint, 0.42f, 0.62f);
     }
 
     private void OnRouteLeverActivated()
@@ -664,7 +665,9 @@ public partial class Room08Runtime : RoomRuntime
             }
 
             int streakTicks = _blueStreakStartTick < 0 ? int.MaxValue : _roomTick - _blueStreakStartTick;
-            if (_blueStreakEligible && streakTicks <= MaximumBlueStreakTicks)
+            if (_blueStreakEligible &&
+                streakTicks <= MaximumBlueStreakTicks &&
+                !_player.TouchedSideBoundarySinceReset)
             {
                 MarkAdvancementCondition("blue-streak");
             }

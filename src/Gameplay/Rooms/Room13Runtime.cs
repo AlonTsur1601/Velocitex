@@ -595,13 +595,13 @@ public partial class Room13Runtime : RoomRuntime
     {
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(this, $"StartRail{side}", new Vector3(0.38f, 1.45f, 19.775f), new Vector3(side * 8.2f, 10.975f, 44.8875f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"StartRail{side}", new Vector3(0.38f, 1.45f, 19.775f), new Vector3(side * 8.2f, 10.975f, 44.8875f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
             AddSlopeRail($"DescentRail{side}", side * 8.2f, 35.0f, 10.25f, 19.0f, 5.25f, metal, frame);
-            RoomGeometry.AddBox(this, $"StickyOuterRail{side}", new Vector3(0.38f, 1.45f, 16.0f), new Vector3(side * 13.2f, 5.975f, 11.0f), Vector3.Zero, copper, frame, 0.42f, 0.58f);
-            RoomGeometry.AddBox(this, $"AcceleratorRail{side}", new Vector3(0.38f, 1.45f, 15.0f), new Vector3(-6.0f + (side * 3.7f), 5.975f, -4.5f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"StickyOuterRail{side}", new Vector3(0.38f, 1.45f, 16.0f), new Vector3(side * 13.2f, 5.975f, 11.0f), Vector3.Zero, copper, frame, 0.42f, 0.58f);
+            RoomGeometry.AddWall(this, $"AcceleratorRail{side}", new Vector3(0.38f, 1.45f, 15.0f), new Vector3(-6.0f + (side * 3.7f), 5.975f, -4.5f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
             AddSlopeRail($"LaunchRail{side}", -6.0f + (side * 3.7f), -12.0f, 5.25f, -21.0f, 7.75f, copper, frame);
-            RoomGeometry.AddBox(this, $"LandingRail{side}", new Vector3(0.38f, 1.45f, 34.0f), new Vector3(side * 13.2f, 4.975f, -75.0f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
-            RoomGeometry.AddBox(this, $"RecoveryRail{side}", new Vector3(0.38f, 1.45f, 22.775f), new Vector3(side * 7.2f, 4.975f, -103.3875f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"LandingRail{side}", new Vector3(0.38f, 1.45f, 34.0f), new Vector3(side * 13.2f, 4.975f, -75.0f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"RecoveryRail{side}", new Vector3(0.38f, 1.45f, 22.775f), new Vector3(side * 7.2f, 4.975f, -103.3875f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
         }
 
         // Only the left launch bay remains open at the front of the timing
@@ -615,13 +615,15 @@ public partial class Room13Runtime : RoomRuntime
 
     private void AddSlopeRail(string name, float x, float backZ, float backTopY, float frontZ, float frontTopY, string texture, Color tint)
     {
+        const float wallHeight = 0.75f;
+        const float halfWallHeight = wallHeight * 0.5f;
         float run = backZ - frontZ;
         float rise = backTopY - frontTopY;
         float angle = -Mathf.Atan2(rise, run);
-        float length = Mathf.Sqrt((run * run) + (rise * rise));
+        float length = Mathf.Sqrt((run * run) + (rise * rise)) - (wallHeight * Mathf.Abs(Mathf.Sin(angle)));
         Vector3 up = new Basis(Vector3.Right, angle) * Vector3.Up;
-        Vector3 topCenter = new(x, ((backTopY + frontTopY) * 0.5f) + 0.725f, (backZ + frontZ) * 0.5f);
-        RoomGeometry.AddBox(this, name, new Vector3(0.38f, 1.45f, length), topCenter - (up * 0.725f), new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.42f, 0.62f);
+        Vector3 topCenter = new(x, ((backTopY + frontTopY) * 0.5f) + halfWallHeight, (backZ + frontZ) * 0.5f);
+        RoomGeometry.AddWall(this, name, new Vector3(0.38f, wallHeight, length), topCenter - (up * halfWallHeight), new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.42f, 0.62f);
     }
 
     private void BuildLaunchGate(string metal, Color frame)
@@ -657,10 +659,10 @@ public partial class Room13Runtime : RoomRuntime
             Rotation = new Vector3(Mathf.Pi / 2.0f, 0.0f, 0.0f),
             Shape = new CylinderShape3D { Radius = radius, Height = 1.6f },
         });
-        StandardMaterial3D frameMaterial = RoomGeometry.CreateMaterial("res://assets/textures/copper_rivets.svg", new Color("6c8993"), 0.36f, 0.62f);
+        StandardMaterial3D frameMaterial = RoomGeometry.CreateMaterial(string.Empty, new Color("62d9e4"), 0.12f, 0.48f, emissionEnabled: true, emission: new Color("17636b"));
         StandardMaterial3D activeMaterial = RoomGeometry.CreateMaterial(
-            "res://assets/textures/sugar_glaze.svg",
-            new Color("91d8d5"),
+            string.Empty,
+            new Color("b9fbff"),
             0.08f,
             0.48f,
             emissionEnabled: true,
@@ -743,31 +745,7 @@ public partial class Room13Runtime : RoomRuntime
         StandardMaterial3D bladeMaterial = RoomGeometry.CreateMaterial("res://assets/textures/brushed_metal.png", new Color("b7c6cc"), 0.42f, 0.62f);
         foreach (float z in new[] { -30.0f, -45.0f, -60.0f })
         {
-            Node3D housing = new()
-            {
-                Name = $"WindFanHousing{Mathf.Abs(z):F0}",
-                Position = new Vector3(-13.7f, 10.0f, z),
-                Rotation = new Vector3(0.0f, Mathf.Pi / 2.0f, 0.0f),
-            };
-            AddChild(housing);
-            RoomGeometry.AddCylinder(housing, "Hub", Vector3.Zero, new Vector3(Mathf.Pi / 2.0f, 0.0f, 0.0f), 0.48f, 0.8f, hubMaterial);
-            Node3D rotor = new() { Name = "Rotor" };
-            housing.AddChild(rotor);
-            for (int index = 0; index < 5; index++)
-            {
-                float angle = index * Mathf.Tau / 5.0f;
-                RoomGeometry.AddVisualBox(
-                    rotor,
-                    $"Blade{index}",
-                    new Vector3(0.3f, 3.1f, 0.16f),
-                    new Vector3(Mathf.Sin(angle) * 1.4f, Mathf.Cos(angle) * 1.4f, 0.0f),
-                    new Vector3(0.0f, 0.0f, angle),
-                    string.Empty,
-                    Colors.White,
-                    0.0f,
-                    1.0f,
-                    bladeMaterial);
-            }
+            Node3D rotor = RoomGeometry.AddWindFan(this, $"WindFanHousing{Mathf.Abs(z):F0}", new Vector3(-13.7f, 10.0f, z), new Vector3(0.0f, Mathf.Pi / 2.0f, 0.0f), 1.0f, hubMaterial, bladeMaterial);
             _fanRotors.Add(rotor);
         }
     }

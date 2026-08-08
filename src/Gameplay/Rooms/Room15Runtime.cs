@@ -427,12 +427,12 @@ public partial class Room15Runtime : RoomRuntime
         AddLowGravityGate(4, new Vector3(-1.0f, 9.7f, -69.0f), 3.3f);
         AddLowGravityGate(5, new Vector3(1.5f, 6.4f, -79.0f), 3.3f);
 
-        _windAlignmentPad = AddCheckpoint("WindAlignmentPad", 0, new Vector3(-5.0f, 5.95f, -112.0f), new Vector3(4.0f, 1.6f, 4.0f), new Color("78a1a9"));
+        _windAlignmentPad = AddCheckpoint("WindAlignmentPad", 0, new Vector3(-6.5f, 5.95f, -112.0f), new Vector3(4.0f, 1.6f, 4.0f), new Color("78a1a9"));
         _windAlignmentPad.Entered += (pad, player) => { if (player == _player) { pad.Activate(); _alignedForWind = true; } };
 
-        _correctRail = AddRail("CorrectRail", new Vector3(-1.0f, 4.8f, -158.0f), new Vector3(-2.0f, 19.65f, -201.0f), 12.5f, new Color("8ec4a9"), 0);
-        _recoveryRail = AddRail("RecoveryRail", new Vector3(5.0f, 4.8f, -158.0f), new Vector3(9.0f, 10.2f, -179.0f), 11.0f, new Color("bd886c"), 2);
-        _correctionRail = AddRail("CorrectionRail", new Vector3(9.0f, 10.2f, -196.0f), new Vector3(4.0f, 19.65f, -201.0f), 11.0f, new Color("9b789d"), 4);
+        _correctRail = AddRail("CorrectRail", new Vector3(-1.0f, 5.15f, -158.0f), new Vector3(-2.0f, 20.0f, -201.0f), 12.5f, new Color("8ec4a9"), 0);
+        _recoveryRail = AddRail("RecoveryRail", new Vector3(5.0f, 5.15f, -158.0f), new Vector3(9.0f, 10.55f, -179.0f), 11.0f, new Color("bd886c"), 2);
+        _correctionRail = AddRail("CorrectionRail", new Vector3(9.0f, 10.55f, -196.0f), new Vector3(4.0f, 20.0f, -201.0f), 11.0f, new Color("9b789d"), 4);
 
         // Catch rail exits above the front of the final deck.  The field begins
         // at the deck lip and spans all the way to the ceiling so the pink
@@ -448,7 +448,7 @@ public partial class Room15Runtime : RoomRuntime
         {
             if (player != _player) { return; }
             if (_usedCorrectRail || _usedRecoveryRoute) { latch.Activate(); return; }
-            latch.FlashDenied();
+            return;
         };
 
         AddFanBank();
@@ -463,16 +463,17 @@ public partial class Room15Runtime : RoomRuntime
     {
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(this, $"StartSideWall{side}", new Vector3(0.36f, 1.45f, 26.075f), new Vector3(side * 7.18f, 12.725f, 51.7375f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"StartSideWall{side}", new Vector3(0.36f, 1.45f, 26.075f), new Vector3(side * 7.18f, 12.725f, 51.7375f), Vector3.Zero, metal, frame, 0.42f, 0.62f, endJoinAllowance: 0.80f);
             AddSlopeWall($"ApproachSideWall{side}", side * 7.18f, 38.7f, 12.25f, 23.7f, 8.25f, metal, frame);
             AddSlopeWall($"LowLaunchSideWall{side}", side * 7.18f, 23.7f, 8.25f, 18.0f, 11.25f, metal, frame);
-            RoomGeometry.AddBox(this, $"LowLandingSideWall{side}", new Vector3(0.36f, 1.45f, 20.0f), new Vector3(side * 9.18f, 5.725f, -91.0f), Vector3.Zero, copper, frame, 0.42f, 0.6f);
-            RoomGeometry.AddBox(this, $"WindPrepSideWall{side}", new Vector3(0.36f, 1.45f, 16.0f), new Vector3(side * 9.18f, 5.725f, -109.0f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"LowLandingSideWall{side}", new Vector3(0.36f, 1.45f, 20.0f), new Vector3(side * 9.18f, 5.725f, -91.0f), Vector3.Zero, copper, frame, 0.42f, 0.6f, endJoinAllowance: 0.80f);
+            RoomGeometry.AddWall(this, $"WindPrepSideWall{side}", new Vector3(0.36f, 1.45f, 16.0f), new Vector3(side * 9.18f, 5.725f, -109.0f), Vector3.Zero, metal, frame, 0.42f, 0.62f, endJoinAllowance: 0.80f);
             AddSlopeWall($"WindSlopeSideWall{side}", side * 9.18f, -117.0f, 5.25f, -125.0f, 10.25f, copper, frame);
-            RoomGeometry.AddBox(this, $"ChoiceSideWall{side}", new Vector3(0.36f, 1.45f, 18.0f), new Vector3(side * 11.18f, 4.725f, -151.0f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
-            RoomGeometry.AddBox(this, $"FinalSideWall{side}", new Vector3(0.36f, 1.45f, 32.7f), new Vector3(side * 8.18f, 19.225f, -218.35f), Vector3.Zero, copper, frame, 0.42f, 0.6f);
+            RoomGeometry.AddWall(this, $"ChoiceSideWall{side}", new Vector3(0.36f, 1.45f, 18.0f), new Vector3(side * 11.18f, 4.725f, -151.0f), Vector3.Zero, metal, frame, 0.42f, 0.62f, endJoinAllowance: 0.80f);
+            RoomGeometry.AddWall(this, $"FinalSideWall{side}", new Vector3(0.36f, 1.45f, 32.7f), new Vector3(side * 8.18f, 19.225f, -218.35f), Vector3.Zero, copper, frame, 0.42f, 0.6f, endJoinAllowance: 0.80f);
+            RoomGeometry.AddWall(this, $"ApproachLaunchSideWallJunction{side}", new Vector3(0.48f, 1.55f, 1.25f), new Vector3(side * 7.18f, 8.9f, 23.7f), Vector3.Zero, metal, frame, 0.42f, 0.62f, endJoinAllowance: 0.80f);
         }
-        RoomGeometry.AddBox(this, "RecoveryOuterSideWall", new Vector3(0.36f, 1.45f, 18.0f), new Vector3(13.68f, 10.225f, -188.0f), Vector3.Zero, copper, frame, 0.42f, 0.6f);
+        RoomGeometry.AddWall(this, "RecoveryOuterSideWall", new Vector3(0.36f, 1.45f, 18.0f), new Vector3(13.68f, 10.225f, -188.0f), Vector3.Zero, copper, frame, 0.42f, 0.6f, endJoinAllowance: 0.80f);
     }
 
     private StaticBody3D AddSlopeBetween(string name, float width, float backZ, float backTopY, float frontZ, float frontTopY, string texture, Color tint)
@@ -492,10 +493,10 @@ public partial class Room15Runtime : RoomRuntime
         float run = backZ - frontZ;
         float rise = backTopY - frontTopY;
         float angle = -Mathf.Atan2(rise, run);
-        float length = Mathf.Sqrt(run * run + rise * rise);
+        float length = Mathf.Sqrt(run * run + rise * rise) - (1.45f * Mathf.Abs(Mathf.Sin(angle)));
         Vector3 up = new Basis(Vector3.Right, angle) * Vector3.Up;
         Vector3 topCenter = new(x, (backTopY + frontTopY) * 0.5f + 0.725f, (backZ + frontZ) * 0.5f);
-        RoomGeometry.AddBox(this, name, new Vector3(0.36f, 1.45f, length), topCenter - up * 0.725f, new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.42f, 0.6f);
+        RoomGeometry.AddWall(this, name, new Vector3(0.36f, 1.45f, length), topCenter - up * 0.725f, new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.42f, 0.6f, endJoinAllowance: 0.80f);
     }
 
     private ForceVolume3D AddForceVolume(string name, Vector3 position, Vector3 size, string profilePath)
@@ -569,26 +570,18 @@ public partial class Room15Runtime : RoomRuntime
 
     private void AddFanBank()
     {
-        StandardMaterial3D metal = RoomGeometry.CreateMaterial("res://assets/textures/brushed_metal.png", new Color("75949a"), 0.4f, 0.64f);
-        StandardMaterial3D blades = RoomGeometry.CreateMaterial("res://assets/textures/copper_rivets.svg", new Color("b6d7da"), 0.34f, 0.58f);
+        StandardMaterial3D metal = RoomGeometry.CreateMaterial("res://assets/textures/copper_rivets.svg", new Color("607985"), 0.4f, 0.58f);
+        StandardMaterial3D blades = RoomGeometry.CreateMaterial("res://assets/textures/brushed_metal.png", new Color("b7c6cc"), 0.42f, 0.62f);
         foreach ((float y, float z) in new[] { (7.0f, -128.0f), (13.0f, -133.0f), (7.0f, -138.0f) })
         {
-            Node3D rotor = new() { Name = $"WindFanRotor{_fanRotors.Count + 1}", Position = new Vector3(-17.0f, y, z) };
-            RoomGeometry.AddVisualBox(rotor, "Hub", new Vector3(1.1f, 0.8f, 0.8f), Vector3.Zero, Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, metal);
-            for (int bladeIndex = 0; bladeIndex < 4; bladeIndex++)
-            {
-                Node3D bladeRoot = new() { Name = $"Blade{bladeIndex + 1}", Rotation = new Vector3((bladeIndex * Mathf.Pi) / 2.0f, 0.0f, 0.0f) };
-                RoomGeometry.AddVisualBox(bladeRoot, "BladeMesh", new Vector3(0.18f, 2.8f, 0.62f), new Vector3(0.0f, 1.55f, 0.0f), new Vector3(0.0f, 0.0f, Mathf.DegToRad(12.0f)), string.Empty, Colors.White, 0.0f, 1.0f, blades);
-                rotor.AddChild(bladeRoot);
-            }
-            AddChild(rotor);
+            Node3D rotor = RoomGeometry.AddWindFan(this, $"WindFanHousing{_fanRotors.Count + 1}", new Vector3(-17.0f, y, z), new Vector3(0.0f, Mathf.Pi / 2.0f, 0.0f), 1.0f, metal, blades);
             _fanRotors.Add(rotor);
         }
     }
 
     private void AddLowGravityParticles()
     {
-        StandardMaterial3D material = new() { ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded, AlbedoColor = new Color("c6eadc"), EmissionEnabled = true, Emission = new Color("659b88") };
+        StandardMaterial3D material = new() { ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded, AlbedoColor = Colors.White, EmissionEnabled = true, Emission = new Color("dfefff") };
         ParticleProcessMaterial process = new() { EmissionShape = ParticleProcessMaterial.EmissionShapeEnum.Box, EmissionBoxExtents = new Vector3(11.0f, 12.0f, 51.0f), Direction = Vector3.Up, Spread = 15.0f, Gravity = Vector3.Zero, InitialVelocityMin = 0.3f, InitialVelocityMax = 0.8f };
         AddChild(new GpuParticles3D { Name = "LowGravityMotes", Position = new Vector3(0.0f, 13.0f, -31.0f), Amount = 126, Lifetime = 7.0, Randomness = 0.8f, ProcessMaterial = process, DrawPass1 = new SphereMesh { Radius = 0.05f, Height = 0.1f, RadialSegments = 8, Rings = 4, Material = material } });
     }

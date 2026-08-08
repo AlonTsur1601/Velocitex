@@ -20,4 +20,4 @@ foreach ($mode in $modes) {
     }
 }
 
-Write-Output "ROOM20_MECHANICS_SUITE_PASS: extended twenty-four-cannon gauntlet, controlled transit, level piston base, wall exit and Clean Assembly positive/negative cases passed."
+Write-Output "ROOM20_MECHANICS_SUITE_PASS: 720-cannon wall gauntlet, controlled transit, level piston base, wall exit and Clean Assembly positive/surviving-hit cases passed."

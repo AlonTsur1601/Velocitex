@@ -555,6 +555,21 @@
 
 ## Exact next action
 
+## 2026-07-27 - challenge modes and 30-room campaign follow-up
+
+- Added campaign-mode roots and central rules for Normal, Hard and Extreme: separate save roots, checkpoint-only saves for challenge modes, legal Hard checkpoint selection, and no manual load/select controls in Extreme.
+- Added the three badge-only advancement definitions and profile fields/catalog entries for the Hard finish and Extreme trail-style reward families. Badge-only achievements render without a cosmetic reward.
+- Added Room 29 and Room 30 catalog/story entries, deterministic solution traces, basic playable course scenes, their story clips, and campaign-flow coverage through Room 30. Room 28 now uses the requested counterweight line.
+- Passed: build (0 warnings/errors), save smoke, UI smoke, campaign flow for Rooms 01-30, story-audio smoke (35 clips), and deterministic core-room solution tests for Rooms 27-30.
+
+### Current unrelated regression finding
+
+- `scripts\Test-AllRoomSolutions.ps1` stops in the pre-existing Room 04 trace: both buttons activate, but the trace times out before the exit. This must be resolved before a clean full-suite claim or refreshed Windows export.
+
+### Exact next action
+
+Diagnose the Room 04 trace timeout without discarding the existing dirty-worktree changes, then rerun all-room solutions, panoramas and the Windows export.
+
 Continue the manual playtest from Room 01 in the refreshed Windows build and record any remaining gameplay or visual issue at the room where it appears.
 
 ## Planned SFX pass
@@ -993,3 +1008,23 @@ The verified Windows package was exported successfully with 189 files (`373.8 MB
 ### Exact next action
 
 The refreshed Windows package was exported successfully with 189 files (`373.8 MB`) and passed its packaged-startup check. Use `builds/windows/Velocitex/Velocitex.exe` for the next manual campaign playthrough.
+
+## 2026-07-28 - Hard/Extreme modes and 30-room campaign complete
+
+- Added isolated Normal, Hard and Extreme campaign roots. Hard exposes Continue, Load Game, Select Checkpoint, New Game and Back with only Rooms 01/06/11/16/21/26 selectable; Extreme exposes only Continue, New Game and Back. Challenge saves are written only at those six boundaries, Hard failures return to the current five-room group, and Extreme failures clear the run and restart Room 01.
+- Added persistent Hard finish choices and Extreme trail-style choices to Customize, including runtime finish shading and distinct trail particle treatments. Hard completion without a checkpoint return awards Iron Candy. Smooth Operator and Final Inspection are supported as badge-only achievements, including notifications, icons and profile persistence.
+- Kept Room 28 as Counterweight and assigned its new child line. Added Rooms 29-30, their requested story lines, deterministic solution traces, shell/exit integration, and current two-view panoramas. Room 29 includes ordered calibration stages, a moving platform and Frictionless/Sticky/Super-Elastic surfaces; Room 30 enforces its ordered final route and Final Inspection completion contract.
+- Final verification passed: build with zero warnings/errors; isolated challenge-mode smoke; saves/UI/campaign/story/advancement smokes; all 30 room solutions for 300 deterministic completions; shell containment and exits through Room 30; all 61 panoramas current at 2560x1440. Windows export and ZIP validation passed (`Velocitex.exe`, 191 files, 806.2 MB; ZIP 328.4 MB).
+
+## 2026-07-28 - named challenge cosmetics and Iron Candy finish
+
+- Finish and Trail Style controls now show their complete names instead of single-letter abbreviations. Locked Finish choices explicitly direct the player to complete Hard Mode, and locked Trail Style choices explicitly direct the player to complete Extreme Mode.
+- Added the animated `Sparkling` Finish. It is awarded only by `IRON CANDY`, whose condition remains completing Hard Mode in one attempt without returning to a checkpoint.
+- Build, challenge-mode, advancement and UI smoke tests pass with six Finish choices and five Trail Style choices.
+
+## 2026-07-28 - Room 29-30 rewards and instant Customize reopen
+
+- `SMOOTH OPERATOR` now awards the `Red Trail`, and `FINAL INSPECTION` now awards the `Inspection Grid` pattern. Both use the regular achievement reward and persistence path.
+- Rooms 29–30 were rebuilt as readable, fully illuminated staged courses. Room 29 now follows a single marked route through an activated moving platform, frictionless glide, sticky brake, accelerator, super-elastic launch and ordered latches. Room 30 replaces its three-button placeholder with a fully charged Momentum Bank release, Momentum Piston, Player Cannon, low-gravity flight, a clearly marked white polarity rail under Interference Cannon fire and an absorbing landing. Room 30's exit lighting is neutral white, and the physical press path for every button in Rooms 28–30 is covered by same-frame depression QA.
+- All six Finish choices use one six-column row. Pattern swatches now use a dedicated shader that reproduces the same pattern-mode equations as the candy material, including the new Inspection Grid, instead of approximate hand-drawn symbols.
+- Customize controls and pattern shader materials are prebuilt once and reused. Opening the menu no longer reloads the profile or destroys and rebuilds every swatch; UI smoke verifies the same control instances survive reopening and that reopen work stays below 100 ms.

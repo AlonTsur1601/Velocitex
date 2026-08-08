@@ -1,6 +1,9 @@
 using Godot;
 using Velocitex.Core.Input;
 using Velocitex.Gameplay.Player;
+using Velocitex.Gameplay.Rooms;
+using Velocitex.Gameplay.Visual;
+using Velocitex.Core.Save;
 
 namespace Velocitex.Tests;
 
@@ -15,6 +18,7 @@ public partial class PlayerSfxSmokeTest : Node
             "res://assets/audio/sfx/player_roll_glass_loop.wav",
             "res://assets/audio/sfx/player_roll_soft_loop.wav",
             "res://assets/audio/sfx/player_roll_rubber_loop.wav",
+            "res://assets/audio/sfx/player_roll_slime_loop.wav",
             "res://assets/audio/sfx/player_air_wind_loop.wav",
             "res://assets/audio/sfx/player_land_soft.wav",
             "res://assets/audio/sfx/player_land_hard.wav",
@@ -54,10 +58,32 @@ public partial class PlayerSfxSmokeTest : Node
         player.Position = new Vector3(0.0f, 2.0f, 0.0f);
         AddChild(player);
         PlayerAudioController controller = player.GetNode<PlayerAudioController>("Audio");
-        if (controller.LoadedLoopStreamCount != 5 || !controller.AllLoopStreamsStereo ||
+        player.ApplyProfile(new PlayerProfile { CrownId = "gold-crown" }, trailAllowed: false);
+        player.Freeze = true;
+        if (player.AppliedCrownId != "gold-crown" || !player.IsCrownVisible)
+        {
+            Fail("The selected king crown was not attached visibly above the gameplay candy.");
+            return;
+        }
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        Node3D gameplayCrown = player.GetNode<Node3D>("Crown");
+        Vector3 expectedCrownPosition = player.GlobalPosition + Vector3.Up * 0.61f;
+        if (gameplayCrown.GlobalPosition.DistanceTo(expectedCrownPosition) > 0.001f)
+        {
+            Fail($"The gameplay crown is not seated on the candy. actual={gameplayCrown.GlobalPosition}, expected={expectedCrownPosition}.");
+            return;
+        }
+        if (gameplayCrown.GlobalBasis.Scale.DistanceTo(Vector3.One * CandyCrown3D.VisualScale) > 0.001f)
+        {
+            Fail($"The gameplay crown was not reduced to half size. scale={gameplayCrown.GlobalBasis.Scale}.");
+            return;
+        }
+        player.Freeze = false;
+        if (controller.LoadedLoopStreamCount != 6 || !controller.AllLoopStreamsStereo ||
             controller.ImpactVoiceCount != 4 || controller.ImpactTierCount != 5)
         {
-            Fail($"Player audio controller loaded {controller.LoadedLoopStreamCount} loop families, {controller.ImpactTierCount} impact tiers and {controller.ImpactVoiceCount} voices instead of five, five and four.");
+            Fail($"Player audio controller loaded {controller.LoadedLoopStreamCount} loop families, {controller.ImpactTierCount} impact tiers and {controller.ImpactVoiceCount} voices instead of six, five and four.");
             return;
         }
 
@@ -133,11 +159,28 @@ public partial class PlayerSfxSmokeTest : Node
             return;
         }
 
-        GD.Print($"PLAYER_SFX_SMOKE_PASS: audible active rolling, five monotonic metal-impact tiers, seam suppression and four pooled voices load through the SFX bus.");
+        StaticBody3D caramelFloor = new() { Name = "CaramelAudioFloor", Position = new Vector3(-12.0f, -0.5f, 0.0f) };
+        caramelFloor.SetMeta(RoomGeometry.StickyRollSfxMetadata, true);
+        caramelFloor.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = new Vector3(6.0f, 1.0f, 10.0f) } });
+        AddChild(caramelFloor);
+        player.ResetTo(new Transform3D(Basis.Identity, new Vector3(-12.0f, 2.0f, 0.0f)));
+        player.LinearVelocity = new Vector3(0.0f, -2.0f, 0.0f);
+        for (int tick = 0; tick < 180 && (!player.GroundUsesStickyRollSfx || !controller.StickyContactPlaying); tick++)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+        }
+        if (!player.GroundUsesStickyRollSfx || !controller.StickyContactPlaying)
+        {
+            Fail($"A caramel-textured contact did not select both sticky rolling and sticky entry SFX (surface={player.GroundUsesStickyRollSfx}, entry={controller.StickyContactPlaying}).");
+            return;
+        }
+
+        GD.Print($"PLAYER_SFX_SMOKE_PASS: caramel contact selects distinct sticky/slimy entry and rolling SFX, ordinary rolling stays audible, five monotonic metal-impact tiers and four pooled voices load through the SFX bus.");
         player.QueueFree();
         floor.QueueFree();
         adjacentFloor.QueueFree();
         wall.QueueFree();
+        caramelFloor.QueueFree();
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         GetTree().Quit(0);

@@ -27,6 +27,13 @@ public static class AdvancementService
             return false;
         }
 
+        if (advancement.RewardCosmeticId is null)
+        {
+            profile.UnlockedAdvancementIds.Add(advancement.Id);
+            profile.UpdatedAtUtc = DateTimeOffset.UtcNow;
+            return true;
+        }
+
         reward = CosmeticCatalog.FindById(advancement.RewardCosmeticId);
         if (reward is null || reward.UnlockedByDefault)
         {

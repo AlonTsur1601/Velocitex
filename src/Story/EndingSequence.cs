@@ -245,7 +245,7 @@ public partial class EndingSequence : Node3D
         AddCreditLine("The game was created by:", creditFontSize, creditColor);
         AddCreditLine("Codex with GPT 5.6 Sol & Terra", creditFontSize, creditColor);
         AddCreditLine("Alon Tsur", creditFontSize, creditColor);
-        AddCreditLine("Thank you for playing :)", creditFontSize, creditColor, 118.0f);
+        AddCreditLine("Thank you for playing :)", creditFontSize, creditColor);
     }
 
     private void AddCreditLine(string text, int fontSize, Color color, float minimumHeight = 88.0f)

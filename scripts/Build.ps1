@@ -1,6 +1,8 @@
 param(
     [ValidateSet("Debug", "ExportDebug", "ExportRelease")]
-    [string]$Configuration = "Debug"
+    [string]$Configuration = "Debug",
+    [ValidatePattern("^\d+\.\d+\.\d+$")]
+    [string]$Version
 )
 
 $ErrorActionPreference = "Stop"
@@ -18,7 +20,8 @@ if ($LASTEXITCODE -ne 0) {
     throw "dotnet restore exited with code $LASTEXITCODE"
 }
 
-dotnet build (Join-Path $root "Velocitex.sln") --configuration $Configuration --no-restore
+$versionArguments = if ($Version) { @("-p:Version=$Version", "-p:AssemblyVersion=$Version.0", "-p:FileVersion=$Version.0", "-p:InformationalVersion=$Version") } else { @() }
+dotnet build (Join-Path $root "Velocitex.sln") --configuration $Configuration --no-restore @versionArguments
 if ($LASTEXITCODE -ne 0) {
     throw "dotnet build exited with code $LASTEXITCODE"
 }

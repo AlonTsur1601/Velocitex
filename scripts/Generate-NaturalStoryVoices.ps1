@@ -41,7 +41,9 @@ $jobs = @(
     @{ File="room25.mp3"; Role="child"; Text="Why does it keep changing how it rolls?" },
     @{ File="room26.mp3"; Role="child"; Text="Those cannons are tracking it through the air!" },
     @{ File="room27.mp3"; Role="child"; Text="Did the candy just change direction?" },
-    @{ File="room28.mp3"; Role="child"; Text="It must be close now!" },
+    @{ File="room28.mp3"; Role="child"; Text="It sounds like something really heavy is moving." },
+    @{ File="room29.mp3"; Role="mother"; Text="I think it is almost through." },
+    @{ File="room30.mp3"; Role="child"; Text="It must be close now!" },
     @{ File="ending_finally.mp3"; Role="child"; Text="Finally!" }
 )
 

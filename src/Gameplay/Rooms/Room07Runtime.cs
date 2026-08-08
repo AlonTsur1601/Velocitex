@@ -29,8 +29,6 @@ public partial class Room07Runtime : RoomRuntime
     private const float StopTargetZ = -16.2f;
 
     private readonly List<RouteCheckpoint3D> _sequenceButtons = new();
-    private readonly Dictionary<RouteCheckpoint3D, Material> _buttonIdleMaterials = new();
-    private readonly Dictionary<RouteCheckpoint3D, Tween> _wrongOrderTweens = new();
     private readonly List<MeshInstance3D> _targetChargeSegments = new();
     private readonly List<Node3D> _targetLatches = new();
 
@@ -42,7 +40,6 @@ public partial class Room07Runtime : RoomRuntime
     private MeshInstance3D _stopTargetCore = null!;
     private Material _targetIdleMaterial = null!;
     private Material _targetActiveMaterial = null!;
-    private Material _wrongOrderMaterial = null!;
     private Transform3D _spawnTransform;
     private SolutionTrace? _solutionTrace;
     private bool _touchedStickyThisRun;
@@ -201,11 +198,6 @@ public partial class Room07Runtime : RoomRuntime
 
     public override void _ExitTree()
     {
-        foreach (Tween tween in _wrongOrderTweens.Values)
-        {
-            tween.Kill();
-        }
-        _wrongOrderTweens.Clear();
         _stickyContactAudio?.Stop();
         if (_stickyContactAudio is not null)
         {
@@ -423,17 +415,7 @@ public partial class Room07Runtime : RoomRuntime
         foreach (RouteCheckpoint3D button in _sequenceButtons)
         {
             button.ResetCheckpoint();
-            if (_buttonIdleMaterials.TryGetValue(button, out Material? idleMaterial) &&
-                button.GetNodeOrNull<MeshInstance3D>("InsetPlate") is MeshInstance3D inset)
-            {
-                SetWrongOrderVisual(inset, idleMaterial, showSequencePips: true);
-            }
         }
-        foreach (Tween tween in _wrongOrderTweens.Values)
-        {
-            tween.Kill();
-        }
-        _wrongOrderTweens.Clear();
     }
 
     private void BuildRoom(bool reducedMotion)
@@ -446,19 +428,10 @@ public partial class Room07Runtime : RoomRuntime
         ShaderMaterial stickyMaterial = (ShaderMaterial)GD.Load<ShaderMaterial>(MaterialPath).Duplicate();
         stickyMaterial.SetShaderParameter("motion_scale", reducedMotion ? 0.0f : 1.0f);
 
-        _wrongOrderMaterial = new StandardMaterial3D
-        {
-            AlbedoColor = new Color("d62f2f"),
-            Metallic = 0.0f,
-            Roughness = 0.54f,
-            EmissionEnabled = true,
-            Emission = new Color("721010"),
-            EmissionEnergyMultiplier = 1.15f,
-        };
-        _targetIdleMaterial = RoomGeometry.CreateMaterial(copper, new Color("d0a365"), 0.38f, 0.56f);
+        _targetIdleMaterial = RoomGeometry.CreateMaterial(string.Empty, Colors.White, 0.08f, 0.52f);
         _targetActiveMaterial = RoomGeometry.CreateMaterial(
-            "res://assets/textures/sugar_glaze.svg",
-            new Color("84d1aa"),
+            string.Empty,
+            Colors.White,
             0.08f,
             0.48f,
             emissionEnabled: true,
@@ -653,36 +626,11 @@ public partial class Room07Runtime : RoomRuntime
                     GD.Print($"ROOM07_BUTTON_TRACE: activated={_nextSequenceButton}/{RequiredButtons}, tick={_solutionTick}, position={player.GlobalPosition}, speed={player.LinearVelocity.Length():F2}.");
                 }
             }
-            else
-            {
-                FlashWrongOrder(entered);
-            }
         };
         AddChild(button);
         MeshInstance3D insetPlate = button.GetNode<MeshInstance3D>("InsetPlate");
-        if (insetPlate.MaterialOverride is Material idleMaterial)
-        {
-            _buttonIdleMaterials[button] = idleMaterial;
-        }
         RoomGeometry.AddSequencePips(insetPlate, index + 1);
         _sequenceButtons.Add(button);
-    }
-
-    private void FlashWrongOrder(RouteCheckpoint3D button)
-    {
-        button.FlashDenied();
-    }
-
-    private static void SetWrongOrderVisual(MeshInstance3D insetPlate, Material material, bool showSequencePips)
-    {
-        insetPlate.MaterialOverride = material;
-        foreach (MeshInstance3D pip in insetPlate.GetChildren().OfType<MeshInstance3D>())
-        {
-            if (pip.Name.ToString().StartsWith("SequencePip", StringComparison.Ordinal))
-            {
-                pip.Visible = showSequencePips;
-            }
-        }
     }
 
     private void BuildStopTarget(Vector3 position)

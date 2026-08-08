@@ -15,6 +15,7 @@ $rollFiles = @(
     "player_roll_glass_loop.wav",
     "player_roll_soft_loop.wav",
     "player_roll_rubber_loop.wav"
+    "player_roll_slime_loop.wav"
 )
 foreach ($rollFile in $rollFiles) {
     $rollPath = Join-Path $root "assets\audio\sfx\$rollFile"
@@ -45,11 +46,12 @@ foreach ($rollFile in $rollFiles) {
         $previous = $current
     }
     $durationSeconds = ($bytes.Length - 44) / (44100.0 * 4.0)
-    if (($crossings / $durationSeconds) -lt 150.0) {
+    $minimumCrossingsPerSecond = if ($rollFile -eq "player_roll_slime_loop.wav") { 100.0 } else { 150.0 }
+    if (($crossings / $durationSeconds) -lt $minimumCrossingsPerSecond) {
         throw "Rolling source lacks laptop-audible texture: $rollFile ($([Math]::Round($crossings / $durationSeconds)) zero crossings/s)."
     }
 }
-Write-Output "ROLL_SOURCE_AUDIO_PASS: all four rolling loops contain audible PCM data and laptop-audible texture."
+Write-Output "ROLL_SOURCE_AUDIO_PASS: all five rolling loops, including sticky/slimy movement, contain audible PCM data and laptop-audible texture."
 
 $impactFiles = @(
     "player_impact_metal_tap.wav",

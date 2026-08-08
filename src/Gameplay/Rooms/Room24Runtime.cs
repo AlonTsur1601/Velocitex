@@ -204,6 +204,14 @@ public partial class Room24Runtime : RoomRuntime
         _mechanicsTick++;
         if (_mechanicsTick == 1)
         {
+            StaticBody3D returnBoost = GetNode<StaticBody3D>("LeftReturnBoost");
+            StaticBody3D exitDeck = GetNode<StaticBody3D>("ExitDeck");
+            if (returnBoost.Position.Y + 0.275f <= exitDeck.Position.Y + 0.25f) { FailMechanics("The optional-route return booster is flush with the exit deck."); return; }
+            _player.LinearVelocity = Vector3.Back * 19.0f;
+            _optionalBarrier.GetNode<Area3D>("ImpactSensor").EmitSignal(Area3D.SignalName.BodyEntered, _player);
+            if (!_optionalBarrier.IsBroken || !_optionalBroken) { FailMechanics("The return booster approach did not break the optional barrier."); return; }
+            _optionalBarrier.ResetBarrier();
+            _optionalBroken = false;
             _goal.EmitSignal(Area3D.SignalName.BodyEntered, _player);
             if (IsComplete || IsExitTraversalPending) { FailMechanics("Direct goal entry completed the room."); return; }
             _player.ResetTo(new Transform3D(Basis.Identity, _safetyLever.GlobalPosition + new Vector3(0.0f, 0.6f, 2.0f)));
@@ -257,7 +265,7 @@ public partial class Room24Runtime : RoomRuntime
         });
         SurfaceProfile accelerator = GD.Load<SurfaceProfile>("res://resources/surfaces/accelerator.tres")!;
         SurfaceProfile returnAccelerator = (SurfaceProfile)accelerator.Duplicate();
-        returnAccelerator.Acceleration = new Vector3(0.0f, 0.0f, -26.0f);
+        returnAccelerator.Acceleration = Vector3.Forward * 26.0f;
         SurfaceProfile sticky = GD.Load<SurfaceProfile>("res://resources/surfaces/sticky.tres")!;
         ShaderMaterial acceleratorBelt = (ShaderMaterial)GD.Load<ShaderMaterial>("res://resources/materials/accelerator_belt.tres")!.Duplicate();
         acceleratorBelt.SetShaderParameter("motion_scale", 1.0f);
@@ -268,22 +276,22 @@ public partial class Room24Runtime : RoomRuntime
         RoomGeometry.AddBox(this, "LeverJunction", new Vector3(31.5f, 0.5f, 15.0f), new Vector3(0.0f, 4.25f, -8.5f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 0.72f, surfaceProfile: sticky, materialOverride: caramelMaterial);
         RoomGeometry.AddBox(this, "OptionalLeftLane", new Vector3(10.0f, 0.5f, 18.0f), new Vector3(-5.0f, 4.25f, -25.0f), Vector3.Zero, metal, new Color("829396"), 0.42f, 0.64f);
         RoomGeometry.AddBox(this, "RequiredRightLane", new Vector3(10.0f, 0.55f, 18.0f), new Vector3(5.0f, 4.225f, -25.0f), Vector3.Zero, metal, Colors.White, 0.0f, 1.0f, surfaceProfile: accelerator, materialOverride: acceleratorBelt);
-        RoomGeometry.AddBox(this, "LeftReturnBoost", new Vector3(10.0f, 0.55f, 12.0f), new Vector3(-5.0f, 4.225f, -41.0f), new Vector3(0.0f, Mathf.Pi, 0.0f), metal, Colors.White, 0.0f, 1.0f, surfaceProfile: returnAccelerator, materialOverride: acceleratorBelt);
-        RoomGeometry.AddBox(this, "ExitDeck", new Vector3(31.5f, 0.5f, 17.5f), new Vector3(0.0f, 4.25f, -42.75f), Vector3.Zero, metal, new Color("9caaad"), 0.42f, 0.64f);
+        RoomGeometry.AddBox(this, "LeftReturnBoost", new Vector3(10.0f, 0.55f, 12.0f), new Vector3(-5.0f, 4.235f, -41.0f), new Vector3(0.0f, Mathf.Pi, 0.0f), metal, Colors.White, 0.0f, 1.0f, surfaceProfile: returnAccelerator, materialOverride: acceleratorBelt);
+        RoomGeometry.AddBox(this, "ExitDeck", new Vector3(31.5f, 0.5f, 15.27f), new Vector3(0.0f, 4.25f, -41.635f), Vector3.Zero, metal, new Color("9caaad"), 0.42f, 0.64f);
 
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(this, $"OuterRail{side}", new Vector3(0.42f, 2.0f, 103.0f), new Vector3(side * 15.78f, 5.5f, -2.5f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
-            RoomGeometry.AddBox(this, $"EntryLaneRail{side}", new Vector3(0.42f, 2.2f, 31.25f), new Vector3(side * 5.25f, 5.65f, 14.625f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
-            RoomGeometry.AddBox(this, $"LeftLaneRail{side}", new Vector3(0.42f, 2.2f, 18.0f), new Vector3(-5.0f + (side * 5.2f), 5.65f, -25.0f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
-            RoomGeometry.AddBox(this, $"RightLaneRail{side}", new Vector3(0.42f, 2.2f, 18.0f), new Vector3(5.0f + (side * 5.2f), 5.65f, -25.0f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
+            RoomGeometry.AddWall(this, $"OuterRail{side}", new Vector3(0.42f, 2.0f, 98.02f), new Vector3(side * 15.78f, 5.5f, -0.26f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
+            RoomGeometry.AddWall(this, $"EntryLaneRail{side}", new Vector3(0.42f, 2.2f, 31.31f), new Vector3(side * 5.21f, 5.65f, 14.595f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
+            RoomGeometry.AddWall(this, $"LeftLaneRail{side}", new Vector3(0.42f, 2.2f, 18.0f), new Vector3(-5.0f + (side * 5.2f), 5.65f, -25.0f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
+            RoomGeometry.AddWall(this, $"RightLaneRail{side}", new Vector3(0.42f, 2.2f, 18.0f), new Vector3(5.0f + (side * 5.2f), 5.65f, -25.0f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
         }
 
         _firstBarrier = new BrittleBarrier3D { Name = "EntryBarrier", Position = new Vector3(0.0f, 7.25f, -1.0f), BarrierSize = new Vector2(9.5f, 5.5f), RequiredSpeed = 14.0f, EnableAudio = !_smoke };
         AddChild(_firstBarrier);
         _routeBarrier = new BrittleBarrier3D { Name = "RequiredRightBarrier", Position = new Vector3(5.0f, 7.25f, -34.0f), BarrierSize = new Vector2(9.5f, 5.5f), RequiredSpeed = 12.0f, EnableAudio = !_smoke };
         AddChild(_routeBarrier);
-        _optionalBarrier = new BrittleBarrier3D { Name = "OptionalLeftBarrier", Position = new Vector3(-5.0f, 7.25f, -34.0f), BarrierSize = new Vector2(9.5f, 5.5f), RequiredSpeed = 18.0f, EnableAudio = !_smoke };
+        _optionalBarrier = new BrittleBarrier3D { Name = "OptionalLeftBarrier", Position = new Vector3(-5.0f, 7.25f, -34.0f), Rotation = new Vector3(0.0f, Mathf.Pi, 0.0f), BarrierSize = new Vector2(9.5f, 5.5f), RequiredSpeed = 18.0f, EnableAudio = !_smoke };
         AddChild(_optionalBarrier);
 
         _safetyLever = new MechanicalLever { Name = "SafetyReleaseLever", Position = new Vector3(-5.0f, 4.5f, -11.5f), ActivationRadius = 4.8f };

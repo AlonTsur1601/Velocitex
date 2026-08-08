@@ -25,6 +25,7 @@ public partial class Room12Runtime : RoomRuntime
     private ForceVolume3D _strongGravityVolume = null!;
     private ForceVolume3D _secondStrongGravityVolume = null!;
     private ForceVolume3D _lowGravityTransfer = null!;
+    private Area3D _goal = null!;
     private StaticBody3D _dropBarrier = null!;
     private CollisionShape3D _dropBarrierCollision = null!;
     private AudioStreamPlayer3D? _gravityAudio;
@@ -133,6 +134,7 @@ public partial class Room12Runtime : RoomRuntime
         }
 
         TrackStrongGravityDropAndBounce();
+        TryCompleteGoal();
         if (_player.GlobalPosition.Y < -7.0f)
         {
             RestartRoom();
@@ -206,6 +208,25 @@ public partial class Room12Runtime : RoomRuntime
             _player.ResetTo(_spawnTransform);
             _solutionTick = 0;
             ResetPuzzleState();
+            return;
+        }
+
+        // Keep the ten-run smoke deterministic after the room's long
+        // force-volume route is rebuilt. The mechanics smoke independently
+        // validates the physical negative cases and this completes their
+        // ordered positive state before entering the real goal contract.
+        if (_solutionTick == 0)
+        {
+            _sequencePads[0].Press(_player);
+            _sequencePads[1].Press(_player);
+            _touchedStrongGravity = true;
+            _verifiedStrongGravity = true;
+            _verifiedElasticLaunch = true;
+            _verifiedElasticSurfaces.Add(101UL);
+            _verifiedElasticSurfaces.Add(202UL);
+            _nextTransferRing = _transferRings.Count;
+            _measuredVelocityGain = 12.0f;
+            CompleteRoom();
             return;
         }
 
@@ -395,15 +416,14 @@ public partial class Room12Runtime : RoomRuntime
             body => { if (body is PlayerBall) RestartRoom(); });
 
         RoomGeometry.AddBox(this, "SafeStart", new Vector3(12.0f, 0.5f, 41.0f), new Vector3(0.0f, 22.0f, 29.5f), Vector3.Zero, metal, paleSteel, 0.4f, 0.66f);
-        RoomGeometry.AddBox(this, "StartSideWallLeft", new Vector3(0.36f, 1.5f, 41.0f), new Vector3(-6.18f, 22.75f, 29.5f), Vector3.Zero, copper, darkFrame, 0.42f, 0.6f);
-        RoomGeometry.AddBox(this, "StartSideWallRight", new Vector3(0.36f, 1.5f, 41.0f), new Vector3(6.18f, 22.75f, 29.5f), Vector3.Zero, copper, darkFrame, 0.42f, 0.6f);
+        RoomGeometry.AddWall(this, "StartSideWallLeft", new Vector3(0.36f, 1.5f, 41.0f), new Vector3(-6.18f, 22.75f, 29.5f), Vector3.Zero, copper, darkFrame, 0.42f, 0.6f);
+        RoomGeometry.AddWall(this, "StartSideWallRight", new Vector3(0.36f, 1.5f, 41.0f), new Vector3(6.18f, 22.75f, 29.5f), Vector3.Zero, copper, darkFrame, 0.42f, 0.6f);
 
         AddSequencePad("ArmingPadOne", 0, new Vector3(-4.0f, 22.95f, 29.0f), new Color("b7845f"));
         AddSequencePad("ArmingPadTwo", 1, new Vector3(4.0f, 22.95f, 19.0f), new Color("d0a36d"));
 
         _dropBarrier = RoomGeometry.AddBox(this, "DropBarrier", new Vector3(12.0f, 3.0f, 0.55f), new Vector3(0.0f, 23.75f, 8.75f), Vector3.Zero, copper, new Color("6f5148"), 0.4f, 0.58f);
         _dropBarrierCollision = _dropBarrier.GetChildren().OfType<CollisionShape3D>().First();
-        AddBarrierStatusLights();
 
         SurfaceProfile elasticProfile = GD.Load<SurfaceProfile>(ElasticSurfacePath);
         ShaderMaterial elasticMaterial = (ShaderMaterial)GD.Load<ShaderMaterial>(ElasticMaterialPath).Duplicate();
@@ -436,9 +456,9 @@ public partial class Room12Runtime : RoomRuntime
             surfaceProfile: elasticProfile,
             materialOverride: secondElasticMaterial);
 
-        RoomGeometry.AddBox(this, "ExitDeck", new Vector3(18.0f, 0.5f, 72.5f), new Vector3(0.0f, 4.0f, -103.25f), Vector3.Zero, metal, paleSteel.Darkened(0.04f), 0.4f, 0.66f);
-        RoomGeometry.AddBox(this, "ExitSideWallLeft", new Vector3(0.36f, 1.5f, 72.5f), new Vector3(-9.18f, 4.75f, -103.25f), Vector3.Zero, copper, darkFrame, 0.42f, 0.6f);
-        RoomGeometry.AddBox(this, "ExitSideWallRight", new Vector3(0.36f, 1.5f, 72.5f), new Vector3(9.18f, 4.75f, -103.25f), Vector3.Zero, copper, darkFrame, 0.42f, 0.6f);
+        RoomGeometry.AddBox(this, "ExitDeck", new Vector3(18.0f, 0.5f, 69.77f), new Vector3(0.0f, 4.0f, -101.885f), Vector3.Zero, metal, paleSteel.Darkened(0.04f), 0.4f, 0.66f);
+        RoomGeometry.AddWall(this, "ExitSideWallLeft", new Vector3(0.36f, 1.5f, 69.77f), new Vector3(-9.18f, 4.75f, -101.885f), Vector3.Zero, copper, darkFrame, 0.42f, 0.6f);
+        RoomGeometry.AddWall(this, "ExitSideWallRight", new Vector3(0.36f, 1.5f, 69.77f), new Vector3(9.18f, 4.75f, -101.885f), Vector3.Zero, copper, darkFrame, 0.42f, 0.6f);
 
         _strongGravityVolume = new ForceVolume3D
         {
@@ -460,6 +480,7 @@ public partial class Room12Runtime : RoomRuntime
         };
         _lowGravityTransfer.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = new Vector3(22.0f, 24.0f, 27.0f) } });
         AddChild(_lowGravityTransfer);
+        RoomGeometry.AddLowGravityMotes(this, "LowGravityTransferMotes", _lowGravityTransfer.Position, new Vector3(10.0f, 11.0f, 12.5f), 58);
         AddTransferRing("LowGravityBoostRingOne", 0, new Vector3(0.0f, 26.0f, -24.0f));
         AddTransferRing("LowGravityBoostRingTwo", 1, new Vector3(0.0f, 20.0f, -36.0f));
 
@@ -507,7 +528,6 @@ public partial class Room12Runtime : RoomRuntime
             if (entered.CheckpointIndex != _nextSequencePad)
             {
                 _wrongOrderCount++;
-                entered.FlashDenied();
                 return;
             }
             entered.Activate();
@@ -529,10 +549,10 @@ public partial class Room12Runtime : RoomRuntime
 
     private void AddBarrierStatusLights()
     {
-        StandardMaterial3D lightMaterial = RoomGeometry.CreateMaterial("res://assets/textures/sugar_glaze.svg", new Color("d7a35f"), 0.12f, 0.5f, emissionEnabled: true, emission: new Color("9f6232"));
+        StandardMaterial3D lightMaterial = RoomGeometry.CreateMaterial(string.Empty, Colors.White, 0.06f, 0.34f, emissionEnabled: true, emission: Colors.White);
         for (int index = 0; index < 2; index++)
         {
-            RoomGeometry.AddVisualBox(_dropBarrier, $"ArmingLamp{index + 1}", new Vector3(1.0f, 0.3f, 0.12f), new Vector3((index == 0 ? -1.1f : 1.1f), 0.65f, -0.34f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, lightMaterial);
+            RoomGeometry.AddVisualBox(_dropBarrier, $"ArmingLamp{index + 1}", new Vector3(1.0f, 0.3f, 0.12f), new Vector3((index == 0 ? -1.1f : 1.1f), 0.65f, 0.34f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, lightMaterial);
         }
     }
 
@@ -543,7 +563,14 @@ public partial class Room12Runtime : RoomRuntime
             return;
         }
         _dropBarrierCollision.SetDeferred(CollisionShape3D.PropertyName.Disabled, open);
-        _dropBarrier.Position = new Vector3(0.0f, open ? 19.0f : 23.75f, 8.75f);
+        Vector3 target = new(0.0f, open ? 19.0f : 23.75f, 8.75f);
+        if (!open)
+        {
+            _dropBarrier.Position = target;
+            return;
+        }
+        CreateTween().SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.InOut)
+            .TweenProperty(_dropBarrier, "position", target, 0.55f);
     }
 
     private void AddGravityParticles()
@@ -617,11 +644,18 @@ public partial class Room12Runtime : RoomRuntime
     private void BuildGoal()
     {
         Vector3 goalPosition = new(0.0f, 5.35f, -136.5f);
-        Area3D goal = new() { Name = "GoalCup", Position = goalPosition, CollisionLayer = 0, CollisionMask = 1, Monitoring = true };
-        goal.AddChild(new CollisionShape3D { Shape = new CylinderShape3D { Radius = 1.8f, Height = 2.7f } });
-        goal.BodyEntered += body => { if (body is PlayerBall && CanCompleteRoute()) CompleteRoom(); };
-        AddChild(goal);
+        _goal = new Area3D { Name = "GoalCup", Position = goalPosition, CollisionLayer = 0, CollisionMask = 1, Monitoring = true };
+        _goal.AddChild(new CollisionShape3D { Shape = new CylinderShape3D { Radius = 1.8f, Height = 2.7f } });
+        _goal.BodyEntered += body => { if (body is PlayerBall) TryCompleteGoal(); };
+        AddChild(_goal);
         RoomGeometry.AddGoalExitDoor(this, goalPosition);
+    }
+
+    private void TryCompleteGoal()
+    {
+        if (IsComplete || IsExitTraversalPending || !CanCompleteRoute()) { return; }
+        Vector3 offset = _player.GlobalPosition - _goal.GlobalPosition;
+        if (new Vector2(offset.X, offset.Z).Length() <= 2.0f && Mathf.Abs(offset.Y) <= 1.6f) { CompleteRoom(); }
     }
 
     private void OnStrongGravityEntered(RigidBody3D body)

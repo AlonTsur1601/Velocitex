@@ -398,12 +398,12 @@ public partial class RoomShellContainmentSmokeTest : Node
             .FirstOrDefault(argument => argument.StartsWith("--containment-room=", StringComparison.Ordinal));
         if (requested is not null &&
             int.TryParse(requested["--containment-room=".Length..], out int room) &&
-            room is >= 1 and <= 28)
+            room is >= 1 and <= 30)
         {
             return new[] { room };
         }
 
-        return Enumerable.Range(1, 28).ToArray();
+        return Enumerable.Range(1, 30).ToArray();
     }
 
     private async Task FinishAsync(int exitCode)

@@ -20,4 +20,4 @@ for ($room = 1; $room -le 30; $room++) {
     }
 }
 
-Write-Output "EXIT_PRESENTATION_PASS: Rooms 01-28 use wall-proud threshold-free frames, level lever bases, sealed corridors and requirement-locked doors."
+Write-Output "EXIT_PRESENTATION_PASS: Rooms 01-30 use wall-proud threshold-free frames, level lever bases, sealed corridors and requirement-locked doors."

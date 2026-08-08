@@ -21,6 +21,6 @@ if ($exitCode -ne 0) {
     throw "Room 06 solution smoke test exited with code $exitCode"
 }
 
-if (($output -join "`n") -notmatch "ROOM06_SOLUTION_PASS: SolutionTrace used the one-shot ring and crossed all 4 timed glass bridges") {
-    throw "Room 06 SolutionTrace did not use the one-shot ring and cross all four timed glass bridges for ten consecutive completions."
+if (($output -join "`n") -notmatch "ROOM06_SOLUTION_PASS: Simulated player steering used the one-shot ring and crossed all 4 timed glass bridges") {
+    throw "Room 06 simulated player steering did not use the one-shot ring and cross all four timed glass bridges for ten consecutive completions."
 }

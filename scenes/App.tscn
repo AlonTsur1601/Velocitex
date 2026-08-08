@@ -66,12 +66,12 @@ content_margin_right = 13.0
 content_margin_bottom = 9.0
 
 [sub_resource type="StyleBoxFlat" id="Style_button_pressed"]
-bg_color = Color(0.34, 0.23, 0.13, 1)
+bg_color = Color(0.2, 0.19, 0.16, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.95, 0.72, 0.42, 1)
+border_color = Color(0.83, 0.59, 0.31, 1)
 corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
@@ -104,7 +104,7 @@ content_margin_bottom = 1.0
 default_font_size = 17
 Button/colors/font_color = Color(0.92, 0.91, 0.86, 1)
 Button/colors/font_hover_color = Color(1, 0.86, 0.62, 1)
-Button/colors/font_pressed_color = Color(1, 0.91, 0.75, 1)
+Button/colors/font_pressed_color = Color(1, 0.86, 0.62, 1)
 Button/font_sizes/font_size = 18
 Button/styles/normal = SubResource("Style_button")
 Button/styles/hover = SubResource("Style_button_hover")
@@ -338,6 +338,11 @@ custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 text = "NEW GAME"
 
+[node name="ExtrasButton" type="Button" parent="Ui/PlayMenu/Center/Panel/Layout"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "EXTRAS"
+
 [node name="BackButton" type="Button" parent="Ui/PlayMenu/Center/Panel/Layout"]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
@@ -544,6 +549,36 @@ text = "TRAIL"
 [node name="TrailGrid" type="GridContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
 layout_mode = 2
 columns = 7
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="FinishLabel" type="Label" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+text = "FINISH"
+
+[node name="FinishGrid" type="GridContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+columns = 6
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="TrailStyleLabel" type="Label" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+text = "TRAIL STYLE"
+
+[node name="TrailStyleGrid" type="GridContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+columns = 5
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="CrownLabel" type="Label" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+text = "CROWN"
+
+[node name="CrownGrid" type="GridContainer" parent="Ui/CustomizeMenu/Center/Panel/Layout/Body/ControlsScroll/Controls"]
+layout_mode = 2
+columns = 4
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 
@@ -1103,6 +1138,39 @@ layout_mode = 2
 button_pressed = true
 text = "Enabled"
 
+[node name="UPDATES" type="MarginContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Layout" type="VBoxContainer" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/UPDATES"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="VersionLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/UPDATES/Layout"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "CURRENT VERSION"
+
+[node name="StatusLabel" type="Label" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/UPDATES/Layout"]
+layout_mode = 2
+autowrap_mode = 2
+text = "Check GitHub for a newer version of Velocitex."
+
+[node name="DownloadProgress" type="ProgressBar" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/UPDATES/Layout"]
+visible = false
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+show_percentage = false
+
+[node name="CheckButton" type="Button" parent="Ui/SettingsMenu/Center/Panel/Layout/Tabs/UPDATES/Layout"]
+custom_minimum_size = Vector2(280, 46)
+layout_mode = 2
+text = "CHECK FOR UPDATES"
+
 [node name="Actions" type="HBoxContainer" parent="Ui/SettingsMenu/Center/Panel/Layout"]
 layout_mode = 2
 theme_override_constants/separation = 12
@@ -1273,7 +1341,7 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.89, 0.64, 0.35, 1)
 theme_override_font_sizes/font_size = 20
-text = "ROOM 02 / 28"
+text = "ROOM 02 / 30"
 vertical_alignment = 1
 
 [node name="Separator" type="VSeparator" parent="Ui/RoomIntroCard/Panel/Content"]
@@ -1287,18 +1355,6 @@ theme_override_colors/font_color = Color(0.98, 0.91, 0.78, 1)
 theme_override_font_sizes/font_size = 30
 text = "THE COPPER BEND"
 vertical_alignment = 1
-
-[node name="QuitConfirmation" type="ConfirmationDialog" parent="Ui"]
-title = "Quit Velocitex?"
-dialog_text = "Unsaved room progress will be lost."
-ok_button_text = "QUIT"
-cancel_button_text = "CANCEL"
-
-[node name="NewGameConfirmation" type="ConfirmationDialog" parent="Ui"]
-title = "Start a new game?"
-dialog_text = "All campaign saves will be cleared. Settings, cosmetics and advancements will be kept."
-ok_button_text = "NEW GAME"
-cancel_button_text = "CANCEL"
 
 [node name="RoomCompleteDialog" type="AcceptDialog" parent="Ui"]
 exclusive = true

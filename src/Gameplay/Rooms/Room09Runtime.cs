@@ -316,8 +316,8 @@ public partial class Room09Runtime : RoomRuntime
         StaticBody3D firstMembrane = RoomGeometry.AddBox(
             this,
             "SuperElasticMembraneA",
-            new Vector3(14.0f, 0.5f, 19.0f),
-            new Vector3(0.0f, 2.4955f, 0.5055f),
+            new Vector3(14.0f, 0.5f, 24.0f),
+            new Vector3(0.0f, 2.365f, -1.95f),
             new Vector3(Mathf.DegToRad(-6.0f), 0.0f, 0.0f),
             string.Empty,
             Colors.White,
@@ -330,12 +330,12 @@ public partial class Room09Runtime : RoomRuntime
         // The second membrane is visibly and physically a separate body.  Its
         // raised tower catches the descending first arc without adding random
         // support columns or allowing a route underneath it.
-        RoomGeometry.AddBox(this, "SecondMembraneTower", new Vector3(16.0f, 19.25f, 34.0f), new Vector3(0.0f, 6.825f, -49.0f), Vector3.Zero, copper, new Color("4f4758"), 0.42f, 0.62f);
+        RoomGeometry.AddBox(this, "SecondMembraneTower", new Vector3(16.0f, 19.25f, 40.0f), new Vector3(0.0f, 6.825f, -52.0f), Vector3.Zero, copper, new Color("4f4758"), 0.42f, 0.62f);
         StaticBody3D secondMembrane = RoomGeometry.AddBox(
             this,
             "SuperElasticMembraneB",
-            new Vector3(14.0f, 0.5f, 34.0f),
-            new Vector3(0.0f, 16.7f, -49.0f),
+            new Vector3(14.0f, 0.5f, 40.0f),
+            new Vector3(0.0f, 16.7f, -52.0f),
             Vector3.Zero,
             string.Empty,
             Colors.White,
@@ -345,17 +345,17 @@ public partial class Room09Runtime : RoomRuntime
             surfaceProfile: bounceProfile,
             materialOverride: secondBounceMaterial);
 
-        RoomGeometry.AddBox(this, "LandingDeck", new Vector3(18.0f, 0.5f, 65.0f), new Vector3(0.0f, 2.6f, -101.0f), Vector3.Zero, metal, paleSteel.Darkened(0.05f), 0.4f, 0.66f);
+        RoomGeometry.AddBox(this, "LandingDeck", new Vector3(18.0f, 0.5f, 60.6f), new Vector3(0.0f, 2.6f, -98.8f), Vector3.Zero, metal, paleSteel.Darkened(0.05f), 0.4f, 0.66f);
 
-        RoomGeometry.AddBox(this, "StartRailLeft", new Vector3(0.36f, 1.35f, 22.0f), new Vector3(-7.18f, 12.408f, 24.0f), Vector3.Zero, metal, darkFrame, 0.4f, 0.64f);
-        RoomGeometry.AddBox(this, "StartRailRight", new Vector3(0.36f, 1.35f, 22.0f), new Vector3(7.18f, 12.408f, 24.0f), Vector3.Zero, metal, darkFrame, 0.4f, 0.64f);
+        RoomGeometry.AddWall(this, "StartRailLeft", new Vector3(0.36f, 1.35f, 22.0f), new Vector3(-7.18f, 12.408f, 24.0f), Vector3.Zero, metal, darkFrame, 0.4f, 0.64f);
+        RoomGeometry.AddWall(this, "StartRailRight", new Vector3(0.36f, 1.35f, 22.0f), new Vector3(7.18f, 12.408f, 24.0f), Vector3.Zero, metal, darkFrame, 0.4f, 0.64f);
         Vector3 launchRailRotation = new(Mathf.DegToRad(-13.5f), 0.0f, 0.0f);
-        RoomGeometry.AddBox(this, "LaunchRailLeft", new Vector3(0.36f, 1.35f, 3.0f), new Vector3(-7.18f, 12.02f, 11.62f), launchRailRotation, metal, darkFrame, 0.4f, 0.64f);
-        RoomGeometry.AddBox(this, "LaunchRailRight", new Vector3(0.36f, 1.35f, 3.0f), new Vector3(7.18f, 12.02f, 11.62f), launchRailRotation, metal, darkFrame, 0.4f, 0.64f);
-        AddMembraneRim("FirstMembrane", new Vector3(0.0f, 2.4955f, 0.5055f), 19.0f, new Vector3(Mathf.DegToRad(-6.0f), 0.0f, 0.0f), copper, violetFrame);
-        AddMembraneRim("SecondMembrane", new Vector3(0.0f, 16.7f, -49.0f), 34.0f, Vector3.Zero, copper, violetFrame);
-        RoomGeometry.AddBox(this, "LandingRailLeft", new Vector3(0.36f, 1.45f, 65.0f), new Vector3(-9.18f, 3.575f, -101.0f), Vector3.Zero, metal, darkFrame, 0.4f, 0.64f);
-        RoomGeometry.AddBox(this, "LandingRailRight", new Vector3(0.36f, 1.45f, 65.0f), new Vector3(9.18f, 3.575f, -101.0f), Vector3.Zero, metal, darkFrame, 0.4f, 0.64f);
+        RoomGeometry.AddWall(this, "LaunchRailLeft", new Vector3(0.36f, 1.35f, 3.0f), new Vector3(-7.18f, 12.02f, 11.62f), launchRailRotation, metal, darkFrame, 0.4f, 0.64f);
+        RoomGeometry.AddWall(this, "LaunchRailRight", new Vector3(0.36f, 1.35f, 3.0f), new Vector3(7.18f, 12.02f, 11.62f), launchRailRotation, metal, darkFrame, 0.4f, 0.64f);
+        AddMembraneRim("FirstMembrane", new Vector3(0.0f, 2.365f, -1.95f), 24.0f, new Vector3(Mathf.DegToRad(-6.0f), 0.0f, 0.0f), copper, violetFrame);
+        AddMembraneRim("SecondMembrane", new Vector3(0.0f, 16.7f, -52.0f), 40.0f, Vector3.Zero, copper, violetFrame);
+        RoomGeometry.AddWall(this, "LandingRailLeft", new Vector3(0.36f, 1.45f, 60.6f), new Vector3(-9.18f, 3.575f, -98.8f), Vector3.Zero, metal, darkFrame, 0.4f, 0.64f);
+        RoomGeometry.AddWall(this, "LandingRailRight", new Vector3(0.36f, 1.45f, 60.6f), new Vector3(9.18f, 3.575f, -98.8f), Vector3.Zero, metal, darkFrame, 0.4f, 0.64f);
 
         AddSequenceButton("StartSequenceLeft", 0, new Vector3(-4.0f, 12.30f, 27.2f));
         AddSequenceButton("FinalSequenceRight", 1, new Vector3(7.0f, 3.42f, -126.0f));
@@ -399,8 +399,8 @@ public partial class Room09Runtime : RoomRuntime
 
     private void AddMembraneRim(string prefix, Vector3 center, float length, Vector3 rotation, string texture, Color tint)
     {
-        RoomGeometry.AddBox(this, $"{prefix}RimLeft", new Vector3(0.46f, 0.72f, length + 0.4f), center + new Vector3(-7.2f, 0.0f, 0.0f), rotation, texture, tint, 0.42f, 0.56f);
-        RoomGeometry.AddBox(this, $"{prefix}RimRight", new Vector3(0.46f, 0.72f, length + 0.4f), center + new Vector3(7.2f, 0.0f, 0.0f), rotation, texture, tint, 0.42f, 0.56f);
+        RoomGeometry.AddWall(this, $"{prefix}RimLeft", new Vector3(0.46f, 0.72f, length), center + new Vector3(-7.2f, 0.0f, 0.0f), rotation, texture, tint, 0.42f, 0.56f);
+        RoomGeometry.AddWall(this, $"{prefix}RimRight", new Vector3(0.46f, 0.72f, length), center + new Vector3(7.2f, 0.0f, 0.0f), rotation, texture, tint, 0.42f, 0.56f);
     }
 
     private void AddSequenceButton(string name, int index, Vector3 position)
@@ -420,7 +420,7 @@ public partial class Room09Runtime : RoomRuntime
             {
                 return;
             }
-            if (entered.CheckpointIndex != _nextSequenceButton) { entered.FlashDenied(); return; }
+            if (entered.CheckpointIndex != _nextSequenceButton) { return; }
 
             entered.Activate();
             _nextSequenceButton++;

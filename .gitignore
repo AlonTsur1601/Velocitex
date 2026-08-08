@@ -26,3 +26,5 @@ logs/
 *.import
 tmp/
 output/
+submission/video/recordings/*.mp4
+submission/video/velocitex_showcase.mp4

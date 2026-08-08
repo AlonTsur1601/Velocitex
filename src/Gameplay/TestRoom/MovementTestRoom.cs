@@ -1059,7 +1059,7 @@ public partial class MovementTestRoom : RoomRuntime
 
         foreach (float x in new[] { -7.67f, 7.67f })
         {
-            RoomGeometry.AddBox(
+            RoomGeometry.AddWall(
                 this,
                 $"SafeStartRail{x}",
                 new Vector3(0.34f, 1.2f, 13.275f),
@@ -1076,12 +1076,12 @@ public partial class MovementTestRoom : RoomRuntime
 
         RoomGeometry.AddBox(this, "FirstAimDivider", new Vector3(0.28f, 0.9f, 7.0f), new Vector3(0.0f, 8.75f, 19.0f), new Vector3(Mathf.DegToRad(-14.0f), 0.0f, 0.0f), metalTexture, new Color("746b65"), 0.48f, 0.58f);
 
-        foreach (float x in new[] { -7.75f, 7.75f })
+        foreach (float x in new[] { -7.67f, 7.67f })
         {
-            RoomGeometry.AddBox(this, $"FirstSlopeRail{x}", new Vector3(0.34f, 1.0f, 16.908134f), new Vector3(x, 8.400513f, 18.360829f), new Vector3(Mathf.DegToRad(-14.082268f), 0.0f, 0.0f), metalTexture, new Color("746b65"), 0.48f, 0.58f);
-            RoomGeometry.AddBox(this, $"FirstLandingRail{x}", new Vector3(0.34f, 1.2f, 13.5f + Room01IntermediatePlatformExtension), new Vector3(x, 4.3f, -10.25f - (Room01IntermediatePlatformExtension * 0.5f) - Room01FirstGapExtension), Vector3.Zero, metalTexture, new Color("746b65"), 0.48f, 0.58f);
-            RoomGeometry.AddBox(this, $"SecondSlopeRail{x}", new Vector3(0.34f, 1.0f, 16.908134f), new Vector3(x, 2.150513f, -25.139171f - Room01DownstreamOffset), new Vector3(Mathf.DegToRad(-14.082268f), 0.0f, 0.0f), metalTexture, new Color("746b65"), 0.48f, 0.58f);
-            RoomGeometry.AddBox(this, $"FinalRail{x}", new Vector3(0.34f, 1.2f, 14.85f), new Vector3(x, -1.95f, -62.025f - Room01TotalExtension), Vector3.Zero, metalTexture, new Color("746b65"), 0.48f, 0.58f);
+            RoomGeometry.AddWall(this, $"FirstSlopeRail{x}", new Vector3(0.34f, 1.0f, 16.908134f), new Vector3(x, 8.400513f, 18.360829f), new Vector3(Mathf.DegToRad(-14.082268f), 0.0f, 0.0f), metalTexture, new Color("746b65"), 0.48f, 0.58f);
+            RoomGeometry.AddWall(this, $"FirstLandingRail{x}", new Vector3(0.34f, 1.2f, 13.5f + Room01IntermediatePlatformExtension), new Vector3(x, 4.3f, -10.25f - (Room01IntermediatePlatformExtension * 0.5f) - Room01FirstGapExtension), Vector3.Zero, metalTexture, new Color("746b65"), 0.48f, 0.58f);
+            RoomGeometry.AddWall(this, $"SecondSlopeRail{x}", new Vector3(0.34f, 1.0f, 16.908134f), new Vector3(x, 2.150513f, -25.139171f - Room01DownstreamOffset), new Vector3(Mathf.DegToRad(-14.082268f), 0.0f, 0.0f), metalTexture, new Color("746b65"), 0.48f, 0.58f);
+            RoomGeometry.AddWall(this, $"FinalRail{x}", new Vector3(0.34f, 1.2f, 14.85f), new Vector3(x, -1.95f, -62.025f - Room01TotalExtension), Vector3.Zero, metalTexture, new Color("746b65"), 0.48f, 0.58f);
         }
 
         SurfaceDetail.AddOverlay(this, "FirstLandingGrime", new Vector3(-3.8f, 4.015f, -9.9f - Room01FirstGapExtension), new Vector3(-Mathf.Pi / 2.0f, 0.0f, Mathf.DegToRad(11.0f)), new Vector2(4.6f, 2.8f), "res://assets/textures/overlays/grime.svg", new Color("3a281f"), 0.48f);

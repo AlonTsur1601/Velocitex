@@ -69,7 +69,7 @@ public partial class AdvancementNotificationSmokeTest : Node
                 return;
             }
 
-            GD.Print("ADVANCEMENT_NOTIFICATION_SMOKE_PASS: 20 icons load and two new unlocks queue once in order with Reduced Motion.");
+            GD.Print("ADVANCEMENT_NOTIFICATION_SMOKE_PASS: all 26 icons load and two new unlocks queue once in order with Reduced Motion.");
             FinishCleanly();
             return;
         }

@@ -1,0 +1,193 @@
+﻿model = "gpt-5.6-sol"
+model_reasoning_effort = "medium"
+personality = "pragmatic"
+sandbox_mode = "danger-full-access"
+notify = [ 'C:\Users\alont\AppData\Local\OpenAI\Codex\runtimes\cua_node\f1bf3cd3a5929acd\bin\node_modules\@oai\sky\bin\windows\codex-computer-use.exe', "turn-ended" ]
+[windows]
+sandbox = "elevated"
+[projects.'C:\Users\alont\OneDrive\׳׳¡׳׳›׳™׳\Alon\HTML\Project_site3']
+trust_level = "trusted"
+[projects.'C:\Users\alont\OneDrive\׳׳¡׳׳›׳™׳\Playground']
+trust_level = "trusted"
+[projects.'C:\Users\alont\OneDrive\׳׳¡׳׳›׳™׳\Alon\Yahalom_Python']
+trust_level = "trusted"
+[projects.'c:\users\alont\onedrive\׳׳¡׳׳›׳™׳\alon\java\javaprojects']
+trust_level = "trusted"
+[projects.'c:\users\alont\onedrive\׳׳¡׳׳›׳™׳\alon\html\animalia']
+trust_level = "trusted"
+[projects.'c:\users\alont\onedrive\׳׳¡׳׳›׳™׳\alon\׳”׳ ׳‘׳—׳¨׳× ׳”׳¦׳¢׳™׳¨׳”\׳ ׳‘׳—׳¦_c++\cses.fi']
+trust_level = "trusted"
+[projects.'c:\users\alont\documents\codex\2026-06-19\new-chat']
+trust_level = "trusted"
+[projects.'c:\users\alont\documents\codex\2026-06-20\thl']
+trust_level = "trusted"
+[projects.'c:\users\alont\documents\codex\2026-06-21\vto']
+trust_level = "trusted"
+[projects.'c:\users\alont\documents\codex\2026-07-07\aut']
+trust_level = "trusted"
+[projects.'c:\users\alont\documents\codex\2026-07-07\let-s-set-up-a-scheduled']
+trust_level = "trusted"
+[projects.'c:\users\alont\documents\codex\2026-07-10\sites-plugin-sites-openai-bundled-create']
+trust_level = "trusted"
+[projects.'c:\users\alont\documents\codex\2026-07-10\h']
+trust_level = "trusted"
+[projects.'c:\users\alont\documents\codex']
+trust_level = "trusted"
+[projects.'c:\users\alont\onedrive\׳׳¡׳׳›׳™׳\alon\velocitex']
+trust_level = "trusted"
+[projects.'c:\users\alont']
+trust_level = "trusted"
+[notice.model_migrations]
+"gpt-5.2-codex" = "gpt-5.4"
+[plugins."gmail@openai-curated"]
+enabled = true
+[plugins."google-calendar@openai-curated"]
+enabled = true
+[plugins."google-drive@openai-curated"]
+enabled = true
+[plugins."canva@openai-curated"]
+enabled = true
+[plugins."test-android-apps@openai-curated"]
+enabled = true
+[plugins."build-web-apps@openai-curated"]
+enabled = true
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+[plugins."chatgpt-apps@openai-curated"]
+enabled = true
+[plugins."game-studio@openai-curated"]
+enabled = true
+[plugins."computer-use@openai-bundled"]
+enabled = true
+[plugins."openai-developers@openai-curated"]
+enabled = true
+[plugins."latex@openai-bundled"]
+enabled = true
+[plugins."chrome@openai-bundled"]
+enabled = true
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+[plugins."visualize@openai-bundled"]
+enabled = true
+[plugins."browser@openai-bundled"]
+enabled = true
+[plugins."sites@openai-bundled"]
+enabled = true
+[sandbox_workspace_write]
+network_access = true
+[marketplaces.openai-bundled]
+last_updated = "2026-08-04T18:12:54Z"
+source_type = "local"
+source = '\?\C:\Users\alont.codex.tmp\bundled-marketplaces\openai-bundled'
+[marketplaces.openai-primary-runtime]
+last_updated = "2026-08-02T19:55:47Z"
+source_type = "local"
+source = '\?\C:\Users\alont.cache\codex-runtimes\codex-primary-runtime\plugins\openai-primary-runtime'
+[marketplaces.context-mode]
+last_updated = "2026-08-04T18:17:14Z"
+source_type = "git"
+source = "https://github.com/mksglu/context-mode.git"
+[features]
+memories = true
+js_repl = true
+hooks = true
+plugin_hooks = true
+[memories]
+generate_memories = true
+use_memories = true
+[desktop]
+appearanceTheme = "dark"
+appearanceDarkCodeThemeId = "codex"
+sansFontSize = 14
+codeFontSize = 14
+usePointerCursors = true
+integratedTerminalShell = "commandPrompt"
+selected-avatar-id = "codex"
+keepRemoteControlAwakeWhilePluggedIn = true
+reduced-motion-preference = "system"
+appearanceDiffMarkerStyle = "color"
+followUpQueueMode = "queue"
+avatar-overlay-mascot-width-px = 80
+conversationDetailMode = "STEPS_PROSE"
+enabled-reasoning-efforts = ["low", "medium", "high", "xhigh", "ultra", "max"]
+[desktop.appearanceLightChromeTheme]
+accent = "#9184ee"
+contrast = 45
+ink = "#1a1c1f"
+opaqueWindows = false
+surface = "#ffffff"
+[desktop.appearanceLightChromeTheme.fonts]
+[desktop.appearanceLightChromeTheme.semanticColors]
+diffAdded = "#00a240"
+diffRemoved = "#ba2623"
+skill = "#924ff7"
+[desktop.appearanceDarkChromeTheme]
+accent = "#9184ee"
+contrast = 60
+ink = "#fcfcfc"
+opaqueWindows = false
+surface = "#111111"
+[desktop.appearanceDarkChromeTheme.fonts]
+[desktop.appearanceDarkChromeTheme.semanticColors]
+diffAdded = "#00a240"
+diffRemoved = "#e02e2a"
+skill = "#b06dff"
+[desktop.open-in-target-preferences]
+global = "vscode"
+[desktop.open-in-target-preferences.perPath]
+'C:\Users\alont\OneDrive\׳׳¡׳׳›׳™׳\Alon\HTML\Project_site3' = "visualStudio"
+'C:\Users\alont\OneDrive\׳׳¡׳׳›׳™׳\Playground' = "visualStudio"
+'C:\Users\alont\OneDrive\׳׳¡׳׳›׳™׳\Alon\׳”׳ ׳‘׳—׳¨׳× ׳”׳¦׳¢׳™׳¨׳”\׳ ׳‘׳—׳¦_C++\CSES.fi' = "vscode"
+[mcp_servers.node_repl]
+args = []
+command = 'C:\Users\alont\AppData\Local\OpenAI\Codex\runtimes\cua_node\fb8898c05a62885e\bin\node_repl.exe'
+startup_timeout_sec = 120
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = 'C:\Users\alont\AppData\Local\OpenAI\Codex\runtimes\cua_node\fb8898c05a62885e\bin\node_modules'
+NODE_REPL_NODE_PATH = 'C:\Users\alont\AppData\Local\OpenAI\Codex\runtimes\cua_node\fb8898c05a62885e\bin\node.exe'
+NODE_REPL_TRUSTED_CODE_PATHS = 'C:\Users\alont.codex'
+CODEX_HOME = 'C:\Users\alont.codex'
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "c5e8b73f10ecc47ad1be38f14ba6b79cd3af06fcd86637f7b6b857ae209a686e,f204d340535055781952b10ed396de20b842f00a19e430852f7e121ad1ce91f6"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.727.51351"
+SKY_CUA_NATIVE_PIPE = "1"
+SKY_CUA_NATIVE_PIPE_DIRECTORY = '\.\pipe\codex-computer-use-a4d61205-53f9-429c-ae7a-414e8daa0b7c'
+CODEX_CLI_PATH = 'C:\Users\alont\AppData\Local\OpenAI\Codex\bin\d7e8094cfb76a267\codex.exe'
+[shell_environment_policy.set]
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "c5e8b73f10ecc47ad1be38f14ba6b79cd3af06fcd86637f7b6b857ae209a686e,f204d340535055781952b10ed396de20b842f00a19e430852f7e121ad1ce91f6"
+NODE_REPL_TRUSTED_CODE_PATHS = 'C:\Users\alont.codex'
+[mcp_servers.codexsaver]
+command = "python"
+args = ['C:\Users\alont\.codexsaver\codexsaver_mcp.py']
+startup_timeout_sec = 10
+tool_timeout_sec = 120
+[mcp_servers.blender]
+enabled = true
+command = "uvx"
+args = ["blender-mcp"]
+[mcp_servers.serena]
+command = "uvx"
+args = [
+  "--from",
+  "serena-agent",
+  "serena",
+  "start-mcp-server",
+  "--context",
+  "codex",
+  "--enable-web-dashboard",
+  "false"
+]
+startup_timeout_sec = 120
+tool_timeout_sec = 120
+

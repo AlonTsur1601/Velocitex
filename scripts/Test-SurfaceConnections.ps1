@@ -8,7 +8,7 @@ if (-not $godot) {
 
 $results = [System.Collections.Generic.List[string]]::new()
 $failures = [System.Collections.Generic.List[string]]::new()
-for ($room = 1; $room -le 28; $room++) {
+for ($room = 1; $room -le 30; $room++) {
     $ErrorActionPreference = "Continue"
     $output = & $godot.FullName --headless --fixed-fps 60 --path $root "res://scenes/SurfaceConnectionSmokeTest.tscn" --quit-after 900 -- "--surface-room=$room" 2>&1
     $exitCode = $LASTEXITCODE
@@ -31,4 +31,4 @@ if ($failures.Count -gt 0) {
     throw "Surface connection smoke found problems in $($failures.Count) room(s)."
 }
 $results | Write-Output
-Write-Output "SURFACE_CONNECTION_PASS: all adjoining platform and slope edges in Rooms 01-28 are flush and connected."
+Write-Output "SURFACE_CONNECTION_PASS: all adjoining platform and slope edges in Rooms 01-30 are flush and connected."

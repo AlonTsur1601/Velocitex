@@ -22,11 +22,18 @@ public partial class InterferenceCannon3D : Node3D
     [Export] public int CadenceTicks { get; set; } = 120;
     [Export] public int InitialDelayJitterTicks { get; set; } = 3;
     [Export] public int CadenceJitterTicks { get; set; } = 18;
+    [Export] public int RandomInitialDelayMinTicks { get; set; } = 15;
+    [Export] public int RandomInitialDelayMaxTicks { get; set; } = 180;
+    [Export] public int RandomCadenceMinTicks { get; set; } = 120;
+    [Export] public int RandomCadenceMaxTicks { get; set; } = 180;
     [Export] public int ProjectileLifetimeTicks { get; set; } = 100;
     [Export] public int PoolSize { get; set; } = 6;
     [Export] public bool EnableAudio { get; set; } = true;
+    [Export] public bool EnableWarningLight { get; set; } = true;
+    [Export] public bool UseBatchedDenseVisuals { get; set; }
 
     public int ShotsFired { get; private set; }
+    public int ScheduledFirstFireTick => _nextFireTick;
     public bool UsesRandomizedTiming => InitialDelayJitterTicks > 0 && CadenceJitterTicks > 0;
     public bool HasSolidBodyHitbox =>
         GetNodeOrNull<StaticBody3D>("CannonHitbox")?.GetNodeOrNull<CollisionShape3D>("BodyEnvelopeHitbox") is { Disabled: false };
@@ -34,8 +41,8 @@ public partial class InterferenceCannon3D : Node3D
     private readonly List<ProjectileState> _projectiles = new();
     private StaticBody3D _cannonHitbox = null!;
     private Node3D _barrelRoot = null!;
-    private MeshInstance3D _warningLamp = null!;
-    private OmniLight3D _warningLight = null!;
+    private MeshInstance3D? _warningLamp;
+    private OmniLight3D? _warningLight;
     private AudioStreamPlayer3D? _fireAudio;
     private readonly RandomNumberGenerator _timingRng = new();
     private int _tick;
@@ -47,6 +54,7 @@ public partial class InterferenceCannon3D : Node3D
     {
         BuildVisual();
         BuildProjectilePool();
+        SetProcess(_warningLamp is not null);
         _deterministicSmokeTiming = OS.GetCmdlineUserArgs().Any(argument => argument.Contains("solution-smoke", StringComparison.Ordinal));
         if (_deterministicSmokeTiming)
         {
@@ -54,19 +62,43 @@ public partial class InterferenceCannon3D : Node3D
         }
         else
         {
-            _timingRng.Randomize();
+            _timingRng.Seed = StableSeed(Name.ToString()) ^ (ulong)Time.GetTicksUsec() ^ GetInstanceId();
         }
         ScheduleInitialFire();
     }
 
     public override void _Process(double delta)
     {
+        if (_warningLamp is null)
+        {
+            return;
+        }
+
         int cycleLength = Math.Max(1, _nextFireTick - _lastFireTick);
         int cycleTick = Mathf.Clamp(_tick - _lastFireTick, 0, cycleLength);
         float charge = Mathf.Clamp(cycleTick / (float)cycleLength, 0.0f, 1.0f);
         float pulse = 1.0f + (charge * 0.28f);
         _warningLamp.Scale = Vector3.One * pulse;
-        _warningLight.LightEnergy = 0.35f + (charge * 2.25f);
+        if (_warningLight is not null)
+        {
+            _warningLight.LightEnergy = 0.35f + (charge * 2.25f);
+        }
+    }
+
+    public override void _ExitTree()
+    {
+        _fireAudio?.Stop();
+        if (_fireAudio is not null)
+        {
+            _fireAudio.Stream = null;
+        }
+        foreach (ProjectileState projectile in _projectiles)
+        {
+            Deactivate(projectile);
+        }
+        ProjectileFired = null;
+        PlayerHit = null;
+        _projectiles.Clear();
     }
 
     public void AdvancePhysicsTick()
@@ -76,7 +108,7 @@ public partial class InterferenceCannon3D : Node3D
         {
             FireProjectile();
             _lastFireTick = _tick;
-            _nextFireTick = _tick + SampleInterval(CadenceTicks, CadenceJitterTicks);
+            _nextFireTick = _tick + SampleCadenceInterval();
         }
 
         foreach (ProjectileState projectile in _projectiles)
@@ -114,8 +146,18 @@ public partial class InterferenceCannon3D : Node3D
 
     private void ScheduleInitialFire()
     {
-        _nextFireTick = SampleInterval(InitialDelayTicks, InitialDelayJitterTicks);
+        _nextFireTick = _deterministicSmokeTiming
+            ? SampleInterval(InitialDelayTicks, InitialDelayJitterTicks)
+            : _timingRng.RandiRange(
+                Math.Max(1, RandomInitialDelayMinTicks),
+                Math.Max(Math.Max(1, RandomInitialDelayMinTicks), RandomInitialDelayMaxTicks));
     }
+
+    private int SampleCadenceInterval() => _deterministicSmokeTiming
+        ? SampleInterval(CadenceTicks, CadenceJitterTicks)
+        : _timingRng.RandiRange(
+            Math.Max(1, RandomCadenceMinTicks),
+            Math.Max(Math.Max(1, RandomCadenceMinTicks), RandomCadenceMaxTicks));
 
     private int SampleInterval(int baseTicks, int jitterTicks)
     {
@@ -158,10 +200,13 @@ public partial class InterferenceCannon3D : Node3D
         ShotsFired++;
         _fireAudio?.Play();
 
-        float firingDirection = GetFiringDirection();
-        _barrelRoot.Position = new Vector3(-firingDirection * 0.28f, 0.0f, 0.0f);
-        Tween tween = CreateTween().SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
-        tween.TweenProperty(_barrelRoot, "position", Vector3.Zero, 0.18f);
+        if (!UseBatchedDenseVisuals)
+        {
+            float firingDirection = GetFiringDirection();
+            _barrelRoot.Position = new Vector3(-firingDirection * 0.28f, 0.0f, 0.0f);
+            Tween tween = CreateTween().SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+            tween.TweenProperty(_barrelRoot, "position", Vector3.Zero, 0.18f);
+        }
         ProjectileFired?.Invoke();
     }
 
@@ -224,17 +269,43 @@ public partial class InterferenceCannon3D : Node3D
 
     private void BuildVisual()
     {
-        StandardMaterial3D steel = RoomGeometry.CreateMaterial("res://assets/textures/brushed_metal.png", new Color("77858c"), 0.46f, 0.58f);
-        StandardMaterial3D dark = RoomGeometry.CreateMaterial("res://assets/textures/rubber_chevrons.svg", new Color("252c32"), 0.04f, 0.94f);
-        StandardMaterial3D warning = RoomGeometry.CreateMaterial("res://assets/textures/sugar_glaze.svg", new Color("e2683f"), 0.08f, 0.4f, emissionEnabled: true, emission: new Color("7d1d0b"));
         float firingDirection = GetFiringDirection();
 
-        RoomGeometry.AddVisualBox(this, "CannonMount", new Vector3(0.36f, 3.2f, 2.2f), new Vector3(firingDirection * 0.08f, 1.6f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, steel);
         _barrelRoot = new Node3D { Name = "BarrelRoot" };
         AddChild(_barrelRoot);
-        RoomGeometry.AddVisualBox(_barrelRoot, "CannonHousing", new Vector3(2.4f, 1.25f, 1.25f), new Vector3(firingDirection * 1.35f, 2.35f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, dark);
-        RoomGeometry.AddVisualBox(_barrelRoot, "MuzzleFrame", new Vector3(0.24f, 1.65f, 1.65f), new Vector3(firingDirection * 2.62f, 2.35f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, steel);
-        RoomGeometry.AddVisualBox(_barrelRoot, "MuzzleOpening", new Vector3(0.08f, 1.02f, 1.02f), new Vector3(firingDirection * 2.76f, 2.35f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, dark);
+        if (!UseBatchedDenseVisuals)
+        {
+            StandardMaterial3D steel = RoomGeometry.CreateMaterial("res://assets/textures/brushed_metal.png", new Color("77858c"), 0.46f, 0.58f);
+            StandardMaterial3D dark = RoomGeometry.CreateMaterial("res://assets/textures/rubber_chevrons.svg", new Color("252c32"), 0.04f, 0.94f);
+            StandardMaterial3D warning = RoomGeometry.CreateMaterial("res://assets/textures/sugar_glaze.svg", new Color("e2683f"), 0.08f, 0.4f, emissionEnabled: true, emission: new Color("7d1d0b"));
+            RoomGeometry.AddVisualBox(this, "CannonMount", new Vector3(0.36f, 3.2f, 2.2f), new Vector3(firingDirection * 0.08f, 1.6f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, steel);
+            RoomGeometry.AddVisualBox(_barrelRoot, "CannonHousing", new Vector3(2.4f, 1.25f, 1.25f), new Vector3(firingDirection * 1.35f, 2.35f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, dark);
+            RoomGeometry.AddVisualBox(_barrelRoot, "MuzzleFrame", new Vector3(0.24f, 1.65f, 1.65f), new Vector3(firingDirection * 2.62f, 2.35f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, steel);
+            RoomGeometry.AddVisualBox(_barrelRoot, "MuzzleOpening", new Vector3(0.08f, 1.02f, 1.02f), new Vector3(firingDirection * 2.76f, 2.35f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, dark);
+
+            _warningLamp = new MeshInstance3D
+            {
+                Name = "WarningLamp",
+                Position = new Vector3(0.0f, 2.5f, 0.0f),
+                Mesh = new SphereMesh { Radius = 0.36f, Height = 0.72f, RadialSegments = 16, Rings = 8 },
+                MaterialOverride = warning,
+                CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+            };
+            AddChild(_warningLamp);
+            if (EnableWarningLight)
+            {
+                _warningLight = new OmniLight3D
+                {
+                    Name = "WarningLight",
+                    Position = _warningLamp.Position,
+                    LightColor = new Color("ef7046"),
+                    LightEnergy = 0.35f,
+                    OmniRange = 7.0f,
+                    ShadowEnabled = false,
+                };
+                AddChild(_warningLight);
+            }
+        }
 
         _cannonHitbox = new StaticBody3D
         {
@@ -268,26 +339,6 @@ public partial class InterferenceCannon3D : Node3D
         });
         AddChild(_cannonHitbox);
 
-        _warningLamp = new MeshInstance3D
-        {
-            Name = "WarningLamp",
-            Position = new Vector3(0.0f, 2.5f, 0.0f),
-            Mesh = new SphereMesh { Radius = 0.36f, Height = 0.72f, RadialSegments = 16, Rings = 8 },
-            MaterialOverride = warning,
-            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
-        };
-        AddChild(_warningLamp);
-        _warningLight = new OmniLight3D
-        {
-            Name = "WarningLight",
-            Position = _warningLamp.Position,
-            LightColor = new Color("ef7046"),
-            LightEnergy = 0.35f,
-            OmniRange = 7.0f,
-            ShadowEnabled = false,
-        };
-        AddChild(_warningLight);
-
         if (EnableAudio)
         {
             _fireAudio = new AudioStreamPlayer3D
@@ -301,6 +352,87 @@ public partial class InterferenceCannon3D : Node3D
             };
             AddChild(_fireAudio);
         }
+    }
+
+    public static void AddDenseVisualBatch(Node3D parent, IReadOnlyList<InterferenceCannon3D> cannons)
+    {
+        if (cannons.Count == 0)
+        {
+            return;
+        }
+
+        StandardMaterial3D steel = RoomGeometry.CreateMaterial("res://assets/textures/brushed_metal.png", new Color("77858c"), 0.46f, 0.58f);
+        StandardMaterial3D dark = RoomGeometry.CreateMaterial("res://assets/textures/rubber_chevrons.svg", new Color("252c32"), 0.04f, 0.94f);
+        StandardMaterial3D warning = RoomGeometry.CreateMaterial("res://assets/textures/sugar_glaze.svg", new Color("e2683f"), 0.08f, 0.4f, emissionEnabled: true, emission: new Color("7d1d0b"));
+
+        AddDenseBoxBatch(parent, "DenseCannonMounts", cannons, new Vector3(0.36f, 3.2f, 2.2f), cannon => new Vector3(cannon.GetFiringDirection() * 0.08f, 1.6f, 0.0f), steel);
+        AddDenseBoxBatch(parent, "DenseCannonHousings", cannons, new Vector3(2.4f, 1.25f, 1.25f), cannon => new Vector3(cannon.GetFiringDirection() * 1.35f, 2.35f, 0.0f), dark);
+        AddDenseBoxBatch(parent, "DenseCannonMuzzleFrames", cannons, new Vector3(0.24f, 1.65f, 1.65f), cannon => new Vector3(cannon.GetFiringDirection() * 2.62f, 2.35f, 0.0f), steel);
+        AddDenseBoxBatch(parent, "DenseCannonOpenings", cannons, new Vector3(0.08f, 1.02f, 1.02f), cannon => new Vector3(cannon.GetFiringDirection() * 2.76f, 2.35f, 0.0f), dark);
+        AddDenseMeshBatch(
+            parent,
+            "DenseCannonWarningLamps",
+            cannons,
+            new SphereMesh { Radius = 0.36f, Height = 0.72f, RadialSegments = 12, Rings = 6 },
+            _ => new Vector3(0.0f, 2.5f, 0.0f),
+            warning,
+            GeometryInstance3D.ShadowCastingSetting.Off);
+    }
+
+    public static bool HasDenseVisualBatch(Node parent, int expectedCount)
+    {
+        string[] batchNames =
+        {
+            "DenseCannonMounts",
+            "DenseCannonHousings",
+            "DenseCannonMuzzleFrames",
+            "DenseCannonOpenings",
+            "DenseCannonWarningLamps",
+        };
+        return batchNames.All(name =>
+            parent.GetNodeOrNull<MultiMeshInstance3D>(name)?.Multimesh?.InstanceCount == expectedCount);
+    }
+
+    private static void AddDenseBoxBatch(
+        Node3D parent,
+        string name,
+        IReadOnlyList<InterferenceCannon3D> cannons,
+        Vector3 size,
+        Func<InterferenceCannon3D, Vector3> localPosition,
+        Material material)
+    {
+        AddDenseMeshBatch(parent, name, cannons, new BoxMesh { Size = size }, localPosition, material, GeometryInstance3D.ShadowCastingSetting.On);
+    }
+
+    private static void AddDenseMeshBatch(
+        Node3D parent,
+        string name,
+        IReadOnlyList<InterferenceCannon3D> cannons,
+        Mesh mesh,
+        Func<InterferenceCannon3D, Vector3> localPosition,
+        Material material,
+        GeometryInstance3D.ShadowCastingSetting shadowCasting)
+    {
+        MultiMesh multiMesh = new()
+        {
+            TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
+            Mesh = mesh,
+            InstanceCount = cannons.Count,
+        };
+        for (int index = 0; index < cannons.Count; index++)
+        {
+            InterferenceCannon3D cannon = cannons[index];
+            Transform3D localPart = new(Basis.Identity, localPosition(cannon));
+            multiMesh.SetInstanceTransform(index, cannon.Transform * localPart);
+        }
+
+        parent.AddChild(new MultiMeshInstance3D
+        {
+            Name = name,
+            Multimesh = multiMesh,
+            MaterialOverride = material,
+            CastShadow = shadowCasting,
+        });
     }
 
     private float GetFiringDirection()

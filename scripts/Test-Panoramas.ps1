@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $panoramaRoot = Join-Path $root "assets\panoramas"
-$required = @("room01_a.png", "room01_b.png", "room02_a.png", "room02_b.png", "room03_a.png", "room03_b.png", "room04_a.png", "room04_b.png", "room05_a.png", "room05_b.png", "room06_a.png", "room06_b.png", "room07_a.png", "room07_b.png", "room08_a.png", "room08_b.png", "room09_a.png", "room09_b.png", "room09_c.png", "room10_a.png", "room10_b.png", "room11_a.png", "room11_b.png", "room12_a.png", "room12_b.png", "room13_a.png", "room13_b.png", "room14_a.png", "room14_b.png", "room15_a.png", "room15_b.png", "room16_a.png", "room16_b.png", "room17_a.png", "room17_b.png", "room18_a.png", "room18_b.png", "room19_a.png", "room19_b.png", "room20_a.png", "room20_b.png", "room21_a.png", "room21_b.png", "room22_a.png", "room22_b.png", "room23_a.png", "room23_b.png", "room24_a.png", "room24_b.png", "room25_a.png", "room25_b.png", "room26_a.png", "room26_b.png", "room27_a.png", "room27_b.png", "room28_a.png", "room28_b.png")
+$required = @("room01_a.png", "room01_b.png", "room02_a.png", "room02_b.png", "room03_a.png", "room03_b.png", "room04_a.png", "room04_b.png", "room05_a.png", "room05_b.png", "room06_a.png", "room06_b.png", "room07_a.png", "room07_b.png", "room08_a.png", "room08_b.png", "room09_a.png", "room09_b.png", "room09_c.png", "room10_a.png", "room10_b.png", "room11_a.png", "room11_b.png", "room12_a.png", "room12_b.png", "room13_a.png", "room13_b.png", "room14_a.png", "room14_b.png", "room15_a.png", "room15_b.png", "room16_a.png", "room16_b.png", "room17_a.png", "room17_b.png", "room18_a.png", "room18_b.png", "room19_a.png", "room19_b.png", "room20_a.png", "room20_b.png", "room21_a.png", "room21_b.png", "room22_a.png", "room22_b.png", "room23_a.png", "room23_b.png", "room24_a.png", "room24_b.png", "room25_a.png", "room25_b.png", "room26_a.png", "room26_b.png", "room27_a.png", "room27_b.png", "room28_a.png", "room28_b.png", "room29_a.png", "room29_b.png", "room30_a.png", "room30_b.png")
 $sources = @(
     "scenes\MovementTestRoom.tscn",
     "scenes\Room02.tscn",
@@ -31,6 +31,8 @@ $sources = @(
     "scenes\Room26.tscn",
     "scenes\Room27.tscn",
     "scenes\Room28.tscn",
+    "scenes\Room29.tscn",
+    "scenes\Room30.tscn",
     "src\Gameplay\TestRoom\MovementTestRoom.cs",
     "src\Gameplay\Rooms\Room02Runtime.cs",
     "src\Gameplay\Rooms\Room03Runtime.cs",

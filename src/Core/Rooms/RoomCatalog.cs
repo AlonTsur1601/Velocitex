@@ -40,7 +40,9 @@ public static class RoomCatalog
         new(25, "room-25", "Processing Line", "res://scenes/Room25.tscn", "PROCESSING EXAM", "CHILD", "Why does it keep changing how it rolls?"),
         new(26, "room-26", "Zero-G Crossfire", "res://scenes/Room26.tscn", "LOW-GRAVITY RINGS + CROSSFIRE", "CHILD", "Those cannons are tracking it through the air!"),
         new(27, "room-27", "Polarity Gauntlet", "res://scenes/Room27.tscn", "CROSSING MAGNETIC RAILS + LOW-G RING", "CHILD", "Did the candy just change direction?"),
-        new(28, "room-28", "Counterweight", "res://scenes/Room28.tscn", "COUNTERWEIGHT", "CHILD", "It must be close now!"),
+        new(28, "room-28", "Counterweight", "res://scenes/Room28.tscn", "COUNTERWEIGHT", "CHILD", "It sounds like something really heavy is moving."),
+        new(29, "room-29", "Calibration Cascade", "res://scenes/Room29.tscn", "CALIBRATION CASCADE", "MOTHER", "I think it is almost through."),
+        new(30, "room-30", "Final Assembly", "res://scenes/Room30.tscn", "FINAL ASSEMBLY", "CHILD", "It must be close now!"),
     };
 
     public static IReadOnlyList<RoomCatalogEntry> All => AvailableRooms;

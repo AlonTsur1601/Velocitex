@@ -11,6 +11,7 @@ public partial class PlayerAudioController : Node
     private AudioStreamPlayer _rollB = null!;
     private AudioStreamPlayer _wind = null!;
     private AudioStreamPlayer _elasticImpact = null!;
+    private AudioStreamPlayer _stickyContact = null!;
     private AudioStream[] _impactStreams = Array.Empty<AudioStream>();
     private readonly List<AudioStreamPlayer> _impactVoices = new();
     private AudioStreamPlayer _activeRoll = null!;
@@ -19,11 +20,14 @@ public partial class PlayerAudioController : Node
     private int _lastBounceCount;
     private int _lastCollisionImpactCount;
     private int _nextImpactVoice;
+    private bool _wasGrounded;
+    private bool _wasSticky;
 
     public int LoadedLoopStreamCount => _rollStreams.Values.Distinct().Count() + (_wind.Stream is null ? 0 : 1);
     public bool AllLoopStreamsStereo => _rollStreams.Values.All(stream => stream.Stereo) && _wind.Stream is AudioStreamWav { Stereo: true };
     public int ImpactVoiceCount => _impactVoices.Count;
     public int ImpactTierCount => _impactStreams.Length;
+    public bool StickyContactPlaying => _stickyContact.Playing;
     public float CurrentRollVolumeDb => _activeRoll.VolumeDb;
     public bool CurrentRollPlaying => _activeRoll.Playing;
     public double CurrentRollPlaybackPosition => _activeRoll.GetPlaybackPosition();
@@ -62,6 +66,7 @@ public partial class PlayerAudioController : Node
             _impactVoices.Add(CreatePlayer($"Impact{index + 1}"));
         }
         _elasticImpact = CreatePlayer("ElasticImpact", "res://assets/audio/sfx/surface_super_elastic_bounce.wav");
+        _stickyContact = CreatePlayer("StickyContact", "res://assets/audio/sfx/surface_sticky_contact.wav");
         _activeRoll = _rollA;
         _fadingRoll = _rollB;
         _activeRoll.Stream = _rollStreams[SurfaceKind.Standard];
@@ -76,7 +81,17 @@ public partial class PlayerAudioController : Node
     public override void _PhysicsProcess(double delta)
     {
         float seconds = (float)delta;
-        SurfaceKind surface = ResolveAudibleSurface(_player.GroundSurfaceKind);
+        SurfaceKind surface = _player.GroundUsesStickyRollSfx
+            ? SurfaceKind.Sticky
+            : ResolveAudibleSurface(_player.GroundSurfaceKind);
+        bool isSticky = _player.IsGrounded && surface == SurfaceKind.Sticky;
+        bool enteredSticky = isSticky && (!_wasGrounded || !_wasSticky);
+        if (enteredSticky)
+        {
+            _stickyContact.PitchScale = Mathf.Clamp(0.96f + (_player.LinearVelocity.Length() * 0.006f), 0.96f, 1.12f);
+            _stickyContact.VolumeDb = 0.0f;
+            _stickyContact.Play();
+        }
         if (_player.IsGrounded && surface != _audibleSurface)
         {
             SwitchRollSurface(surface);
@@ -88,6 +103,10 @@ public partial class PlayerAudioController : Node
         float rollTarget = rollAmount <= 0.0f
             ? -60.0f
             : Mathf.Lerp(-12.0f, -1.5f, Mathf.Sqrt(rollAmount));
+        if (surface == SurfaceKind.Sticky && rollAmount > 0.0f)
+        {
+            rollTarget = Mathf.Min(0.0f, rollTarget + 8.0f);
+        }
         _activeRoll.VolumeDb = Mathf.MoveToward(_activeRoll.VolumeDb, rollTarget, 180.0f * seconds);
         _activeRoll.PitchScale = Mathf.Lerp(0.72f, 1.48f, Mathf.Clamp(planarSpeed / 28.0f, 0.0f, 1.0f));
         _fadingRoll.VolumeDb = Mathf.MoveToward(_fadingRoll.VolumeDb, -60.0f, 78.0f * seconds);
@@ -111,13 +130,15 @@ public partial class PlayerAudioController : Node
             _elasticImpact.Play();
         }
 
-        if (_player.CollisionImpactCount > _lastCollisionImpactCount && !elasticImpact)
+        if (_player.CollisionImpactCount > _lastCollisionImpactCount && !elasticImpact && !enteredSticky)
         {
             PlayCollision(_player.LastCollisionImpactSpeed);
         }
 
         _lastBounceCount = _player.SuperElasticBounceCount;
         _lastCollisionImpactCount = _player.CollisionImpactCount;
+        _wasGrounded = _player.IsGrounded;
+        _wasSticky = isSticky;
     }
 
     public override void _ExitTree()
@@ -128,7 +149,7 @@ public partial class PlayerAudioController : Node
             voice.Stream = null;
         }
         _impactVoices.Clear();
-        foreach (AudioStreamPlayer loop in new[] { _rollA, _rollB, _wind, _elasticImpact })
+        foreach (AudioStreamPlayer loop in new[] { _rollA, _rollB, _wind, _elasticImpact, _stickyContact })
         {
             if (!IsInstanceValid(loop))
             {
@@ -146,10 +167,11 @@ public partial class PlayerAudioController : Node
         AudioStreamWav metal = LoadLoop("res://assets/audio/sfx/player_roll_metal_loop.wav");
         AudioStreamWav glass = LoadLoop("res://assets/audio/sfx/player_roll_glass_loop.wav");
         AudioStreamWav soft = LoadLoop("res://assets/audio/sfx/player_roll_soft_loop.wav");
+        AudioStreamWav sticky = LoadLoop("res://assets/audio/sfx/player_roll_slime_loop.wav");
         AudioStreamWav rubber = LoadLoop("res://assets/audio/sfx/player_roll_rubber_loop.wav");
         _rollStreams[SurfaceKind.Standard] = metal;
         _rollStreams[SurfaceKind.Frictionless] = glass;
-        _rollStreams[SurfaceKind.Sticky] = soft;
+        _rollStreams[SurfaceKind.Sticky] = sticky;
         _rollStreams[SurfaceKind.Accelerator] = metal;
         _rollStreams[SurfaceKind.SuperElastic] = rubber;
         _rollStreams[SurfaceKind.Absorbing] = soft;

@@ -15,8 +15,6 @@ public partial class Room02Runtime : RoomRuntime
     private const int MaximumSolutionTicksPerRun = 1700;
 
     private readonly List<RouteCheckpoint3D> _routeCheckpoints = new();
-    private readonly Dictionary<RouteCheckpoint3D, Material> _checkpointIdleMaterials = new();
-    private readonly Dictionary<RouteCheckpoint3D, Tween> _wrongOrderTweens = new();
     private PlayerBall _player = null!;
     private PlayerCameraRig _cameraRig = null!;
     private Transform3D _spawnTransform;
@@ -30,7 +28,6 @@ public partial class Room02Runtime : RoomRuntime
     private int _shellSmokeTick;
     private int _nextRouteCheckpoint;
     private int _solutionWarmupTicks = 6;
-    private StandardMaterial3D? _wrongOrderMaterial;
     private ExitDoor3D? _exitDoor;
     private CollisionShape3D? _routeLockCollision;
 
@@ -233,16 +230,6 @@ public partial class Room02Runtime : RoomRuntime
         Color copperTint = new("b57758");
         Color darkCopper = new("785448");
         Color steelTint = new("789096");
-        _wrongOrderMaterial = new StandardMaterial3D
-        {
-            AlbedoColor = new Color("d62f2f"),
-            Metallic = 0.0f,
-            Roughness = 0.54f,
-            EmissionEnabled = true,
-            Emission = new Color("721010"),
-            EmissionEnergyMultiplier = 1.15f,
-        };
-
         RoomGeometry.AddClosedRoomShell(
             this,
             "RoomShell",
@@ -286,25 +273,28 @@ public partial class Room02Runtime : RoomRuntime
         AddRouteCheckpoint("LeftReturnLatch", 2, new Vector3(-20.0f, 12.8f, 3.0f), new Vector3(4.0f, 5.0f, 10.0f));
         AddRouteCheckpoint("ExitCommitLatch", 3, new Vector3(0.0f, 7.0f, -12.0f), new Vector3(5.0f, 3.0f, 5.0f));
 
-        // Long uninterrupted side guards cover every playable edge. Short
-        // basin segments leave only the intentional ramp and exit openings.
-        foreach (float x in new[] { -4.0f, 4.0f })
-        {
-            RoomGeometry.AddBox(this, $"StartRail{x}", new Vector3(0.34f, 1.2f, 23.775f), new Vector3(x, 6.35f, 25.8875f), Vector3.Zero, metal, steelTint, 0.5f, 0.58f);
-            RoomGeometry.AddBox(this, $"ExitRunRail{x}", new Vector3(0.34f, 1.2f, 33.75f), new Vector3(x, 6.35f, -20.875f), Vector3.Zero, metal, steelTint, 0.5f, 0.58f);
-        }
-        foreach (float side in new[] { -1.0f, 1.0f })
-        {
-            RoomGeometry.AddBox(this, $"BasinNorthRail{side}", new Vector3(4.0f, 1.2f, 0.34f), new Vector3(side * 6.0f, 6.35f, 14.0f), Vector3.Zero, metal, steelTint, 0.5f, 0.58f);
-            RoomGeometry.AddBox(this, $"BasinSouthRail{side}", new Vector3(4.0f, 1.2f, 0.34f), new Vector3(side * 6.0f, 6.35f, -4.0f), Vector3.Zero, metal, steelTint, 0.5f, 0.58f);
-        }
-        foreach (float z in new[] { -4.0f, 14.0f })
-        {
-            RoomGeometry.AddBox(this, $"RightSlopeRail{z}", new Vector3(slopeLength, 1.2f, 0.34f), new Vector3(12.731672f, 8.786657f, z), new Vector3(0.0f, 0.0f, Mathf.DegToRad(slopeAngle)), metal, steelTint, 0.5f, 0.58f);
-            RoomGeometry.AddBox(this, $"LeftSlopeRail{z}", new Vector3(slopeLength, 1.2f, 0.34f), new Vector3(-12.731672f, 8.786657f, z), new Vector3(0.0f, 0.0f, Mathf.DegToRad(-slopeAngle)), metal, steelTint, 0.5f, 0.58f);
-            RoomGeometry.AddBox(this, $"RightDeckRail{z}", new Vector3(4.75f, 1.2f, 0.34f), new Vector3(20.375f, 11.35f, z), Vector3.Zero, metal, steelTint, 0.5f, 0.58f);
-            RoomGeometry.AddBox(this, $"LeftDeckRail{z}", new Vector3(4.75f, 1.2f, 0.34f), new Vector3(-20.375f, 11.35f, z), Vector3.Zero, metal, steelTint, 0.5f, 0.58f);
-        }
+        RoomGeometry.AddPlatformWallLayout(
+            this,
+            new[]
+            {
+                new PlatformWallSelection("SafeStart", PlatformWallEdge.Left, "StartRailLeft"),
+                new PlatformWallSelection("SafeStart", PlatformWallEdge.Right, "StartRailRight"),
+                new PlatformWallSelection("ExitRun", PlatformWallEdge.Left, "ExitRunRailLeft"),
+                new PlatformWallSelection("ExitRun", PlatformWallEdge.Right, "ExitRunRailRight"),
+                new PlatformWallSelection("MomentumBasin", PlatformWallEdge.Back, "BasinNorthRailLeft", -8.0f, -4.0f),
+                new PlatformWallSelection("MomentumBasin", PlatformWallEdge.Back, "BasinNorthRailRight", 4.0f, 8.0f),
+                new PlatformWallSelection("MomentumBasin", PlatformWallEdge.Front, "BasinSouthRailLeft", -8.0f, -4.0f),
+                new PlatformWallSelection("MomentumBasin", PlatformWallEdge.Front, "BasinSouthRailRight", 4.0f, 8.0f),
+                new PlatformWallSelection("RightChargeSlope", PlatformWallEdge.Front, "RightSlopeRailFront"),
+                new PlatformWallSelection("RightChargeSlope", PlatformWallEdge.Back, "RightSlopeRailBack"),
+                new PlatformWallSelection("LeftReturnSlope", PlatformWallEdge.Front, "LeftSlopeRailFront"),
+                new PlatformWallSelection("LeftReturnSlope", PlatformWallEdge.Back, "LeftSlopeRailBack"),
+                new PlatformWallSelection("RightButtonDeck", PlatformWallEdge.Front, "RightDeckRailFront"),
+                new PlatformWallSelection("RightButtonDeck", PlatformWallEdge.Back, "RightDeckRailBack"),
+                new PlatformWallSelection("LeftButtonDeck", PlatformWallEdge.Front, "LeftDeckRailFront"),
+                new PlatformWallSelection("LeftButtonDeck", PlatformWallEdge.Back, "LeftDeckRailBack"),
+            },
+            new PlatformWallStyle(0.34f, 1.2f, metal, steelTint, 0.5f, 0.58f));
 
         SurfaceDetail.AddOverlay(this, "BasinGrime", new Vector3(-1.8f, lowTopY + 0.015f, 4.2f), new Vector3(-Mathf.Pi / 2.0f, 0.0f, Mathf.DegToRad(13.0f)), new Vector2(6.2f, 3.8f), "res://assets/textures/overlays/grime.svg", new Color("26352f"), 0.48f);
         SurfaceDetail.AddOverlay(this, "ApproachPatina", new Vector3(-1.3f, lowTopY + 0.015f, 22.0f), new Vector3(-Mathf.Pi / 2.0f, 0.0f, Mathf.DegToRad(-9.0f)), new Vector2(5.2f, 3.4f), "res://assets/textures/overlays/patina.svg", new Color("2f6d65"), 0.48f);
@@ -380,40 +370,11 @@ public partial class Room02Runtime : RoomRuntime
                     UnlockExitDoor();
                 }
             }
-            else
-            {
-                FlashWrongOrder(entered);
-            }
         };
         AddChild(checkpoint);
         MeshInstance3D insetPlate = checkpoint.GetNode<MeshInstance3D>("InsetPlate");
-        if (insetPlate.MaterialOverride is Material idleMaterial)
-        {
-            _checkpointIdleMaterials[checkpoint] = idleMaterial;
-        }
         RoomGeometry.AddSequencePips(insetPlate, index + 1);
         _routeCheckpoints.Add(checkpoint);
-    }
-
-    private void FlashWrongOrder(RouteCheckpoint3D checkpoint)
-    {
-        checkpoint.FlashDenied();
-    }
-
-    private static void SetWrongOrderVisual(
-        RouteCheckpoint3D checkpoint,
-        MeshInstance3D insetPlate,
-        Material material,
-        bool showSequencePips)
-    {
-        insetPlate.MaterialOverride = material;
-        foreach (Node child in insetPlate.GetChildren())
-        {
-            if (child is MeshInstance3D pip && child.Name.ToString().StartsWith("SequencePip", StringComparison.Ordinal))
-            {
-                pip.Visible = showSequencePips;
-            }
-        }
     }
 
 
@@ -467,19 +428,9 @@ public partial class Room02Runtime : RoomRuntime
     private void ResetRouteCheckpoints()
     {
         _nextRouteCheckpoint = 0;
-        foreach (Tween tween in _wrongOrderTweens.Values)
-        {
-            tween.Kill();
-        }
-        _wrongOrderTweens.Clear();
         foreach (RouteCheckpoint3D checkpoint in _routeCheckpoints)
         {
             checkpoint.ResetCheckpoint();
-            if (_checkpointIdleMaterials.TryGetValue(checkpoint, out Material? idleMaterial) &&
-                checkpoint.GetNodeOrNull<MeshInstance3D>("InsetPlate") is MeshInstance3D insetPlate)
-            {
-                SetWrongOrderVisual(checkpoint, insetPlate, idleMaterial, showSequencePips: true);
-            }
         }
         LockExitDoor();
     }

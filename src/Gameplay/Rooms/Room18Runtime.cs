@@ -294,8 +294,8 @@ public partial class Room18Runtime : RoomRuntime
 
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(this, $"StartRail{side}", new Vector3(0.36f, 1.4f, 20.775f), new Vector3(side * 6.35f, 6.75f, 23.3875f), Vector3.Zero, copper, frame, 0.38f, 0.6f);
-            RoomGeometry.AddBox(this, $"ExitRail{side}", new Vector3(0.36f, 1.45f, 20.7f), new Vector3(side * 7.35f, 17.75f, -37.35f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"StartRail{side}", new Vector3(0.36f, 1.4f, 20.775f), new Vector3(side * 6.18f, 6.75f, 23.3875f), Vector3.Zero, copper, frame, 0.38f, 0.6f);
+            RoomGeometry.AddWall(this, $"ExitRail{side}", new Vector3(0.36f, 1.45f, 20.7f), new Vector3(side * 7.18f, 17.75f, -37.35f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
             RoomGeometry.AddVisualBox(this, $"GuideRail{side}", new Vector3(0.34f, 0.34f, 30.1f), new Vector3(side * 6.0f, 10.7f, -6.0f), new Vector3(Mathf.DegToRad(-158.55f), 0.0f, 0.0f), copper, new Color("8a6956"), 0.36f, 0.58f);
         }
 
@@ -415,7 +415,7 @@ public partial class Room18Runtime : RoomRuntime
             {
                 return;
             }
-            if (!_transitStarted || entered.CheckpointIndex != _nextBalancePlate) { entered.FlashDenied(); return; }
+            if (!_transitStarted || entered.CheckpointIndex != _nextBalancePlate) { return; }
 
             entered.Activate();
             _nextBalancePlate++;

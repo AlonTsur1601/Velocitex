@@ -21,4 +21,4 @@ foreach ($mode in $modes) {
     }
 }
 
-Write-Output "ROOM17_MECHANICS_SUITE_PASS: forty-cannon grid, projectile impact, and Untouchable positive/negative cases passed."
+Write-Output "ROOM17_MECHANICS_SUITE_PASS: 924-cannon wall grid, projectile impact, and Clean Crossfire positive/surviving-hit cases passed."

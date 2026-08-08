@@ -8,4 +8,4 @@ $exitCode = $LASTEXITCODE
 $ErrorActionPreference = "Stop"
 $output | Write-Output
 if ($exitCode -ne 0) { throw "Room 21 solution smoke test exited with code $exitCode" }
-if (($output -join "`n") -notmatch "ROOM21_SOLUTION_PASS: SolutionTrace crossed three ordered foam buttons and stopped inside the precision target from\s+(?!0\.00)([0-9]+\.[0-9]+) to (?!0\.00)([0-9]+\.[0-9]+) m/s for 10 consecutive completions") { throw "Room 21 SolutionTrace did not prove ten ordered absorber-slalom completions." }
+if (($output -join "`n") -notmatch "ROOM21_SOLUTION_PASS: SolutionTrace crossed five ordered foam buttons and stopped inside the precision target from\s+(?!0\.00)([0-9]+\.[0-9]+) to (?!0\.00)([0-9]+\.[0-9]+) m/s for 10 consecutive completions") { throw "Room 21 SolutionTrace did not prove ten ordered absorber-slalom completions." }

@@ -18,9 +18,11 @@ public partial class ExitPresentationSmokeTest : Node
 
     public override async void _Ready()
     {
-        int requestedRoom = ResolveRequestedRoom(OS.GetCmdlineUserArgs());
+        string[] arguments = OS.GetCmdlineUserArgs();
+        bool captureDoor = arguments.Any(argument => argument.StartsWith("--exit-door-capture-room=", StringComparison.Ordinal));
+        int requestedRoom = ResolveRequestedRoom(arguments);
         int firstRoom = requestedRoom > 0 ? requestedRoom : 1;
-        int lastRoom = requestedRoom > 0 ? requestedRoom : 28;
+        int lastRoom = requestedRoom > 0 ? requestedRoom : 30;
         int issues = 0;
         for (int room = firstRoom; room <= lastRoom; room++)
         {
@@ -42,6 +44,11 @@ public partial class ExitPresentationSmokeTest : Node
             issues += AuditRoom(room, roomRoot);
             issues += AuditInnerSideEscape(room, roomRoot);
             issues += AuditExitApproach(room, roomRoot);
+            issues += AuditPlatformDoorClipping(room, roomRoot);
+            if (captureDoor)
+            {
+                await CaptureDoorApproachAsync(room, roomRoot);
+            }
             roomRoot.ProcessMode = ProcessModeEnum.Disabled;
             roomRoot.QueueFree();
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
@@ -56,17 +63,65 @@ public partial class ExitPresentationSmokeTest : Node
 
         GD.Print(requestedRoom > 0
             ? $"EXIT_PRESENTATION_ROOM_PASS: Room {requestedRoom:00} has a wall-attached, wall-proud and threshold-free frame, a flush platform approach, level lever bases, a requirement-locked physical door, carved opening and enclosed dark corridor."
-            : "EXIT_PRESENTATION_PASS: Rooms 01-28 share the same wall-attached, wall-proud and threshold-free frame, flush platform approach, level lever bases, requirement-locked physical door, carved wall opening, statically darkening enclosed corridor, continuous traversal fade and deep transition trigger.");
+            : "EXIT_PRESENTATION_PASS: Rooms 01-30 share the same wall-attached, wall-proud and threshold-free frame, flush platform approach, level lever bases, requirement-locked physical door, carved wall opening, statically darkening enclosed corridor, continuous traversal fade and deep transition trigger.");
         await FinishAsync(0);
     }
 
     private static int ResolveRequestedRoom(string[] args)
     {
-        const string prefix = "--exit-presentation-room=";
-        string? value = args.FirstOrDefault(argument => argument.StartsWith(prefix, StringComparison.Ordinal));
-        return value is not null && int.TryParse(value[prefix.Length..], out int room) && room is >= 1 and <= 28
-            ? room
-            : 0;
+        foreach (string prefix in new[] { "--exit-presentation-room=", "--exit-door-capture-room=" })
+        {
+            string? value = args.FirstOrDefault(argument => argument.StartsWith(prefix, StringComparison.Ordinal));
+            if (value is not null && int.TryParse(value[prefix.Length..], out int room) && room is >= 1 and <= 30)
+            {
+                return room;
+            }
+        }
+        return 0;
+    }
+
+    private async Task CaptureDoorApproachAsync(int room, Node roomRoot)
+    {
+        ExitDoor3D? door = roomRoot.GetNodeOrNull<ExitDoor3D>("ExitDoor");
+        if (door is null)
+        {
+            return;
+        }
+
+        foreach (Camera3D existingCamera in EnumerateDescendants(roomRoot).OfType<Camera3D>())
+        {
+            existingCamera.Current = false;
+        }
+
+        PlayerBall? player = EnumerateDescendants(roomRoot).OfType<PlayerBall>().FirstOrDefault();
+        RoomRuntime? runtime = roomRoot as RoomRuntime;
+        MethodInfo? completeRoom = typeof(RoomRuntime).GetMethod("CompleteRoom", BindingFlags.Instance | BindingFlags.NonPublic);
+        if (player is not null && runtime is not null && completeRoom is not null)
+        {
+            player.GlobalPosition = door.ToGlobal(new Vector3(0.0f, 0.72f, 2.8f));
+            completeRoom.Invoke(runtime, null);
+            door._Process(0.3);
+            player.Visible = false;
+        }
+
+        Camera3D camera = new()
+        {
+            Name = "ExitDoorCaptureCamera",
+            Current = true,
+            Fov = 50.0f,
+        };
+        door.AddChild(camera);
+        camera.Position = new Vector3(0.0f, 3.2f, 6.2f);
+        camera.LookAt(door.ToGlobal(new Vector3(0.0f, 0.18f, 0.35f)), Vector3.Up);
+        camera.MakeCurrent();
+        for (int frame = 0; frame < 24; frame++)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        }
+        await ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
+        string path = ProjectSettings.GlobalizePath($"user://exit-door-room{room:00}.png");
+        GetViewport().GetTexture().GetImage().SavePng(path);
+        GD.Print($"EXIT_DOOR_CAPTURE_PASS: Room {room:00} -> {path}");
     }
 
     private async Task FinishAsync(int exitCode)
@@ -234,10 +289,10 @@ public partial class ExitPresentationSmokeTest : Node
                 issues++;
             }
             StaticBody3D? frameCollision = door.GetNodeOrNull<StaticBody3D>("FrameCollision");
-            if (!HasNamedCollisionBox(frameCollision, "LeftPocketHitbox", new Vector3(1.5f, 4.1f, 0.38f), new Vector3(-3.1f, 2.08f, ExitDoor3D.FrameRoomSideCenterZ)) ||
-                !HasNamedCollisionBox(frameCollision, "RightPocketHitbox", new Vector3(1.5f, 4.1f, 0.38f), new Vector3(3.1f, 2.08f, ExitDoor3D.FrameRoomSideCenterZ)) ||
-                !HasNamedCollisionBox(frameCollision, "LeftFrameHitbox", new Vector3(0.5f, 4.55f, 0.58f), new Vector3(-2.1f, 2.3f, ExitDoor3D.FrameRoomSideCenterZ)) ||
-                !HasNamedCollisionBox(frameCollision, "RightFrameHitbox", new Vector3(0.5f, 4.55f, 0.58f), new Vector3(2.1f, 2.3f, ExitDoor3D.FrameRoomSideCenterZ)) ||
+            if (!HasNamedCollisionBox(frameCollision, "LeftPocketHitbox", new Vector3(1.5f, 4.02f, 0.38f), new Vector3(-3.1f, 2.13f, ExitDoor3D.FrameRoomSideCenterZ)) ||
+                !HasNamedCollisionBox(frameCollision, "RightPocketHitbox", new Vector3(1.5f, 4.02f, 0.38f), new Vector3(3.1f, 2.13f, ExitDoor3D.FrameRoomSideCenterZ)) ||
+                !HasNamedCollisionBox(frameCollision, "LeftFrameHitbox", new Vector3(0.5f, 4.46f, 0.58f), new Vector3(-2.1f, 2.35f, ExitDoor3D.FrameRoomSideCenterZ)) ||
+                !HasNamedCollisionBox(frameCollision, "RightFrameHitbox", new Vector3(0.5f, 4.46f, 0.58f), new Vector3(2.1f, 2.35f, ExitDoor3D.FrameRoomSideCenterZ)) ||
                 !HasNamedCollisionBox(frameCollision, "HeaderHitbox", new Vector3(4.7f, 0.58f, 0.58f), new Vector3(0.0f, 4.55f, ExitDoor3D.FrameRoomSideCenterZ)))
             {
                 Report(room, "visible door frame or side pocket is missing its matching hitbox");
@@ -261,7 +316,7 @@ public partial class ExitPresentationSmokeTest : Node
                 Report(room, "door requirement lights are not contained in the housing above the frame");
                 issues++;
             }
-            if (!HasCollisionBox(door, "ExitCorridorFloor", new Vector3(ExitDoor3D.CorridorInteriorWidth, 0.24f, ExitDoor3D.CorridorLength + 0.5f)) ||
+            if (!HasCorridorFloorCollision(door) ||
                 !HasCollisionBox(door, "ExitCorridorCeiling", new Vector3(ExitDoor3D.CorridorInteriorWidth, 0.24f, ExitDoor3D.CorridorLength)) ||
                 !HasCollisionBox(door, "ExitCorridorLeftWall", new Vector3(0.24f, ExitDoor3D.CorridorInteriorHeight + 0.24f, ExitDoor3D.CorridorLength + 0.64f)) ||
                 !HasCollisionBox(door, "ExitCorridorRightWall", new Vector3(0.24f, ExitDoor3D.CorridorInteriorHeight + 0.24f, ExitDoor3D.CorridorLength + 0.64f)) ||
@@ -514,6 +569,76 @@ public partial class ExitPresentationSmokeTest : Node
         return 0;
     }
 
+    private static int AuditPlatformDoorClipping(int room, Node root)
+    {
+        ExitDoor3D? door = root.GetNodeOrNull<ExitDoor3D>("ExitDoor");
+        if (door is null)
+        {
+            return 0;
+        }
+
+        int issues = 0;
+        foreach (StaticBody3D body in EnumerateDescendants(root).OfType<StaticBody3D>())
+        {
+            string bodyName = body.Name.ToString();
+            bool rebuiltApproachPiece = bodyName.StartsWith("ExitDoorwayTrim", StringComparison.Ordinal) ||
+                bodyName == "ExitPlatformWallBridge";
+            if ((door.IsAncestorOf(body) && !rebuiltApproachPiece) ||
+                bodyName.Contains("Corridor", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            foreach (CollisionShape3D collision in body.GetChildren().OfType<CollisionShape3D>())
+            {
+                if (collision.Disabled || collision.Shape is not BoxShape3D box)
+                {
+                    continue;
+                }
+
+                Vector3 half = box.Size * 0.5f;
+                Vector3 minimum = new(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+                Vector3 maximum = new(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+                foreach (float x in new[] { -half.X, half.X })
+                foreach (float y in new[] { -half.Y, half.Y })
+                foreach (float z in new[] { -half.Z, half.Z })
+                {
+                    Vector3 point = door.ToLocal(collision.ToGlobal(new Vector3(x, y, z)));
+                    minimum = minimum.Min(point);
+                    maximum = maximum.Max(point);
+                }
+
+                const float thresholdZ = 0.12f;
+                bool exitFloorCrossesDoorway =
+                    Mathf.Abs(maximum.Y - thresholdZ) <= 0.03f &&
+                    maximum.X >= -ExitDoor3D.FrameOpeningHalfWidth &&
+                    minimum.X <= ExitDoor3D.FrameOpeningHalfWidth &&
+                    maximum.Z > thresholdZ + 0.25f;
+                if (exitFloorCrossesDoorway && minimum.Z < thresholdZ - 0.01f)
+                {
+                    Report(room, $"exit platform {body.Name} continues {thresholdZ - minimum.Z:F3} m behind the door threshold");
+                    issues++;
+                }
+
+                bool overlapsFrameDepth = maximum.Z > ExitDoor3D.FrameRoomSideCenterZ - (ExitDoor3D.FrameDepth * 0.5f) &&
+                    minimum.Z < ExitDoor3D.FrameRoomSideCenterZ + (ExitDoor3D.FrameDepth * 0.5f);
+                bool risesAboveFrameBottom = maximum.Y > ExitDoor3D.FrameBottomY + 0.001f;
+                bool overlapsSideFrame = maximum.Y > 0.0f && minimum.Y < ExitDoor3D.FrameOuterHeight &&
+                    maximum.X > -ExitDoor3D.FrameOuterHalfWidth && minimum.X < ExitDoor3D.FrameOuterHalfWidth &&
+                    (minimum.X < -ExitDoor3D.FrameOpeningHalfWidth || maximum.X > ExitDoor3D.FrameOpeningHalfWidth);
+                bool overlapsHeader = maximum.Y > 4.18f && minimum.Y < ExitDoor3D.FrameOuterHeight &&
+                    maximum.X > -ExitDoor3D.FrameOuterHalfWidth && minimum.X < ExitDoor3D.FrameOuterHalfWidth;
+                if (overlapsFrameDepth && risesAboveFrameBottom && (overlapsSideFrame || overlapsHeader))
+                {
+                    Report(room, $"platform/body {body.Name} clips the visible exit-door frame");
+                    issues++;
+                }
+            }
+        }
+
+        return issues;
+    }
+
     private static IEnumerable<Node> EnumerateDescendants(Node root)
     {
         foreach (Node child in root.GetChildren())
@@ -533,6 +658,18 @@ public partial class ExitPresentationSmokeTest : Node
         return collision?.Shape is BoxShape3D box && box.Size.DistanceTo(expectedSize) <= 0.001f;
     }
 
+    private static bool HasCorridorFloorCollision(Node root)
+    {
+        CollisionShape3D? collision = root.GetNodeOrNull<StaticBody3D>("ExitCorridorFloor")?
+            .GetChildren()
+            .OfType<CollisionShape3D>()
+            .FirstOrDefault();
+        return collision?.Shape is BoxShape3D box &&
+            Mathf.Abs(box.Size.X - ExitDoor3D.CorridorInteriorWidth) <= 0.001f &&
+            Mathf.Abs(box.Size.Y - 0.24f) <= 0.001f &&
+            box.Size.Z > ExitDoor3D.CorridorTransitionDepth;
+    }
+
     private static bool HasNamedCollisionBox(StaticBody3D? body, string name, Vector3 expectedSize, Vector3 expectedPosition)
     {
         CollisionShape3D? collision = body?.GetNodeOrNull<CollisionShape3D>(name);
@@ -548,7 +685,8 @@ public partial class ExitPresentationSmokeTest : Node
             .OfType<MeshInstance3D>()
             .FirstOrDefault();
         return mesh?.MaterialOverride is ShaderMaterial material &&
-            material.Shader?.Code.Contains("corridor_depth", StringComparison.Ordinal) == true;
+            material.Shader?.Code.Contains("corridor_depth", StringComparison.Ordinal) == true &&
+            material.Shader.Code.Contains("render_mode unshaded", StringComparison.Ordinal);
     }
 
     private static bool DoorwayPiecesClearVisibleFrame(Node3D shell, StaticBody3D carvedWall, ExitDoor3D door)

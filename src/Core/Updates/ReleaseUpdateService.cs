@@ -22,14 +22,26 @@ public static class ReleaseUpdateService
     {
         get
         {
-            string labelPath = Path.Combine(AppContext.BaseDirectory, VersionLabelFileName);
-            if (File.Exists(labelPath) && Version.TryParse(File.ReadAllText(labelPath).Trim(), out Version? labeledVersion) && labeledVersion is not null)
-                return labeledVersion;
+            foreach (string directory in VersionLabelDirectories())
+            {
+                string labelPath = Path.Combine(directory, VersionLabelFileName);
+                if (File.Exists(labelPath) && Version.TryParse(File.ReadAllText(labelPath).Trim(), out Version? labeledVersion) && labeledVersion is not null)
+                    return labeledVersion;
+            }
 
             Version assemblyVersion = typeof(ReleaseUpdateService).Assembly.GetName().Version ?? new Version(1, 3, 0);
             Version normalizedAssemblyVersion = new(assemblyVersion.Major, assemblyVersion.Minor, Math.Max(0, assemblyVersion.Build));
             return normalizedAssemblyVersion;
         }
+    }
+
+    private static IEnumerable<string> VersionLabelDirectories()
+    {
+        // The real executable's own folder (where the updater actually installs files) takes priority;
+        // AppContext.BaseDirectory can point at the Godot Mono "data_..." subfolder instead.
+        string? processDirectory = Path.GetDirectoryName(Environment.ProcessPath);
+        if (!string.IsNullOrWhiteSpace(processDirectory)) yield return processDirectory;
+        yield return AppContext.BaseDirectory;
     }
 
     public static async Task<UpdateCheckResult> CheckForUpdateAsync(CancellationToken cancellationToken = default)

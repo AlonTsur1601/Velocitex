@@ -1,0 +1,46 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="Script" path="res://src/Gameplay/Rooms/CoreRoomsRuntime.cs" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3"]
+[sub_resource type="Environment" id="e"]
+background_mode = 1
+background_color = Color(0.29, 0.265, 0.235, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.96, 0.9, 0.82, 1)
+ambient_light_energy = 2.25
+reflected_light_source = 2
+tonemap_exposure = 1.5
+[node name="Room29" type="Node3D"]
+script = ExtResource("1")
+RoomNumber = 29
+RoomId = "room-29"
+RoomDisplayName = "Calibration Cascade"
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("e")
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
+rotation_degrees = Vector3(-52, -28, 0)
+light_color = Color(1, 0.91, 0.78, 1)
+light_energy = 2.65
+shadow_enabled = true
+[node name="RoomFillFront" type="OmniLight3D" parent="."]
+position = Vector3(0, 11.5, 24)
+light_color = Color(0.94, 0.89, 0.8, 1)
+light_energy = 7.0
+omni_range = 70.0
+shadow_enabled = false
+[node name="RoomFillRear" type="OmniLight3D" parent="."]
+position = Vector3(-43, 11.5, -25)
+light_color = Color(0.94, 0.89, 0.8, 1)
+light_energy = 7.0
+omni_range = 70.0
+shadow_enabled = false
+[node name="ExitAreaFill" type="OmniLight3D" parent="."]
+position = Vector3(-75, 8.2, -25)
+light_color = Color(0.94, 0.9, 0.83, 1)
+light_energy = 4.2
+omni_range = 24.0
+shadow_enabled = false
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector3(0, 5.1, 58)
+[node name="CameraRig" parent="." instance=ExtResource("3")]
+position = Vector3(0, 5.4, 58)

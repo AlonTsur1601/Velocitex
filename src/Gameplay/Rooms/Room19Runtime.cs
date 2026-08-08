@@ -161,6 +161,7 @@ public partial class Room19Runtime : RoomRuntime
         {
             _trajectoryLever.Interact(_player);
         }
+        TryCompleteGoal(requireOverlap: true);
         if (_player.GlobalPosition.Y < -7.0f)
         {
             RestartRoom();
@@ -204,6 +205,7 @@ public partial class Room19Runtime : RoomRuntime
     private void RunSolutionTick()
     {
         if (_solutionTrace is null || _solutionSmokeFinishing) { return; }
+        TryCompleteGoal(requireOverlap: true);
         float goalDistance = _player.GlobalPosition.DistanceTo(_goal.GlobalPosition);
         if (goalDistance < _minimumGoalDistance)
         {
@@ -326,9 +328,10 @@ public partial class Room19Runtime : RoomRuntime
         BuildTrajectoryBarrier(metal, frame);
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(this, $"StartRail{side}", new Vector3(0.36f, 1.4f, 17.275f), new Vector3(side * 6.35f, 7.85f, 29.1375f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
-            RoomGeometry.AddBox(this, $"ApproachRail{side}", new Vector3(0.36f, 1.45f, 18.069311f), new Vector3(side * 5.35f, 5.802104f, 11.569220f), new Vector3(Mathf.DegToRad(-14.420773f), 0.0f, 0.0f), metal, frame, 0.42f, 0.62f);
-            RoomGeometry.AddBox(this, $"ExitRail{side}", new Vector3(0.36f, 1.45f, 35.7f), new Vector3(side * 10.35f, 14.75f, -90.85f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"StartRail{side}", new Vector3(0.36f, 1.4f, 17.275f), new Vector3(side * 6.18f, 7.85f, 29.1375f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"ApproachRail{side}", new Vector3(0.36f, 1.45f, 18.069311f), new Vector3(side * 5.18f, 5.802104f, 11.569220f), new Vector3(Mathf.DegToRad(-14.420773f), 0.0f, 0.0f), metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"ExitRail{side}", new Vector3(0.36f, 1.45f, 35.7f), new Vector3(side * 10.18f, 14.75f, -90.85f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"StartApproachRailJunction{side}", new Vector3(1.36f, 1.45f, 0.42f), new Vector3(side * 5.68f, 7.85f, 20.42f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
         }
         _piston = new MomentumPiston3D
         {
@@ -369,7 +372,7 @@ public partial class Room19Runtime : RoomRuntime
             }
             else if (player == _player)
             {
-                entered.FlashDenied();
+                return;
             }
         };
         AddChild(plate);
@@ -431,13 +434,13 @@ public partial class Room19Runtime : RoomRuntime
         _lowGravityVolume = new ForceVolume3D
         {
             Name = "PostPistonLowGravity",
-            Position = new Vector3(0.0f, 16.0f, -39.0f),
+            Position = new Vector3(0.0f, 16.0f, -42.0f),
             CollisionMask = 1,
             Profile = GD.Load<ForceVolumeProfile>("res://resources/force_volumes/low_gravity.tres"),
         };
         _lowGravityVolume.AddChild(new CollisionShape3D
         {
-            Shape = new BoxShape3D { Size = new Vector3(23.4f, 30.0f, 72.0f) },
+            Shape = new BoxShape3D { Size = new Vector3(23.4f, 30.0f, 78.0f) },
         });
         _lowGravityVolume.RigidBodyEntered += body =>
         {
@@ -458,7 +461,7 @@ public partial class Room19Runtime : RoomRuntime
 
         AddLowGravityParticles();
         AddMagneticField("RightPushMagnet", 0, new Vector3(-9.6f, 15.0f, -25.0f), Vector3.Right, new Color("df6f73"));
-        AddMagneticField("ForwardPushMagnet", 1, new Vector3(0.0f, 16.0f, -91.0f), Vector3.Forward, new Color("6fa9df"));
+        AddMagneticField("ForwardPushMagnet", 1, new Vector3(0.0f, 20.0f, -82.0f), Vector3.Forward, new Color("6fa9df"));
     }
 
     private void AddMagneticField(string name, int index, Vector3 magnetPosition, Vector3 direction, Color tint)
@@ -466,20 +469,20 @@ public partial class Room19Runtime : RoomRuntime
         bool forwardPlatformField = index == 1;
         float fieldCenterY = forwardPlatformField ? 19.0f : 16.0f;
         float fieldHeight = forwardPlatformField ? 10.0f : 28.0f;
-        float fieldCenterZ = forwardPlatformField ? -96.0f : magnetPosition.Z;
-        float fieldDepth = forwardPlatformField ? 25.4f : 22.0f;
+        float fieldCenterZ = forwardPlatformField ? -95.0f : magnetPosition.Z;
+        float fieldDepth = forwardPlatformField ? 27.0f : 22.0f;
         float fieldWidth = forwardPlatformField ? 19.4f : 23.0f;
         ForceVolume3D field = new()
         {
             Name = $"{name}Field",
             Position = new Vector3(0.0f, fieldCenterY, fieldCenterZ),
             CollisionMask = 1,
-            AirborneOnly = forwardPlatformField,
+            AirborneOnly = false,
             Profile = new ForceVolumeProfile
             {
                 Kind = ForceVolumeKind.Magnetic,
                 Direction = direction,
-                Strength = index == 0 ? 3.0f : 12.0f,
+                Strength = index == 0 ? 3.0f : 20.0f,
                 AirControlAcceleration = 0.0f,
             },
         };
@@ -543,14 +546,14 @@ public partial class Room19Runtime : RoomRuntime
         StandardMaterial3D material = new()
         {
             ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            AlbedoColor = new Color("c6eadc"),
+            AlbedoColor = Colors.White,
             EmissionEnabled = true,
-            Emission = new Color("659b88"),
+            Emission = new Color("dfefff"),
         };
         ParticleProcessMaterial process = new()
         {
             EmissionShape = ParticleProcessMaterial.EmissionShapeEnum.Box,
-            EmissionBoxExtents = new Vector3(11.0f, 13.0f, 35.0f),
+            EmissionBoxExtents = new Vector3(11.0f, 13.0f, 38.5f),
             Direction = Vector3.Up,
             Spread = 15.0f,
             Gravity = Vector3.Zero,
@@ -560,7 +563,7 @@ public partial class Room19Runtime : RoomRuntime
         AddChild(new GpuParticles3D
         {
             Name = "PostPistonLowGravityMotes",
-            Position = new Vector3(0.0f, 16.0f, -39.0f),
+            Position = new Vector3(0.0f, 16.0f, -42.0f),
             Amount = 96,
             Lifetime = 6.0,
             Randomness = 0.8f,
@@ -607,22 +610,27 @@ public partial class Room19Runtime : RoomRuntime
         _goal.AddChild(new CollisionShape3D { Shape = new CylinderShape3D { Radius = 2.0f, Height = 2.8f } });
         _goal.BodyEntered += body =>
         {
-            if (body is PlayerBall &&
-                _nextTrajectoryPlate == _trajectoryPlates.Count &&
-                _pistonArmed &&
-                _trajectoryLeverActivated &&
-                _pistonFired &&
-                _launchSpeed >= 19.5f &&
-                _touchedLowGravity &&
-                _nextMagneticField == _magneticFields.Count &&
-                _airControlCleared &&
-                _player.AirControlAcceleration <= 0.001f)
-            {
-                CompleteRoom();
-            }
+            if (body is PlayerBall) { TryCompleteGoal(requireOverlap: false); }
         };
         AddChild(_goal);
         RoomGeometry.AddGoalExitDoor(this, position);
+    }
+
+    private void TryCompleteGoal(bool requireOverlap)
+    {
+        if (IsComplete || (requireOverlap && !_goal.OverlapsBody(_player))) { return; }
+        if (_nextTrajectoryPlate == _trajectoryPlates.Count &&
+            _pistonArmed &&
+            _trajectoryLeverActivated &&
+            _pistonFired &&
+            _launchSpeed >= 19.5f &&
+            _touchedLowGravity &&
+            _nextMagneticField == _magneticFields.Count &&
+            _airControlCleared &&
+            _player.AirControlAcceleration <= 0.001f)
+        {
+            CompleteRoom();
+        }
     }
 
     private void TryAwardPistonPerfect()

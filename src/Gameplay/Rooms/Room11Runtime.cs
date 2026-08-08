@@ -15,14 +15,16 @@ public partial class Room11Runtime : RoomRuntime
     private const string SuperElasticSurfacePath = "res://resources/surfaces/super_elastic.tres";
     private const string SuperElasticMaterialPath = "res://resources/materials/super_elastic_membrane.tres";
     private const int RequiredSolutionRuns = 10;
+    private const int RequiredVariationAttempts = 30;
+    private const int RequiredVariationSuccesses = 10;
     private const int MaximumSolutionTicksPerRun = 1200;
 
     private static readonly (Vector3 Position, float Radius)[] AirCourse =
     {
-        (new Vector3(-3.0f, 12.5f, -8.0f), 2.3f),
-        (new Vector3(3.0f, 21.5f, -35.0f), 2.35f),
-        (new Vector3(-3.0f, 24.2f, -67.0f), 2.4f),
-        (new Vector3(-3.5f, 24.0f, -98.0f), 2.5f),
+        (new Vector3(-3.0f, 11.5f, -8.0f), 4.0f),
+        (new Vector3(3.2f, 20.5f, -35.0f), 4.2f),
+        (new Vector3(-3.2f, 23.2f, -67.0f), 4.3f),
+        (new Vector3(0.0f, 23.0f, -98.0f), 5.0f),
     };
 
     private PlayerBall _player = null!;
@@ -38,6 +40,7 @@ public partial class Room11Runtime : RoomRuntime
     private bool _runPreview;
     private bool _runShellSmoke;
     private bool _runAirControlSmoke;
+    private bool _runVariationSmoke;
     private bool _solutionSmokeFinishing;
     private bool _touchedLowGravity;
     private bool _touchedSuperElastic;
@@ -53,6 +56,9 @@ public partial class Room11Runtime : RoomRuntime
     private int _previewFrames;
     private int _shellSmokeTick;
     private int _airControlSmokeTick;
+    private int _variationAttempt;
+    private int _variationSuccesses;
+    private int _respawnStabilizationTicks;
     private float _maximumLateralAirSpeed;
 
     public override void _Ready()
@@ -63,6 +69,7 @@ public partial class Room11Runtime : RoomRuntime
         _runPreview = Array.Exists(arguments, argument => argument == "--room11-preview");
         _runShellSmoke = Array.Exists(arguments, argument => argument == "--room-shell-smoke");
         _runAirControlSmoke = Array.Exists(arguments, argument => argument == "--room11-air-control-smoke");
+        _runVariationSmoke = Array.Exists(arguments, argument => argument == "--room11-variation-smoke");
 
         BuildRoom();
         BuildGoal();
@@ -86,7 +93,7 @@ public partial class Room11Runtime : RoomRuntime
         _lowGravityVolume.RigidBodyEntered += OnLowGravityEntered;
         _lowGravityVolume.RigidBodyExited += OnLowGravityExited;
 
-        if (_runSolutionSmoke)
+        if (_runSolutionSmoke || _runVariationSmoke)
         {
             _solutionTrace = GD.Load<SolutionTrace>(TracePath);
             if (_solutionTrace is null ||
@@ -126,7 +133,16 @@ public partial class Room11Runtime : RoomRuntime
             return;
         }
 
-        if (_runSolutionSmoke)
+        if (_respawnStabilizationTicks > 0)
+        {
+            if (--_respawnStabilizationTicks == 0)
+            {
+                _player.Freeze = false;
+            }
+            return;
+        }
+
+        if (_runSolutionSmoke || _runVariationSmoke)
         {
             RunSolutionTick();
             return;
@@ -142,6 +158,12 @@ public partial class Room11Runtime : RoomRuntime
 
     public override void RestartRoom()
     {
+        if (_runVariationSmoke && _solutionTick > 0 && !_solutionSmokeFinishing)
+        {
+            FinishVariationAttempt(false);
+            return;
+        }
+
         if (_runSolutionSmoke && _solutionTick > 0 && !_solutionSmokeFinishing)
         {
             FailSolutionSmoke($"Run {_solutionRun + 1} hit a hazard at {_player.GlobalPosition} with velocity {_player.LinearVelocity}; gates={_nextAirGate}/{_airGates.Count}.");
@@ -152,6 +174,7 @@ public partial class Room11Runtime : RoomRuntime
         _player.SimulatedMoveInput = null;
         ResetDevices();
         _player.ResetTo(_spawnTransform);
+        StabilizeRespawn();
         ResetRouteState();
         _verifiedResetCleared = _player.AirControlAcceleration <= 0.001f;
     }
@@ -296,6 +319,12 @@ public partial class Room11Runtime : RoomRuntime
                 return;
             }
 
+            if (_runVariationSmoke)
+            {
+                FinishVariationAttempt(true);
+                return;
+            }
+
             _solutionRun++;
             if (_solutionRun >= RequiredSolutionRuns)
             {
@@ -315,15 +344,75 @@ public partial class Room11Runtime : RoomRuntime
 
         if (++_solutionTick > MaximumSolutionTicksPerRun)
         {
+            if (_runVariationSmoke)
+            {
+                FinishVariationAttempt(false);
+                return;
+            }
             FailSolutionSmoke($"Run {_solutionRun + 1} timed out at {_player.GlobalPosition}, velocity={_player.LinearVelocity}; {DescribeEvidence()}.");
             return;
         }
 
-        _player.SimulatedMoveInput = ResolveTraceInput(_solutionTick - 1);
+        _player.SimulatedMoveInput = _runVariationSmoke
+            ? ResolveVariedTraceInput(_solutionTick - 1, _variationAttempt)
+            : ResolveTraceInput(_solutionTick - 1);
         if (_solutionTick % 30 == 0)
         {
             GD.Print($"ROOM11_TRACE: tick={_solutionTick}, position={_player.GlobalPosition}, velocity={_player.LinearVelocity}, grounded={_player.IsGrounded}, air_control={_player.AirControlAcceleration:F2}, gates={_nextAirGate}/{_airGates.Count}, bounces={_player.SuperElasticBounceCount}.");
         }
+    }
+
+    private Vector2 ResolveVariedTraceInput(int tick, int attempt)
+    {
+        Vector2 canonical = ResolveTraceInput(tick);
+        float magnitude = 0.97f + ((attempt % 6) * 0.006f);
+        float lateralNoise = Mathf.Sin((tick * 0.043f) + (attempt * 1.71f)) * (0.006f + ((attempt % 5) * 0.002f));
+        float forwardNoise = Mathf.Cos((tick * 0.031f) + (attempt * 0.83f)) * 0.012f;
+        if (Mathf.Abs(canonical.Y) > 0.5f && Mathf.Abs(canonical.X) < 0.1f)
+        {
+            // Preserve the broad launch intent while varying its small lateral
+            // correction; the 30 runs primarily probe imperfect air steering.
+            return new Vector2(lateralNoise, canonical.Y);
+        }
+        return new Vector2(
+            Mathf.Clamp((canonical.X * magnitude) + lateralNoise, -1.0f, 1.0f),
+            Mathf.Clamp((canonical.Y * magnitude) + forwardNoise, -1.0f, 1.0f));
+    }
+
+    private void FinishVariationAttempt(bool succeeded)
+    {
+        _variationSuccesses += succeeded ? 1 : 0;
+        _variationAttempt++;
+        if (_variationAttempt >= RequiredVariationAttempts)
+        {
+            if (_variationSuccesses < RequiredVariationSuccesses)
+            {
+                FailSolutionSmoke($"Only {_variationSuccesses}/{RequiredVariationAttempts} varied human-input runs completed Room 11; required at least {RequiredVariationSuccesses}.");
+                return;
+            }
+
+            GD.Print($"ROOM11_VARIATION_PASS: {_variationSuccesses}/{RequiredVariationAttempts} distinct non-robotic input runs completed Room 11 (required {RequiredVariationSuccesses}).");
+            FinishSolutionSmoke(0);
+            return;
+        }
+
+        ClearCompletionState();
+        _player.SimulatedMoveInput = null;
+        ResetDevices();
+        _player.ResetTo(_spawnTransform);
+        StabilizeRespawn();
+        _solutionTick = 0;
+        ResetRouteState();
+        _verifiedResetCleared = _player.AirControlAcceleration <= 0.001f;
+    }
+
+    private void StabilizeRespawn()
+    {
+        // A hazard callback can reset while the old SuperElastic contact is
+        // still being solved. Freeze through the next physics boundary so that
+        // stale contact impulse cannot launch the respawned ball.
+        _player.Freeze = true;
+        _respawnStabilizationTicks = 2;
     }
 
     private void TrackRequiredMechanics()
@@ -466,8 +555,8 @@ public partial class Room11Runtime : RoomRuntime
         StaticBody3D membrane = RoomGeometry.AddBox(
             this,
             "SuperElasticLaunch",
-            new Vector3(12.0f, 0.5f, 12.0f),
-            new Vector3(0.0f, 2.5f, 0.0f),
+            new Vector3(12.0f, 0.5f, 16.0f),
+            new Vector3(0.0f, 2.5f, -2.0f),
             Vector3.Zero,
             string.Empty,
             Colors.White,
@@ -477,13 +566,13 @@ public partial class Room11Runtime : RoomRuntime
             surfaceProfile: superElastic,
             materialOverride: bounceMaterial);
 
-        RoomGeometry.AddBox(this, "LandingDeck", new Vector3(14.0f, 0.5f, 50.0f), new Vector3(0.0f, 2.75f, -175.0f), Vector3.Zero, metal, paleSteel.Darkened(0.04f), 0.4f, 0.66f);
+        RoomGeometry.AddBox(this, "LandingDeck", new Vector3(14.0f, 0.5f, 46.67f), new Vector3(0.0f, 2.75f, -173.335f), Vector3.Zero, metal, paleSteel.Darkened(0.04f), 0.4f, 0.66f);
 
         AddSideWalls("Start", new Vector3(0.0f, 9.92f, 30.3875f), 18.775f, Vector3.Zero, 6.18f, metal, darkFrame);
         AddSideWalls("Ramp", new Vector3(0.0f, 7.36f, 14.45f), 14.2f, rampRotation, 6.18f, metal, darkFrame);
-        AddSideWalls("Landing", new Vector3(0.0f, 3.72f, -175.0f), 50.0f, Vector3.Zero, 7.18f, metal, darkFrame);
-        RoomGeometry.AddBox(this, "MembraneRimLeft", new Vector3(0.42f, 0.68f, 12.0f), new Vector3(-6.22f, 2.62f, 0.0f), Vector3.Zero, copper, darkFrame, 0.42f, 0.58f);
-        RoomGeometry.AddBox(this, "MembraneRimRight", new Vector3(0.42f, 0.68f, 12.0f), new Vector3(6.22f, 2.62f, 0.0f), Vector3.Zero, copper, darkFrame, 0.42f, 0.58f);
+        AddSideWalls("Landing", new Vector3(0.0f, 3.72f, -173.335f), 46.67f, Vector3.Zero, 7.18f, metal, darkFrame);
+        RoomGeometry.AddWall(this, "MembraneRimLeft", new Vector3(0.42f, 0.68f, 16.0f), new Vector3(-6.22f, 2.62f, -2.0f), Vector3.Zero, copper, darkFrame, 0.42f, 0.58f);
+        RoomGeometry.AddWall(this, "MembraneRimRight", new Vector3(0.42f, 0.68f, 16.0f), new Vector3(6.22f, 2.62f, -2.0f), Vector3.Zero, copper, darkFrame, 0.42f, 0.58f);
 
         _lowGravityVolume = new ForceVolume3D
         {
@@ -525,7 +614,7 @@ public partial class Room11Runtime : RoomRuntime
     {
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(
+            RoomGeometry.AddWall(
                 this,
                 $"{prefix}SideWall{(side < 0.0f ? "Left" : "Right")}",
                 new Vector3(0.36f, 1.35f, length),
@@ -574,9 +663,9 @@ public partial class Room11Runtime : RoomRuntime
         StandardMaterial3D moteMaterial = new()
         {
             ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            AlbedoColor = new Color("bce9d8"),
+            AlbedoColor = Colors.White,
             EmissionEnabled = true,
-            Emission = new Color("6cae9c"),
+            Emission = new Color("dfefff"),
         };
         ParticleProcessMaterial process = new()
         {

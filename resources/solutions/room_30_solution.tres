@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SolutionTrace" load_steps=2 format=3]
+[ext_resource type="Script" path="res://src/Core/Rooms/SolutionTrace.cs" id="1"]
+[resource]
+resource_name="Room 30 - Final Assembly"
+script=ExtResource("1")
+RoomId="room-30"
+PhysicsTicksPerSecond=60
+MoveInputs=Array[Vector2]([Vector2(0,-1)])
+ActionFlags=PackedByteArray(0)
+MoveDurationsTicks=PackedInt32Array(2200)
+HoldLastInput=true

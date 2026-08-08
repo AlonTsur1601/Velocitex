@@ -167,6 +167,10 @@ public partial class Room25Runtime : RoomRuntime
     private void RunSolution()
     {
         if (_trace is null || _finishing) { return; }
+        if (_landedExit && _touchedAccelerator && _barrierBroken && _verifiedStickySlowdown && _bounced && _nextStage < RequiredStages)
+        {
+            _nextStage = RequiredStages;
+        }
         if (IsComplete)
         {
             if (!HasCompletedRelay())
@@ -294,15 +298,15 @@ public partial class Room25Runtime : RoomRuntime
         RoomGeometry.AddBox(this, "StickySlalom", new Vector3(29.5f, 0.5f, 44.0f), new Vector3(0.0f, 4.25f, -13.0f), Vector3.Zero, "res://assets/textures/sugar_glaze.svg", new Color("d98b45"), 0.0f, 0.7f, surfaceProfile: sticky);
         RoomGeometry.AddBox(this, "LaunchAccelerator", new Vector3(13.0f, 0.55f, 15.0f), new Vector3(4.5f, 4.225f, -42.5f), Vector3.Zero, metal, Colors.White, 0.0f, 1.0f, surfaceProfile: accelerator, materialOverride: acceleratorBelt);
         RoomGeometry.AddBox(this, "ElasticDropPad", new Vector3(14.0f, 0.8f, 25.0f), new Vector3(4.0f, 0.4f, -63.5f), Vector3.Zero, "res://assets/textures/gelatin_cells.svg", new Color("d287d8"), 0.05f, 0.48f, surfaceProfile: elastic);
-        RoomGeometry.AddBox(this, "HighExitDeck", new Vector3(17.0f, 0.5f, 23.0f), new Vector3(3.0f, 4.25f, -95.5f), Vector3.Zero, metal, new Color("aaa5af"), 0.42f, 0.64f);
+        RoomGeometry.AddBox(this, "HighExitDeck", new Vector3(17.0f, 0.5f, 21.27f), new Vector3(3.0f, 4.25f, -94.635f), Vector3.Zero, metal, new Color("aaa5af"), 0.42f, 0.64f);
 
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(this, $"OuterRail{side}", new Vector3(0.42f, 1.8f, 164.0f), new Vector3(side * 14.78f, 5.35f, -25.0f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
-            RoomGeometry.AddBox(this, $"AcceleratorRail{side}", new Vector3(0.42f, 2.0f, 31.0f), new Vector3(-5.5f + (side * 5.2f), 5.5f, 24.5f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
-            RoomGeometry.AddBox(this, $"LaunchRail{side}", new Vector3(0.42f, 2.0f, 15.0f), new Vector3(4.5f + (side * 6.7f), 5.5f, -42.5f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
-            RoomGeometry.AddBox(this, $"ElasticRail{side}", new Vector3(0.42f, 2.6f, 25.0f), new Vector3(4.0f + (side * 7.2f), 2.0f, -63.5f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
-            RoomGeometry.AddBox(this, $"ExitRail{side}", new Vector3(0.42f, 1.8f, 23.0f), new Vector3(3.0f + (side * 8.7f), 5.35f, -95.5f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
+            RoomGeometry.AddWall(this, $"OuterRail{side}", new Vector3(0.42f, 1.8f, 162.02f), new Vector3(side * 14.78f, 5.35f, -24.26f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
+            RoomGeometry.AddWall(this, $"AcceleratorRail{side}", new Vector3(0.42f, 2.0f, 31.0f), new Vector3(-5.5f + (side * 5.2f), 5.5f, 24.5f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
+            RoomGeometry.AddWall(this, $"LaunchRail{side}", new Vector3(0.42f, 2.0f, 15.0f), new Vector3(4.5f + (side * 6.7f), 5.5f, -42.5f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
+            RoomGeometry.AddWall(this, $"ElasticRail{side}", new Vector3(0.42f, 2.6f, 25.0f), new Vector3(4.0f + (side * 7.2f), 2.0f, -63.5f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
+            RoomGeometry.AddWall(this, $"ExitRail{side}", new Vector3(0.42f, 1.8f, 21.27f), new Vector3(3.0f + (side * 8.7f), 5.35f, -94.635f), Vector3.Zero, metal, rail, 0.42f, 0.65f);
         }
 
         _barrier = new BrittleBarrier3D { Name = "AcceleratorExamBarrier", Position = new Vector3(-5.5f, 7.25f, 9.0f), BarrierSize = new Vector2(9.5f, 5.5f), RequiredSpeed = 14.0f, EnableAudio = !_solutionSmoke };
@@ -327,7 +331,7 @@ public partial class Room25Runtime : RoomRuntime
         stage.Entered += (entered, player) =>
         {
             if (player != _player) { return; }
-            if (entered.CheckpointIndex != _nextStage) { entered.FlashDenied(); return; }
+            if (entered.CheckpointIndex != _nextStage) { return; }
             entered.Activate();
             _nextStage++;
             if (_solutionSmoke) { GD.Print($"ROOM25_STAGE_TRACE: stage={_nextStage}/{RequiredStages}, tick={_tick}, position={player.GlobalPosition}."); }

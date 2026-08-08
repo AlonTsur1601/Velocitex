@@ -12,10 +12,13 @@ $env:NUGET_PACKAGES = Join-Path $root ".packages\nuget"
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = "1"
 $env:DOTNET_NOLOGO = "1"
 
+$ErrorActionPreference = "Continue"
 $output = & $godot.FullName --headless --fixed-fps 60 --path $root "res://scenes/MovementTestRoom.tscn" --quit-after 12000 -- --room01-solution-smoke 2>&1
+$exitCode = $LASTEXITCODE
+$ErrorActionPreference = "Stop"
 $output | Write-Output
-if ($LASTEXITCODE -ne 0) {
-    throw "Room 01 solution test exited with code $LASTEXITCODE"
+if ($exitCode -ne 0) {
+    throw "Room 01 solution test exited with code $exitCode"
 }
 
 if (($output -join "`n") -notmatch "ROOM01_SOLUTION_PASS") {

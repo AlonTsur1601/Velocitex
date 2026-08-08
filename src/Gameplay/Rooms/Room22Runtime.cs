@@ -294,10 +294,10 @@ public partial class Room22Runtime : RoomRuntime
 
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(this, $"StartRail{side}", new Vector3(0.35f, 1.35f, 16.0f), new Vector3(side * 12.59f, 4.7f, 48.0f), Vector3.Zero, metal, rail, 0.42f, 0.64f);
-            RoomGeometry.AddBox(this, $"FirstDeckRail{side}", new Vector3(0.35f, 1.35f, 20.0f), new Vector3(side * 12.59f, 10.45f, 10.0f), Vector3.Zero, metal, rail, 0.42f, 0.64f);
-            RoomGeometry.AddBox(this, $"SecondDeckRail{side}", new Vector3(0.35f, 1.35f, 20.0f), new Vector3(side * 12.59f, 16.45f, -30.0f), Vector3.Zero, metal, rail, 0.42f, 0.64f);
-            RoomGeometry.AddBox(this, $"HighDeckRail{side}", new Vector3(0.35f, 1.35f, 26.0f), new Vector3(side * 12.59f, 22.45f, -73.0f), Vector3.Zero, metal, rail, 0.42f, 0.64f);
+            RoomGeometry.AddWall(this, $"StartRail{side}", new Vector3(0.35f, 1.35f, 16.0f), new Vector3(side * 12.59f, 4.7f, 48.0f), Vector3.Zero, metal, rail, 0.42f, 0.64f);
+            RoomGeometry.AddWall(this, $"FirstDeckRail{side}", new Vector3(0.35f, 1.35f, 20.0f), new Vector3(side * 12.59f, 10.45f, 10.0f), Vector3.Zero, metal, rail, 0.42f, 0.64f);
+            RoomGeometry.AddWall(this, $"SecondDeckRail{side}", new Vector3(0.35f, 1.35f, 20.0f), new Vector3(side * 12.59f, 16.45f, -30.0f), Vector3.Zero, metal, rail, 0.42f, 0.64f);
+            RoomGeometry.AddWall(this, $"HighDeckRail{side}", new Vector3(0.35f, 1.35f, 26.0f), new Vector3(side * 12.59f, 22.45f, -73.0f), Vector3.Zero, metal, rail, 0.42f, 0.64f);
         }
         AddRampRails("One", -7.0f, rampWidth, 40.0f, 4.25f, 20.0f, 10.0f, metal, rail);
         AddRampRails("Two", 0.0f, rampWidth, 0.0f, 10.0f, -20.0f, 16.0f, metal, rail);
@@ -326,7 +326,7 @@ public partial class Room22Runtime : RoomRuntime
         foreach (float side in new[] { -1.0f, 1.0f })
         {
             Vector3 topCenter = new(x + (side * ((width * 0.5f) + 0.18f)), ((backY + frontY) * 0.5f) + 0.72f, (backZ + frontZ) * 0.5f);
-            RoomGeometry.AddBox(this, $"RatchetRail{suffix}{side}", new Vector3(0.36f, 1.45f, length), topCenter - (up * 0.18f), new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.42f, 0.64f);
+            RoomGeometry.AddWall(this, $"RatchetRail{suffix}{side}", new Vector3(0.36f, 1.45f, length), topCenter - (up * 0.18f), new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.42f, 0.64f);
         }
     }
 
@@ -344,7 +344,7 @@ public partial class Room22Runtime : RoomRuntime
         stage.Entered += (entered, player) =>
         {
             if (player != _player) { return; }
-            if (entered.CheckpointIndex != _nextClimbStage) { entered.FlashDenied(); return; }
+            if (entered.CheckpointIndex != _nextClimbStage) { return; }
             entered.Activate();
             _nextClimbStage++;
             if (_runSolutionSmoke)

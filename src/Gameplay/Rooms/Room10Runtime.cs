@@ -309,11 +309,6 @@ public partial class Room10Runtime : RoomRuntime
 
     private void TraceState(string eventName)
     {
-        if (_runSolutionSmoke)
-        {
-            GD.Print(
-                $"ROOM10_TRACE: event={eventName}, tick={_solutionTick}, position={_player.GlobalPosition}, velocity={_player.LinearVelocity}, {DescribeExamState()}.");
-        }
     }
 
     private void PlaySurfaceAudio(AudioStreamPlayer3D? audio)
@@ -554,15 +549,15 @@ public partial class Room10Runtime : RoomRuntime
     {
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(this, $"StartRail{side}", new Vector3(0.38f, 1.45f, 30.775f), new Vector3(side * 7.2f, 12.975f, 51.3875f), Vector3.Zero, metal, darkFrame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"StartRail{side}", new Vector3(0.38f, 1.45f, 30.775f), new Vector3(side * 7.2f, 12.975f, 51.3875f), Vector3.Zero, metal, darkFrame, 0.42f, 0.62f);
             AddSlopeRail($"MomentumRail{side}", side * 7.2f, 36.0f, 12.25f, 13.0f, 5.85f, metal, darkFrame);
-            RoomGeometry.AddBox(this, $"GlassRail{side}", new Vector3(0.38f, 1.45f, 13.0f), new Vector3(side * 7.2f, 6.575f, 6.5f), Vector3.Zero, metal, darkFrame, 0.42f, 0.62f);
-            RoomGeometry.AddBox(this, $"StickyOuterRail{side}", new Vector3(0.38f, 1.45f, 14.0f), new Vector3(side * 13.2f, 6.575f, -7.0f), Vector3.Zero, copper, new Color("795a48"), 0.42f, 0.58f);
+            RoomGeometry.AddWall(this, $"GlassRail{side}", new Vector3(0.38f, 1.45f, 13.0f), new Vector3(side * 7.2f, 6.575f, 6.5f), Vector3.Zero, metal, darkFrame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"StickyOuterRail{side}", new Vector3(0.38f, 1.45f, 14.0f), new Vector3(side * 13.2f, 6.575f, -7.0f), Vector3.Zero, copper, new Color("795a48"), 0.42f, 0.58f);
             AddSlopeRail($"AcceleratorRail{side}", side * 4.2f, -14.0f, 5.85f, -30.0f, 5.85f, metal, darkFrame);
-            RoomGeometry.AddBox(this, $"AimRail{side}", new Vector3(0.38f, 1.45f, 8.0f), new Vector3(side * 4.2f, 6.575f, -34.0f), Vector3.Zero, metal, darkFrame, 0.42f, 0.62f);
-            RoomGeometry.AddBox(this, $"MembraneARim{side}", new Vector3(0.46f, 0.72f, 24.4f), new Vector3(side * 7.2f, 2.5f, -62.0f), Vector3.Zero, copper, membraneFrame, 0.42f, 0.56f);
-            RoomGeometry.AddBox(this, $"MembraneBRim{side}", new Vector3(0.46f, 0.72f, 20.4f), new Vector3(side * 7.2f, 9.75f, -112.0f), Vector3.Zero, copper, membraneFrame, 0.42f, 0.56f);
-            RoomGeometry.AddBox(this, $"FinalRail{side}", new Vector3(0.38f, 1.45f, 62.775f), new Vector3(side * 7.2f, 10.725f, -185.3875f), Vector3.Zero, metal, darkFrame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"AimRail{side}", new Vector3(0.38f, 1.45f, 8.0f), new Vector3(side * 4.2f, 6.575f, -34.0f), Vector3.Zero, metal, darkFrame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"MembraneARim{side}", new Vector3(0.46f, 0.72f, 24.0f), new Vector3(side * 7.2f, 2.5f, -62.0f), Vector3.Zero, copper, membraneFrame, 0.42f, 0.56f);
+            RoomGeometry.AddWall(this, $"MembraneBRim{side}", new Vector3(0.46f, 0.72f, 20.4f), new Vector3(side * 7.2f, 9.75f, -112.0f), Vector3.Zero, copper, membraneFrame, 0.42f, 0.56f);
+            RoomGeometry.AddWall(this, $"FinalRail{side}", new Vector3(0.38f, 1.45f, 62.775f), new Vector3(side * 7.2f, 10.725f, -185.3875f), Vector3.Zero, metal, darkFrame, 0.42f, 0.62f);
         }
 
         // The sticky yard has one deliberate central exit.  The solid front
@@ -573,13 +568,15 @@ public partial class Room10Runtime : RoomRuntime
 
     private void AddSlopeRail(string name, float x, float backZ, float backTopY, float frontZ, float frontTopY, string texture, Color tint)
     {
+        const float wallHeight = 0.75f;
+        const float halfWallHeight = wallHeight * 0.5f;
         float run = backZ - frontZ;
         float rise = backTopY - frontTopY;
         float angle = -Mathf.Atan2(rise, run);
         float length = Mathf.Sqrt((run * run) + (rise * rise));
         Vector3 up = new Basis(Vector3.Right, angle) * Vector3.Up;
-        Vector3 topCenter = new(x, ((backTopY + frontTopY) * 0.5f) + 0.725f, (backZ + frontZ) * 0.5f);
-        RoomGeometry.AddBox(this, name, new Vector3(0.38f, 1.45f, length), topCenter - (up * 0.725f), new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.42f, 0.62f);
+        Vector3 topCenter = new(x, ((backTopY + frontTopY) * 0.5f) + halfWallHeight, (backZ + frontZ) * 0.5f);
+        RoomGeometry.AddWall(this, name, new Vector3(0.38f, wallHeight, length), topCenter - (up * halfWallHeight), new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.42f, 0.62f);
     }
 
     private void AddSequenceButton(string name, int index, Vector3 position)
@@ -599,7 +596,7 @@ public partial class Room10Runtime : RoomRuntime
             {
                 return;
             }
-            if (entered.CheckpointIndex != _nextSequenceButton) { entered.FlashDenied(); return; }
+            if (entered.CheckpointIndex != _nextSequenceButton) { return; }
 
             entered.Activate();
             _nextSequenceButton++;

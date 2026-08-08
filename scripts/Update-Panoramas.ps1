@@ -1,3 +1,7 @@
+param(
+    [int]$StartRoom = 1
+)
+
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $godot = Get-ChildItem -LiteralPath (Join-Path $root ".tools\Godot") -Recurse -Filter "Godot*_mono_win64_console.exe" |
@@ -63,14 +67,26 @@ $captures = @(
     @{ Scene = "res://scenes/Room27.tscn"; Id = "room27_a" },
     @{ Scene = "res://scenes/Room27.tscn"; Id = "room27_b" },
     @{ Scene = "res://scenes/Room28.tscn"; Id = "room28_a" },
-    @{ Scene = "res://scenes/Room28.tscn"; Id = "room28_b" }
+    @{ Scene = "res://scenes/Room28.tscn"; Id = "room28_b" },
+    @{ Scene = "res://scenes/Room29.tscn"; Id = "room29_a" },
+    @{ Scene = "res://scenes/Room29.tscn"; Id = "room29_b" },
+    @{ Scene = "res://scenes/Room30.tscn"; Id = "room30_a" },
+    @{ Scene = "res://scenes/Room30.tscn"; Id = "room30_b" }
 )
+
+$captures = $captures | Where-Object {
+    [int]($_.Id.Substring(4, 2)) -ge $StartRoom
+}
 
 foreach ($capture in $captures) {
     $captured = $false
     for ($attempt = 1; $attempt -le 3 -and -not $captured; $attempt++) {
-        & $godot.FullName --path $root --resolution 2560x720 $capture.Scene -- "--panorama-capture=$($capture.Id)"
-        if ($LASTEXITCODE -eq 0) {
+        $ErrorActionPreference = "Continue"
+        $output = & $godot.FullName --path $root --resolution 2560x720 $capture.Scene -- "--panorama-capture=$($capture.Id)" 2>&1
+        $exitCode = $LASTEXITCODE
+        $ErrorActionPreference = "Stop"
+        $output | Write-Output
+        if ($exitCode -eq 0 -and ($output -join "`n") -match "PANORAMA_CAPTURE_PASS: $([regex]::Escape($capture.Id))") {
             $captured = $true
         } elseif ($attempt -lt 3) {
             Start-Sleep -Milliseconds 350

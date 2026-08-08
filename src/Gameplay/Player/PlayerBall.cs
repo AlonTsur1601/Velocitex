@@ -4,6 +4,8 @@ using Velocitex.Core.Physics;
 using Velocitex.Core.Profile;
 using Velocitex.Core.Save;
 using Velocitex.Gameplay.Physics;
+using Velocitex.Gameplay.Rooms;
+using Velocitex.Gameplay.Visual;
 
 namespace Velocitex.Gameplay.Player;
 
@@ -24,8 +26,11 @@ public partial class PlayerBall : RigidBody3D
     public bool IsTrailVisible => _trail.Visible;
     public bool IsTrailEnabled => _trailEnabled;
     public string AppliedPatternId { get; private set; } = "none";
+    public string AppliedCrownId => _crown?.AppliedCrownId ?? "none-crown";
+    public bool IsCrownVisible => _crown?.Visible == true;
     public Vector3 GroundNormal { get; private set; } = Vector3.Up;
     public SurfaceKind GroundSurfaceKind { get; private set; } = SurfaceKind.Standard;
+    public bool GroundUsesStickyRollSfx { get; private set; }
     public float GroundTraction { get; private set; } = 1.0f;
     public float GroundLinearDrag { get; private set; }
     public Vector3 GroundSurfaceAcceleration { get; private set; } = Vector3.Zero;
@@ -54,6 +59,7 @@ public partial class PlayerBall : RigidBody3D
     private ShaderMaterial _candyMaterial = null!;
     private GpuParticles3D _trail = null!;
     private StandardMaterial3D _trailMaterial = null!;
+    private CandyCrown3D _crown = null!;
     private Color _baseTrailColor = Colors.White;
     private bool _glassTrailTintApplied;
     private bool _trailEnabled;
@@ -84,6 +90,8 @@ public partial class PlayerBall : RigidBody3D
         trailMesh = (SphereMesh)trailMesh.Duplicate();
         trailMesh.Material = _trailMaterial;
         _trail.DrawPass1 = trailMesh;
+        _crown = new CandyCrown3D { Name = "Crown", FollowParentUpright = true };
+        AddChild(_crown);
         ContactMonitor = true;
         MaxContactsReported = 8;
         CanSleep = false;
@@ -157,6 +165,7 @@ public partial class PlayerBall : RigidBody3D
         IsGrounded = false;
         GroundNormal = Vector3.Up;
         GroundSurfaceKind = SurfaceKind.Standard;
+        GroundUsesStickyRollSfx = false;
         GroundTraction = 1.0f;
         GroundLinearDrag = 0.0f;
         GroundSurfaceAcceleration = Vector3.Zero;
@@ -220,9 +229,26 @@ public partial class PlayerBall : RigidBody3D
     public void ApplyProfile(PlayerProfile profile, bool trailAllowed)
     {
         CandyVisualStyle.ApplyCandyMaterial(_candyMaterial, profile);
+        _crown.Apply(profile.CrownId);
         AppliedPatternId = profile.PatternId;
         bool showTrail = trailAllowed && !string.Equals(profile.TrailId, "off", StringComparison.Ordinal);
         _trailEnabled = showTrail;
+        _trail.Amount = profile.TrailStyleId switch
+        {
+            "solid-line" => 54,
+            "dotted" => 18,
+            "dashed" => 28,
+            "pulse" => 40,
+            _ => 30,
+        };
+        _trail.Lifetime = profile.TrailStyleId switch
+        {
+            "solid-line" => 0.95,
+            "dotted" => 0.58,
+            "dashed" => 0.76,
+            "pulse" => 1.05,
+            _ => 0.72,
+        };
         _trail.Emitting = showTrail && LinearVelocity.LengthSquared() >= 1.0f;
         UpdateTrailVisibility(LinearVelocity);
         if (!showTrail)
@@ -288,6 +314,7 @@ public partial class PlayerBall : RigidBody3D
         _currentContactIds.Clear();
         float strongestNewImpact = 0.0f;
         SurfaceKind strongestImpactSurface = SurfaceKind.Standard;
+        bool stickyGroundContact = false;
 
         for (int contactIndex = 0; contactIndex < state.GetContactCount(); contactIndex++)
         {
@@ -329,6 +356,9 @@ public partial class PlayerBall : RigidBody3D
             SurfaceProfile? profile = profiledSurface?.Profile;
             float traction = Mathf.Clamp(profile?.Friction ?? 1.0f, 0.0f, 1.0f);
             float linearDrag = Mathf.Max(profile?.LinearDrag ?? 0.0f, 0.0f);
+            bool usesStickyRollSfx = collider?.HasMeta(RoomGeometry.StickyRollSfxMetadata) == true &&
+                collider.GetMeta(RoomGeometry.StickyRollSfxMetadata).AsBool();
+            stickyGroundContact |= usesStickyRollSfx;
             if (!IsGrounded ||
                 traction < GroundTraction ||
                 (Mathf.IsEqualApprox(traction, GroundTraction) && linearDrag > GroundLinearDrag))
@@ -350,6 +380,8 @@ public partial class PlayerBall : RigidBody3D
 
             IsGrounded = true;
         }
+
+        GroundUsesStickyRollSfx = IsGrounded && stickyGroundContact;
 
         if (IsGrounded && !IsElasticSurface(GroundSurfaceKind))
         {

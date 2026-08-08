@@ -27,8 +27,6 @@ public partial class Room05Runtime : RoomRuntime
 
     private readonly List<FlightGate3D> _flightGates = new();
     private readonly List<RouteCheckpoint3D> _sequenceButtons = new();
-    private readonly Dictionary<RouteCheckpoint3D, Material> _buttonIdleMaterials = new();
-    private readonly Dictionary<RouteCheckpoint3D, Tween> _wrongOrderTweens = new();
     private PlayerBall _player = null!;
     private PlayerCameraRig _cameraRig = null!;
     private MechanicalLever _lever = null!;
@@ -56,12 +54,10 @@ public partial class Room05Runtime : RoomRuntime
     private int _previewFrames;
     private int _shellSmokeTick;
     private int _sequenceSmokeTick;
-    private int _wrongOrderFeedbackCount;
     private Vector3 _lastInteractionAttemptPosition;
     private float _lastInteractionAttemptDistance;
     private float[] _closestGateRadialDistances = Array.Empty<float>();
     private Vector3[] _closestGatePositions = Array.Empty<Vector3>();
-    private StandardMaterial3D _wrongOrderMaterial = null!;
 
     public override void _Ready()
     {
@@ -78,7 +74,7 @@ public partial class Room05Runtime : RoomRuntime
         PanoramaCaptureController.TryAttach(this, new PanoramaView[]
         {
             new("room05_a", new Vector3(6.1f, 9.2f, 16.0f), new Vector3(0.0f, 1.4f, -8.0f), 54.0f),
-            new("room05_b", new Vector3(-6.2f, 5.2f, -2.0f), new Vector3(0.0f, 1.1f, -12.5f), 56.0f),
+            new("room05_b", new Vector3(-8.0f, 9.0f, -8.0f), new Vector3(0.0f, 2.5f, -32.0f), 58.0f),
         });
 
         _player = GetNode<PlayerBall>("Player");
@@ -218,14 +214,8 @@ public partial class Room05Runtime : RoomRuntime
         _gateTween = null;
         _leverActivatedThisRun = false;
         _sawAirborneThisRun = false;
-        _wrongOrderFeedbackCount = 0;
         _gateRaised = false;
         _lever.ResetLever();
-        foreach (Tween tween in _wrongOrderTweens.Values)
-        {
-            tween.Kill();
-        }
-        _wrongOrderTweens.Clear();
         _gate.Position = _gateClosedPosition;
         _gate.CollisionLayer = 1;
         _gate.CollisionMask = 1;
@@ -234,11 +224,6 @@ public partial class Room05Runtime : RoomRuntime
         foreach (RouteCheckpoint3D button in _sequenceButtons)
         {
             button.ResetCheckpoint();
-            if (_buttonIdleMaterials.TryGetValue(button, out Material? idleMaterial) &&
-                button.GetNodeOrNull<MeshInstance3D>("InsetPlate") is MeshInstance3D insetPlate)
-            {
-                SetWrongOrderVisual(insetPlate, idleMaterial, showSequencePips: true);
-            }
         }
         for (int index = 0; index < _flightGates.Count; index++)
         {
@@ -384,8 +369,7 @@ public partial class Room05Runtime : RoomRuntime
         bool pipsVisible = insetPlate.GetChildren().OfType<MeshInstance3D>()
             .Where(child => child.Name.ToString().StartsWith("SequencePip", StringComparison.Ordinal))
             .All(pip => pip.Visible);
-        if (_wrongOrderFeedbackCount != 1 ||
-            button.IsActivated ||
+        if (button.IsActivated ||
             _nextSequenceButton != 0 ||
             !button.IsDeniedFeedbackActive ||
             !pipsVisible)
@@ -400,9 +384,7 @@ public partial class Room05Runtime : RoomRuntime
         bool pipsVisible = insetPlate.GetChildren().OfType<MeshInstance3D>()
             .Where(child => child.Name.ToString().StartsWith("SequencePip", StringComparison.Ordinal))
             .All(pip => pip.Visible);
-        if (!_buttonIdleMaterials.TryGetValue(button, out Material? idleMaterial) ||
-            insetPlate.MaterialOverride != idleMaterial ||
-            !pipsVisible)
+        if (!button.IsShowingIdleVisual || !pipsVisible)
         {
             FailSequenceSmoke("the wrong-order flash did not return to the readable idle button state.");
         }
@@ -523,16 +505,6 @@ public partial class Room05Runtime : RoomRuntime
         Color paleSteel = new("a9b4ba");
         Color deepBlue = new("536b7a");
         Color warmCopper = new("b77a54");
-        _wrongOrderMaterial = new StandardMaterial3D
-        {
-            AlbedoColor = new Color("d62f2f"),
-            Metallic = 0.0f,
-            Roughness = 0.54f,
-            EmissionEnabled = true,
-            Emission = new Color("721010"),
-            EmissionEnergyMultiplier = 1.15f,
-        };
-
         RoomGeometry.AddClosedRoomShell(
             this,
             "RoomShell",
@@ -562,9 +534,9 @@ public partial class Room05Runtime : RoomRuntime
         RoomGeometry.AddBox(this, "SecondLanding", new Vector3(17.0f, 0.6f, 10.0f), new Vector3(0.0f, 0.7f - DownstreamDrop, -43.5f - FirstGapExtension - SecondGapExtension - IntermediateRunExtension), Vector3.Zero, metal, paleSteel, 0.42f, 0.64f);
         RoomGeometry.AddBox(this, "ExitRun", new Vector3(17.0f, 0.6f, 17.75f), new Vector3(0.0f, 0.7f - DownstreamDrop, -57.375f - FirstGapExtension - SecondGapExtension - IntermediateRunExtension), Vector3.Zero, metal, paleSteel, 0.42f, 0.64f);
 
-        foreach (float x in new[] { -8.75f, 8.75f })
+        foreach (float x in new[] { -8.67f, 8.67f })
         {
-            RoomGeometry.AddBox(this, $"ExitRail{x}", new Vector3(0.34f, 1.35f, 27.75f), new Vector3(x, 1.38f - DownstreamDrop, -52.375f - FirstGapExtension - SecondGapExtension - IntermediateRunExtension), Vector3.Zero, copper, warmCopper, 0.38f, 0.56f);
+            RoomGeometry.AddWall(this, $"ExitRail{x}", new Vector3(0.34f, 1.35f, 27.75f), new Vector3(x, 1.38f - DownstreamDrop, -52.375f - FirstGapExtension - SecondGapExtension - IntermediateRunExtension), Vector3.Zero, copper, warmCopper, 0.38f, 0.56f);
         }
 
         _lever = new MechanicalLever
@@ -655,7 +627,7 @@ public partial class Room05Runtime : RoomRuntime
                 if (index == 1 && gate.LastExitSpeed > gate.LastEntrySpeed + 1.0f)
                 {
                     Vector3 boostedVelocity = player.LinearVelocity;
-                    boostedVelocity.Y = Mathf.Max(boostedVelocity.Y, 5.5f);
+                    boostedVelocity.Y = Mathf.Max(boostedVelocity.Y, 8.0f);
                     player.LinearVelocity = boostedVelocity;
                 }
                 _nextFlightGate++;
@@ -777,37 +749,11 @@ public partial class Room05Runtime : RoomRuntime
                     GD.Print($"ROOM05_BUTTON_TRACE: button={_nextSequenceButton}/{_sequenceButtons.Count}, tick={_solutionTick}, position={player.GlobalPosition}, velocity={player.LinearVelocity}.");
                 }
             }
-            else
-            {
-                FlashWrongOrder(entered);
-            }
         };
         AddChild(button);
         MeshInstance3D insetPlate = button.GetNode<MeshInstance3D>("InsetPlate");
-        if (insetPlate.MaterialOverride is Material idleMaterial)
-        {
-            _buttonIdleMaterials[button] = idleMaterial;
-        }
         RoomGeometry.AddSequencePips(insetPlate, index + 1);
         _sequenceButtons.Add(button);
-    }
-
-    private void FlashWrongOrder(RouteCheckpoint3D button)
-    {
-        _wrongOrderFeedbackCount++;
-        button.FlashDenied();
-    }
-
-    private static void SetWrongOrderVisual(MeshInstance3D insetPlate, Material material, bool showSequencePips)
-    {
-        insetPlate.MaterialOverride = material;
-        foreach (MeshInstance3D pip in insetPlate.GetChildren().OfType<MeshInstance3D>())
-        {
-            if (pip.Name.ToString().StartsWith("SequencePip", StringComparison.Ordinal))
-            {
-                pip.Visible = showSequencePips;
-            }
-        }
     }
 
     private void AlignLeverToFloor()

@@ -22,5 +22,5 @@ if ($exitCode -ne 0) {
 }
 
 if (($output -join "`n") -notmatch "ROOM05_SOLUTION_PASS") {
-    throw "Room 05 SolutionTrace did not use the lever, complete all three ordered buttons, traverse both required flight gates and finish ten consecutive runs."
+    throw "Room 05 SolutionTrace did not use the lever, complete all five ordered buttons, traverse both required flight gates and finish ten consecutive runs."
 }

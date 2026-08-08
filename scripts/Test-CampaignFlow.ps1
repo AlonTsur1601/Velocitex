@@ -13,7 +13,7 @@ $env:DOTNET_CLI_TELEMETRY_OPTOUT = "1"
 $env:DOTNET_NOLOGO = "1"
 
 $ErrorActionPreference = "Continue"
-$output = & $godot.FullName --headless --path $root --quit-after 1200 -- --campaign-flow-smoke 2>&1
+$output = & $godot.FullName --headless --fixed-fps 60 --path $root --quit-after 1200 -- --campaign-flow-smoke 2>&1
 $exitCode = $LASTEXITCODE
 $ErrorActionPreference = "Stop"
 $output | Write-Output

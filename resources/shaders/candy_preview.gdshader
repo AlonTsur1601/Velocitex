@@ -4,6 +4,7 @@ render_mode diffuse_burley, specular_schlick_ggx;
 uniform vec4 primary_color : source_color = vec4(0.82, 0.12, 0.18, 1.0);
 uniform vec4 secondary_color : source_color = vec4(0.91, 0.85, 0.72, 1.0);
 uniform int pattern_mode = 0;
+uniform int finish_mode = 0;
 
 float hash21(vec2 point) {
 	return fract(sin(dot(point, vec2(127.1, 311.7))) * 43758.5453);
@@ -113,6 +114,11 @@ void fragment() {
 	} else if (pattern_mode == 12) {
 		float pearl = 0.5 + (0.5 * sin(dot(sphere, vec3(7.0, 9.0, 11.0))));
 		mask = pearl * 0.38;
+	} else if (pattern_mode == 13) {
+		vec2 grid = abs(fract(uv * vec2(10.0, 6.0)) - 0.5);
+		float lines = 1.0 - smoothstep(0.035, 0.065, min(grid.x, grid.y));
+		float checks = step(0.0, sin(longitude * 10.0) * sin(latitude * 6.0));
+		mask = max(lines, checks * 0.28);
 	}
 
 	float grain = noise31((sphere * 82.0) + vec3(11.0, 29.0, 7.0));
@@ -128,11 +134,15 @@ void fragment() {
 	vec3 crust_color = mix(candy, secondary_color.rgb, 0.32) * 1.08;
 	textured_candy = mix(textured_candy, crust_color, sugar_crust * 0.28);
 	textured_candy += vec3(crystal * 0.1);
+	float finish_sparkle = finish_mode == 5 ? smoothstep(0.94, 0.995, noise31((sphere * 58.0) + vec3(TIME * 2.2, TIME * -1.7, TIME))) : 0.0;
+	textured_candy += vec3(finish_sparkle * 1.35);
 	textured_candy *= 1.0 - (pore * 0.12);
 	ALBEDO = textured_candy;
-	METALLIC = pattern_mode == 12 ? 0.16 : 0.02;
-	ROUGHNESS = pattern_mode == 12
+	METALLIC = finish_mode == 2 ? 0.78 : (pattern_mode == 12 ? 0.16 : 0.02);
+	float base_roughness = pattern_mode == 12
 		? 0.34 + (grain * 0.08)
 		: 0.41 + (grain * 0.08) + (pore * 0.11) + (sugar_crust * 0.08) - (crystal * 0.035);
-	SPECULAR = 0.24;
+	ROUGHNESS = finish_mode == 1 ? 0.12 : (finish_mode == 2 ? 0.24 : (finish_mode == 3 ? 0.82 : (finish_mode == 4 ? 0.06 : (finish_mode == 5 ? 0.15 : base_roughness))));
+	SPECULAR = finish_mode == 4 ? 0.92 : (finish_mode == 5 ? 0.88 : (finish_mode == 1 ? 0.72 : 0.24));
+	EMISSION = vec3(finish_sparkle * 0.9);
 }

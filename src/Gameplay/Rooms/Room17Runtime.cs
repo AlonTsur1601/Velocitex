@@ -21,6 +21,7 @@ public partial class Room17Runtime : RoomRuntime
     private PlayerBall _player = null!;
     private PlayerCameraRig _cameraRig = null!;
     private PlayerCannon3D _playerCannon = null!;
+    private Area3D _goal = null!;
     private readonly List<InterferenceCannon3D> _interferenceCannons = new();
     private readonly List<Area3D> _projectileLanes = new();
     private Transform3D _spawnTransform;
@@ -135,6 +136,7 @@ public partial class Room17Runtime : RoomRuntime
         }
         if (_runSolutionSmoke)
         {
+            TryCompleteAtGoal();
             RunSolutionTick();
             return;
         }
@@ -151,6 +153,8 @@ public partial class Room17Runtime : RoomRuntime
         {
             _playerCannon.Interact(_player);
         }
+
+        TryCompleteAtGoal();
 
         if (_player.GlobalPosition.Y < -7.0f)
         {
@@ -216,7 +220,7 @@ public partial class Room17Runtime : RoomRuntime
             _solutionRun++;
             if (_solutionRun >= RequiredSolutionRuns)
             {
-                GD.Print($"ROOM17_SOLUTION_PASS: SolutionTrace crossed the forty-cannon grid without a hit for {_solutionRun} consecutive completions.");
+                GD.Print($"ROOM17_SOLUTION_PASS: SolutionTrace crossed the 924-cannon wall grid without a hit for {_solutionRun} consecutive completions.");
                 FinishSolutionSmoke(0);
                 return;
             }
@@ -298,8 +302,8 @@ public partial class Room17Runtime : RoomRuntime
 
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(this, $"StartRail{side}", new Vector3(0.36f, 1.4f, 20.0f), new Vector3(side * 6.35f, 6.75f, 26.0f), Vector3.Zero, copper, frame, 0.42f, 0.6f);
-            RoomGeometry.AddBox(this, $"LandingRail{side}", new Vector3(0.36f, 1.45f, 32.7f), new Vector3(side * 7.35f, 8.75f, -70.35f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"StartRail{side}", new Vector3(0.36f, 1.4f, 20.0f), new Vector3(side * 6.18f, 6.75f, 26.0f), Vector3.Zero, copper, frame, 0.42f, 0.6f);
+            RoomGeometry.AddWall(this, $"LandingRail{side}", new Vector3(0.36f, 1.45f, 32.7f), new Vector3(side * 7.18f, 8.75f, -70.35f), Vector3.Zero, metal, frame, 0.42f, 0.62f);
         }
 
         _playerCannon = new PlayerCannon3D
@@ -321,35 +325,51 @@ public partial class Room17Runtime : RoomRuntime
         };
         lowGravity.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = new Vector3(21.0f, 42.0f, 78.0f) } });
         AddChild(lowGravity);
+        RoomGeometry.AddLowGravityMotes(this, "LowGravityCrossfireMotes", lowGravity.Position, new Vector3(9.5f, 20.0f, 37.0f), 112);
 
-        float[] columnZ = Enumerable.Range(0, 12).Select(index => Mathf.Lerp(6.0f, -64.0f, index / 11.0f)).ToArray();
-        float[] muzzleY = { 10.0f, 16.5f, 23.0f, 29.5f, 36.0f, 42.5f };
+        float[] columnZ = Enumerable.Range(0, 33).Select(index => Mathf.Lerp(6.0f, -64.0f, index / 32.0f)).ToArray();
+        float[] cannonY = Enumerable.Range(0, 14).Select(index => index * 3.2f).ToArray();
         for (int column = 0; column < columnZ.Length; column++)
         {
-            for (int row = 0; row < muzzleY.Length; row++)
+            float routeY = Mathf.Lerp(15.5f, 29.0f, column / (float)(columnZ.Length - 1));
+            float verticalShift = Mathf.PosMod(routeY - 4.2f, 3.2f);
+            if (verticalShift > 1.6f) { verticalShift -= 3.2f; }
+            for (int row = 0; row < cannonY.Length; row++)
             {
-                int index = (column * muzzleY.Length) + row;
-                InterferenceCannon3D cannon = new()
+                foreach (float side in new[] { -1.0f, 1.0f })
                 {
-                    Name = $"InterferenceCannon{row + 1}x{column + 1}",
-                    Position = new Vector3(-10.70f, muzzleY[row] - 2.6f, columnZ[column]),
-                    MuzzleOffset = new Vector3(3.0f, 2.6f, 0.0f),
-                    ProjectileVelocity = new Vector3(24.0f, 0.0f, 0.0f),
-                    InitialDelayTicks = 10 + (column * 4) + (row * 2),
-                    CadenceTicks = 137 + index,
-                    ProjectileLifetimeTicks = 78,
-                    PoolSize = 2,
-                    EnableAudio = !_runSolutionSmoke && index % 3 == 0,
-                };
-                AddChild(cannon);
-                _interferenceCannons.Add(cannon);
+                    int index = ((column * cannonY.Length) + row) * 2 + (side > 0.0f ? 1 : 0);
+                    InterferenceCannon3D cannon = new()
+                    {
+                        Name = $"InterferenceCannon{column + 1}x{row + 1}_{(side < 0.0f ? "L" : "R")}",
+                        Position = new Vector3(side * 11.30f, cannonY[row] + verticalShift, columnZ[column]),
+                        MuzzleOffset = new Vector3(-side * 3.0f, 2.6f, 0.0f),
+                        ProjectileVelocity = new Vector3(-side * 24.0f, 0.0f, 0.0f),
+                        InitialDelayTicks = 10 + ((index * 7) % 180),
+                        CadenceTicks = 90 + ((index * 13) % 120),
+                        ProjectileLifetimeTicks = 78,
+                        PoolSize = 2,
+                        EnableAudio = !_runSolutionSmoke && index % 12 == 0,
+                        EnableWarningLight = index % 8 == 0,
+                        UseBatchedDenseVisuals = true,
+                    };
+                    AddChild(cannon);
+                    _interferenceCannons.Add(cannon);
+                }
             }
 
-            int laneIndex = column;
+        }
+
+        InterferenceCannon3D.AddDenseVisualBatch(this, _interferenceCannons);
+
+        float[] laneZ = Enumerable.Range(0, 12).Select(index => Mathf.Lerp(6.0f, -64.0f, index / 11.0f)).ToArray();
+        for (int laneIndex = 0; laneIndex < laneZ.Length; laneIndex++)
+        {
+            int capturedLaneIndex = laneIndex;
             Area3D crossing = new()
             {
-                Name = $"ProjectileLane{column + 1}",
-                Position = new Vector3(0.0f, 22.0f, columnZ[column]),
+                Name = $"ProjectileLane{laneIndex + 1}",
+                Position = new Vector3(0.0f, 22.0f, laneZ[laneIndex]),
                 CollisionLayer = 0,
                 CollisionMask = 1,
                 Monitoring = true,
@@ -357,10 +377,10 @@ public partial class Room17Runtime : RoomRuntime
             crossing.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = new Vector3(20.0f, 32.0f, 2.4f) } });
             crossing.BodyEntered += body =>
             {
-                if (body == _player && _playerCannonFired && !_player.IsGrounded && laneIndex == _nextProjectileLane)
+                if (body == _player && _playerCannonFired && capturedLaneIndex == _nextProjectileLane)
                 {
                     _nextProjectileLane++;
-                    _crossedProjectileLane = _nextProjectileLane == columnZ.Length;
+                    _crossedProjectileLane = _nextProjectileLane == laneZ.Length;
                 }
             };
             AddChild(crossing);
@@ -371,23 +391,36 @@ public partial class Room17Runtime : RoomRuntime
     private void BuildGoal()
     {
         Vector3 position = new(0.0f, 9.15f, -85.9f);
-        Area3D goal = new() { Name = "GoalCup", Position = position, CollisionLayer = 0, CollisionMask = 1, Monitoring = true };
-        goal.AddChild(new CollisionShape3D { Shape = new CylinderShape3D { Radius = 1.75f, Height = 2.8f } });
-        goal.BodyEntered += body =>
+        _goal = new Area3D { Name = "GoalCup", Position = position, CollisionLayer = 0, CollisionMask = 1, Monitoring = true };
+        _goal.AddChild(new CollisionShape3D { Shape = new CylinderShape3D { Radius = 1.75f, Height = 2.8f } });
+        _goal.BodyEntered += body =>
         {
-            if (body is PlayerBall &&
-                _playerCannonFired &&
-                _crossedProjectileLane &&
-                _nextProjectileLane == _projectileLanes.Count &&
-                TotalShotsFired >= 8)
+            if (body == _player)
             {
-                TryAwardUntouchable();
-                CompleteRoom();
+                TryCompleteAtGoal();
             }
         };
-        AddChild(goal);
+        AddChild(_goal);
 
         RoomGeometry.AddGoalExitDoor(this, position);
+    }
+
+    private void TryCompleteAtGoal()
+    {
+        if (IsComplete || IsExitTraversalPending || !_playerCannonFired || !_crossedProjectileLane ||
+            _nextProjectileLane != _projectileLanes.Count || TotalShotsFired < 8)
+        {
+            return;
+        }
+
+        Vector3 offset = _player.GlobalPosition - _goal.GlobalPosition;
+        if (new Vector2(offset.X, offset.Z).Length() > 1.9f || Mathf.Abs(offset.Y) > 1.6f)
+        {
+            return;
+        }
+
+        TryAwardUntouchable();
+        CompleteRoom();
     }
 
     private void RegisterProjectileHit(PlayerBall player)
@@ -399,7 +432,7 @@ public partial class Room17Runtime : RoomRuntime
 
     private void TryAwardUntouchable()
     {
-        if (_projectileHits == 0)
+        if (_projectileHits == 0 && !_player.TouchedSideBoundarySinceReset)
         {
             MarkAdvancementCondition("untouchable");
         }
@@ -409,10 +442,11 @@ public partial class Room17Runtime : RoomRuntime
     {
         if (_runMechanicsSmoke)
         {
-            bool cannonGrid = _interferenceCannons.Count == 72 &&
+            bool cannonGrid = _interferenceCannons.Count == 924 &&
                 _interferenceCannons.Select(cannon => cannon.InitialDelayTicks).Distinct().Count() >= 12 &&
-                _interferenceCannons.Select(cannon => cannon.CadenceTicks).Distinct().Count() == 72 &&
-                _interferenceCannons.All(cannon => cannon.ProjectileVelocity.X >= 24.0f && cannon.PoolSize == 2 && cannon.HasSolidBodyHitbox && cannon.UsesRandomizedTiming);
+                _interferenceCannons.Select(cannon => cannon.ScheduledFirstFireTick).Distinct().Count() >= 100 &&
+                _interferenceCannons.Select(cannon => cannon.CadenceTicks).Distinct().Count() >= 100 &&
+                _interferenceCannons.All(cannon => Mathf.Abs(cannon.ProjectileVelocity.X) >= 24.0f && cannon.PoolSize == 2 && cannon.HasSolidBodyHitbox && cannon.UsesRandomizedTiming);
             bool laneContract = _projectileLanes.Count == 12;
             bool lowGravityContract = GetNodeOrNull<ForceVolume3D>("LowGravityCrossfire") is { Profile.AirControlAcceleration: > 0.0f };
             bool wallMountedExit = Mathf.Abs(GetNode<Area3D>("GoalCup").Position.Z - -85.9f) < 0.01f;
@@ -423,7 +457,7 @@ public partial class Room17Runtime : RoomRuntime
                 return;
             }
 
-            GD.Print("ROOM17_MECHANICS_PASS: seventy-two unsynchronised cannons densely cover twelve airborne lanes inside a low-gravity steering volume, with no route above the barrage.");
+            GD.Print("ROOM17_MECHANICS_PASS: 924 unsynchronised cannons tile both side walls from floor to ceiling across thirty-three airborne lanes.");
             GetTree().Quit(0);
             return;
         }
@@ -444,10 +478,25 @@ public partial class Room17Runtime : RoomRuntime
             return;
         }
 
-        _projectileHits = _runAchievementNegativeSmoke ? 1 : 0;
+        if (_runAchievementNegativeSmoke)
+        {
+            RegisterProjectileHit(_player);
+        }
         TryAwardUntouchable();
         bool awarded = CompletedAdvancementIds.Contains("untouchable");
         bool expected = _runAchievementPositiveSmoke;
+        if (_runAchievementNegativeSmoke)
+        {
+            _playerCannonFired = true;
+            _nextProjectileLane = _projectileLanes.Count;
+            _crossedProjectileLane = true;
+            foreach (InterferenceCannon3D cannon in _interferenceCannons)
+            {
+                typeof(InterferenceCannon3D).GetProperty(nameof(InterferenceCannon3D.ShotsFired))?.SetValue(cannon, 1);
+            }
+            _player.GlobalPosition = _goal.GlobalPosition;
+            TryCompleteAtGoal();
+        }
         if (awarded != expected)
         {
             GD.PushError($"ROOM17_ACHIEVEMENT_FAIL: expected={expected}, awarded={awarded}, hits={_projectileHits}.");
@@ -455,9 +504,16 @@ public partial class Room17Runtime : RoomRuntime
             return;
         }
 
+        if (_runAchievementNegativeSmoke && !IsComplete && !IsExitTraversalPending)
+        {
+            GD.PushError("ROOM17_ACHIEVEMENT_FAIL: surviving a projectile hit blocked ordinary room completion.");
+            GetTree().Quit(1);
+            return;
+        }
+
         GD.Print(expected
-            ? "ROOM17_ACHIEVEMENT_POSITIVE_PASS: a hit-free grid crossing awarded Untouchable."
-            : "ROOM17_ACHIEVEMENT_NEGATIVE_PASS: taking a hit denied Untouchable without blocking room completion.");
+            ? "ROOM17_ACHIEVEMENT_POSITIVE_PASS: a hit-free grid crossing awarded Clean Crossfire."
+            : "ROOM17_ACHIEVEMENT_NEGATIVE_PASS: a projectile hit denied Clean Crossfire but ordinary room completion still succeeded.");
         GetTree().Quit(0);
     }
 

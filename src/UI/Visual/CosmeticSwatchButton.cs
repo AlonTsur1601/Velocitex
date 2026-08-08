@@ -11,9 +11,12 @@ public partial class CosmeticSwatchButton : Button
     public string UnlockRequirement { get; private set; } = string.Empty;
     public Color PreviewPrimaryColor => _primaryColor;
     public Color PreviewSecondaryColor => _secondaryColor;
+    public bool UsesExactPatternShader => Definition.Kind != CosmeticKind.Pattern || _exactPatternPreview?.Material is ShaderMaterial;
+    public int AppliedPatternMode => _exactPatternPreview?.Material is ShaderMaterial material ? material.GetShaderParameter("pattern_mode").AsInt32() : -1;
 
     private Color _primaryColor = new("d12b3f");
     private Color _secondaryColor = new("e8d9b8");
+    private ColorRect? _exactPatternPreview;
 
     public override void _Ready()
     {
@@ -39,10 +42,12 @@ public partial class CosmeticSwatchButton : Button
         UnlockRequirement = unlockRequirement;
         _primaryColor = primaryColor;
         _secondaryColor = secondaryColor;
-        Text = string.Empty;
-        CustomMinimumSize = new Vector2(50.0f, 50.0f);
-        TooltipText = string.Empty;
+        bool namedChoice = definition.Kind is CosmeticKind.Finish or CosmeticKind.TrailStyle;
+        Text = namedChoice ? definition.DisplayName.ToUpperInvariant() : string.Empty;
+        CustomMinimumSize = namedChoice ? new Vector2(118.0f, 50.0f) : new Vector2(50.0f, 50.0f);
+        TooltipText = definition.DisplayName;
         FocusMode = FocusModeEnum.All;
+        ConfigureExactPatternPreview();
         ApplyStyles();
         QueueRedraw();
     }
@@ -52,6 +57,11 @@ public partial class CosmeticSwatchButton : Button
         IsSelected = selected;
         _primaryColor = primaryColor;
         _secondaryColor = secondaryColor;
+        if (_exactPatternPreview?.Material is ShaderMaterial patternMaterial)
+        {
+            patternMaterial.SetShaderParameter("primary_color", primaryColor);
+            patternMaterial.SetShaderParameter("secondary_color", secondaryColor);
+        }
         ApplyStyles();
         QueueRedraw();
     }
@@ -66,10 +76,15 @@ public partial class CosmeticSwatchButton : Button
                 DrawColorSample(center, radius);
                 break;
             case CosmeticKind.Pattern:
-                DrawPatternSample(center, radius);
                 break;
             case CosmeticKind.Trail:
                 DrawTrailSample(center, radius);
+                break;
+            case CosmeticKind.Finish:
+            case CosmeticKind.TrailStyle:
+                break;
+            case CosmeticKind.Crown:
+                DrawCrownSample(center);
                 break;
         }
 
@@ -78,6 +93,63 @@ public partial class CosmeticSwatchButton : Button
             DrawRect(new Rect2(4.0f, 4.0f, Size.X - 8.0f, Size.Y - 8.0f), new Color(0.025f, 0.035f, 0.045f, 0.54f), true);
             DrawLock(new Vector2(Size.X - 13.0f, 13.0f));
         }
+    }
+
+    private void DrawCrownSample(Vector2 center)
+    {
+        bool noCrown = string.Equals(Definition.Id, "none-crown", StringComparison.Ordinal);
+        Color metal = Definition.Id switch
+        {
+            "bronze-crown" => new Color("b66d3d"),
+            "silver-crown" => new Color("bcc4cc"),
+            "gold-crown" => new Color("e5b93f"),
+            _ => new Color("778189"),
+        };
+        Vector2[] crown =
+        {
+            center + new Vector2(-17, 11),
+            center + new Vector2(-15, -10),
+            center + new Vector2(-7, -2),
+            center + new Vector2(0, -15),
+            center + new Vector2(7, -2),
+            center + new Vector2(15, -10),
+            center + new Vector2(17, 11),
+        };
+        DrawColoredPolygon(crown, metal);
+        DrawPolyline(crown.Concat(new[] { crown[0] }).ToArray(), metal.Lightened(0.42f), 2.0f, true);
+        DrawLine(center + new Vector2(-16, 7), center + new Vector2(16, 7), metal.Darkened(0.38f), 3.0f, true);
+        DrawCircle(center + new Vector2(0, -14), 2.5f, metal.Lightened(0.55f));
+        if (noCrown)
+        {
+            DrawLine(center + new Vector2(-18, -18), center + new Vector2(18, 18), new Color("ef6470"), 4.0f, true);
+        }
+    }
+
+    private void ConfigureExactPatternPreview()
+    {
+        if (Definition.Kind != CosmeticKind.Pattern)
+        {
+            if (_exactPatternPreview is not null) _exactPatternPreview.Visible = false;
+            return;
+        }
+        if (_exactPatternPreview is null)
+        {
+            _exactPatternPreview = new ColorRect
+            {
+                Name = "ExactPatternPreview",
+                MouseFilter = MouseFilterEnum.Ignore,
+            };
+            AddChild(_exactPatternPreview);
+            _exactPatternPreview.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+        }
+        ShaderMaterial material = _exactPatternPreview.Material as ShaderMaterial
+            ?? new ShaderMaterial { Shader = GD.Load<Shader>("res://resources/shaders/candy_pattern_icon.gdshader") };
+        material.SetShaderParameter("primary_color", _primaryColor);
+        material.SetShaderParameter("secondary_color", _secondaryColor);
+        material.SetShaderParameter("pattern_mode", CandyVisualStyle.ResolvePatternMode(Definition.Id));
+        _exactPatternPreview.Material = material;
+        _exactPatternPreview.Visible = true;
+        MoveChild(_exactPatternPreview, 0);
     }
 
     private void ApplyStyles()

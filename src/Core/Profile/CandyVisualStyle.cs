@@ -20,6 +20,7 @@ public static class CandyVisualStyle
         ["target"] = 10,
         ["cracks"] = 11,
         ["pearl"] = 12,
+        ["inspection-grid"] = 13,
     };
 
     public static void ApplyCandyMaterial(ShaderMaterial material, PlayerProfile profile)
@@ -29,12 +30,23 @@ public static class CandyVisualStyle
         material.SetShaderParameter(
             "pattern_mode",
             PatternModes.TryGetValue(profile.PatternId, out int mode) ? mode : 0);
+        material.SetShaderParameter("finish_mode", profile.FinishId switch
+        {
+            "glossy" => 1,
+            "metal" => 2,
+            "frosted" => 3,
+            "candy-glaze" => 4,
+            "sparkling" => 5,
+            _ => 0,
+        });
     }
 
     public static Color ResolveTrailColor(string trailId)
     {
         return ResolveColor(CosmeticKind.Trail, trailId, "off");
     }
+
+    public static int ResolvePatternMode(string patternId) => PatternModes.TryGetValue(patternId, out int mode) ? mode : 0;
 
     private static Color ResolveColor(CosmeticKind kind, string id, string fallbackId)
     {

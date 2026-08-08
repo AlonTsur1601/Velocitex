@@ -26,6 +26,7 @@ public partial class MovingPlatform3D : AnimatableBody3D
     [Export] public int TravelTicks { get; set; } = 240;
     [Export] public bool EnableAudio { get; set; } = true;
     [Export] public bool EnableRearGate { get; set; } = true;
+    [Export] public bool CloseRearGateOnActivation { get; set; }
     [Export] public bool RequiresActivation { get; set; }
 
     public bool HasReachedDestination { get; private set; }
@@ -125,6 +126,10 @@ public partial class MovingPlatform3D : AnimatableBody3D
     public void Activate()
     {
         _activated = true;
+        if (EnableRearGate && CloseRearGateOnActivation)
+        {
+            CloseRearGate();
+        }
         if (_state == PlatformState.Docked && _occupants.Count > 0)
         {
             _state = PlatformState.DepartureDelay;
@@ -140,17 +145,18 @@ public partial class MovingPlatform3D : AnimatableBody3D
 
         PhysicsMaterial physicsMaterial = new() { Friction = 1.25f, Rough = true, Bounce = 0.02f };
         PhysicsMaterialOverride = physicsMaterial;
-        AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = PlatformSize } });
+        Vector3 deckSize = new(PlatformSize.X, PlatformSize.Y, Mathf.Max(1.0f, PlatformSize.Z - 0.36f));
+        AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = deckSize } });
         AddChild(new MeshInstance3D
         {
             Name = "TiledDeck",
-            Mesh = SurfaceMeshFactory.CreateTiledBox(PlatformSize),
+            Mesh = SurfaceMeshFactory.CreateTiledBox(deckSize),
             MaterialOverride = deckMaterial,
         });
 
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            Vector3 railSize = new(0.34f, 1.25f, PlatformSize.Z);
+            Vector3 railSize = new(0.34f, 1.25f, deckSize.Z);
             Vector3 railPosition = new(side * ((PlatformSize.X * 0.5f) + 0.22f), 0.62f, 0.0f);
             AddChild(new CollisionShape3D { Position = railPosition, Shape = new BoxShape3D { Size = railSize } });
             AddChild(new MeshInstance3D
@@ -215,11 +221,9 @@ public partial class MovingPlatform3D : AnimatableBody3D
                     _state = PlatformState.DepartureDelay;
                     _stateTick = 0;
                 }
-                if (EnableRearGate)
+                if (EnableRearGate && !CloseRearGateOnActivation)
                 {
-                    _rearGateCollision.SetDeferred(CollisionShape3D.PropertyName.Disabled, false);
-                    Tween rearGateTween = CreateTween().SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.InOut);
-                    rearGateTween.TweenProperty(_rearGateVisual, "position", _rearGateRestPosition, 0.24f);
+                    CloseRearGate();
                 }
                 PlayerBoarded?.Invoke(player);
             }
@@ -246,5 +250,12 @@ public partial class MovingPlatform3D : AnimatableBody3D
             };
             AddChild(_motionAudio);
         }
+    }
+
+    private void CloseRearGate()
+    {
+        _rearGateVisual.Position = _rearGateRestPosition;
+        _rearGateVisual.ForceUpdateTransform();
+        _rearGateCollision.SetDeferred(CollisionShape3D.PropertyName.Disabled, false);
     }
 }

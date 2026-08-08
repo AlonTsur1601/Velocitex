@@ -12,9 +12,12 @@ public partial class ProfileSmokeTest : Node
     {
         ProfileStore.DeleteTestFiles(TestPath);
         PlayerProfile profile = ProfileStore.CreateDefault();
-        if (profile.UnlockedCosmeticIds.Count != 18)
+        int expectedBaseCosmetics = CosmeticCatalog.CreateBaseUnlockSet().Count;
+        if (profile.UnlockedCosmeticIds.Count != expectedBaseCosmetics ||
+            !profile.UnlockedCosmeticIds.Contains("none-crown") ||
+            profile.CrownId != "none-crown")
         {
-            Fail($"Expected 18 base cosmetics, found {profile.UnlockedCosmeticIds.Count}.");
+            Fail($"Expected {expectedBaseCosmetics} base cosmetics including No Crown, found {profile.UnlockedCosmeticIds.Count}.");
             return;
         }
 
@@ -22,7 +25,9 @@ public partial class ProfileSmokeTest : Node
         profile.SecondaryColorId = "vanilla";
         profile.PatternId = "spiral";
         profile.TrailId = "trail-gold";
+        profile.CrownId = "none-crown";
         profile.UnlockedAdvancementIds.Add("clean-wrapper");
+        profile.UnlockedAdvancementIds.Add("iron-candy");
         if (!ProfileStore.Save(profile, out string? saveError, TestPath))
         {
             Fail($"Profile save failed: {saveError}");
@@ -31,8 +36,10 @@ public partial class ProfileSmokeTest : Node
 
         PlayerProfile loaded = ProfileStore.Load(out string? loadWarning, TestPath);
         if (loadWarning is not null || loaded.PrimaryColorId != "blueberry" ||
-            loaded.PatternId != "spiral" || loaded.TrailId != "trail-gold" ||
-            !loaded.UnlockedAdvancementIds.Contains("clean-wrapper"))
+            loaded.PatternId != "spiral" || loaded.TrailId != "trail-gold" || loaded.CrownId != "none-crown" ||
+            !loaded.UnlockedAdvancementIds.Contains("clean-wrapper") ||
+            !loaded.UnlockedAdvancementIds.Contains("jawbreaker") ||
+            loaded.UnlockedAdvancementIds.Contains("iron-candy"))
         {
             Fail($"Profile round-trip failed: {loadWarning}");
             return;
@@ -41,8 +48,9 @@ public partial class ProfileSmokeTest : Node
         loaded.PrimaryColorId = "missing-color";
         loaded.PatternId = "missing-pattern";
         loaded.TrailId = "missing-trail";
+        loaded.CrownId = "missing-crown";
         ProfileStore.Normalize(loaded);
-        if (loaded.PrimaryColorId != "cherry" || loaded.PatternId != "none" || loaded.TrailId != "off")
+        if (loaded.PrimaryColorId != "cherry" || loaded.PatternId != "none" || loaded.TrailId != "off" || loaded.CrownId != "none-crown")
         {
             Fail("Invalid cosmetic selections were not normalized.");
             return;

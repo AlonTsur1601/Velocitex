@@ -16,11 +16,13 @@ public partial class PlayerCannon3D : Node3D, IInteractable, IImpulseDevice
     public string InteractionPrompt => "FIRE CANNON";
     public bool HasFired { get; private set; }
     public bool HasSolidBodyHitbox =>
-        GetNodeOrNull<StaticBody3D>("CannonHitbox")?.GetChildren().OfType<CollisionShape3D>().Count(shape => !shape.Disabled) >= 4;
+        GetNodeOrNull<StaticBody3D>("CannonHitbox")?.GetChildren().OfType<CollisionShape3D>().Count(shape => !shape.Disabled) >= 8;
 
     private Label3D _keyLabel = null!;
     private MeshInstance3D _focusRing = null!;
     private Node3D _barrelRoot = null!;
+    private StaticBody3D _hitbox = null!;
+    private RigidBody3D? _lastFiredBody;
 
     public override void _Ready()
     {
@@ -55,6 +57,8 @@ public partial class PlayerCannon3D : Node3D, IInteractable, IImpulseDevice
         }
 
         HasFired = true;
+        target.AddCollisionExceptionWith(_hitbox);
+        _lastFiredBody = target;
         target.GlobalPosition = ToGlobal(MuzzleOffset);
         target.LinearVelocity = PreviewImpulse(target);
         target.AngularVelocity = Vector3.Zero;
@@ -69,6 +73,11 @@ public partial class PlayerCannon3D : Node3D, IInteractable, IImpulseDevice
 
     public void ResetCannon()
     {
+        if (_lastFiredBody is not null && GodotObject.IsInstanceValid(_lastFiredBody))
+        {
+            _lastFiredBody.RemoveCollisionExceptionWith(_hitbox);
+        }
+        _lastFiredBody = null;
         HasFired = false;
         _keyLabel.Hide();
         _focusRing.Scale = Vector3.One;
@@ -107,19 +116,19 @@ public partial class PlayerCannon3D : Node3D, IInteractable, IImpulseDevice
             RoomGeometry.AddVisualBox(this, $"Support{side}", new Vector3(0.36f, 2.4f, 0.5f), new Vector3(side * 1.25f, 1.35f, -0.4f), new Vector3(0.0f, 0.0f, Mathf.DegToRad(side * 8.0f)), string.Empty, Colors.White, 0.0f, 1.0f, bodyMaterial);
         }
 
-        StaticBody3D hitbox = new()
+        _hitbox = new StaticBody3D
         {
             Name = "CannonHitbox",
             CollisionLayer = 1,
             CollisionMask = 1,
         };
-        hitbox.AddChild(new CollisionShape3D
+        _hitbox.AddChild(new CollisionShape3D
         {
             Name = "TurntableHitbox",
             Position = new Vector3(0.0f, 0.22f, 0.0f),
             Shape = new CylinderShape3D { Radius = 1.7f, Height = 0.44f },
         });
-        hitbox.AddChild(new CollisionShape3D
+        _hitbox.AddChild(new CollisionShape3D
         {
             Name = "SeatHitbox",
             Position = new Vector3(0.0f, 0.75f, 1.2f),
@@ -127,7 +136,7 @@ public partial class PlayerCannon3D : Node3D, IInteractable, IImpulseDevice
         });
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            hitbox.AddChild(new CollisionShape3D
+            _hitbox.AddChild(new CollisionShape3D
             {
                 Name = side < 0.0f ? "LeftSupportHitbox" : "RightSupportHitbox",
                 Position = new Vector3(side * 1.25f, 1.35f, -0.4f),
@@ -135,7 +144,26 @@ public partial class PlayerCannon3D : Node3D, IInteractable, IImpulseDevice
                 Shape = new BoxShape3D { Size = new Vector3(0.36f, 2.4f, 0.5f) },
             });
         }
-        AddChild(hitbox);
+        Basis barrelBasis = new(Vector3.Right, Mathf.DegToRad(-55.0f));
+        Vector3 barrelCenter = new(0.0f, 1.65f, -0.7f);
+        Vector3[] barrelWallOffsets =
+        {
+            Vector3.Left * 1.02f,
+            Vector3.Right * 1.02f,
+            Vector3.Forward * 1.02f,
+            Vector3.Back * 1.02f,
+        };
+        for (int index = 0; index < barrelWallOffsets.Length; index++)
+        {
+            _hitbox.AddChild(new CollisionShape3D
+            {
+                Name = $"BarrelWallHitbox{index + 1}",
+                Position = barrelCenter + (barrelBasis * barrelWallOffsets[index]),
+                Rotation = new Vector3(Mathf.DegToRad(-55.0f), 0.0f, 0.0f),
+                Shape = new BoxShape3D { Size = new Vector3(0.16f, 4.4f, 0.16f) },
+            });
+        }
+        AddChild(_hitbox);
 
         _focusRing = new MeshInstance3D { Name = "FocusRing", Position = new Vector3(0.0f, 0.12f, 0.0f), Mesh = new TorusMesh { InnerRadius = 1.82f, OuterRadius = 1.96f, Rings = 32, RingSegments = 8 }, MaterialOverride = ringMaterial, CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
         AddChild(_focusRing);

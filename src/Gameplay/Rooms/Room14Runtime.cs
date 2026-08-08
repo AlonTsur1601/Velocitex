@@ -28,7 +28,7 @@ public partial class Room14Runtime : RoomRuntime
     private PlayerBall _player = null!;
     private PlayerCameraRig _cameraRig = null!;
     private readonly List<MomentumRail3D> _routeRails = new();
-    private readonly Dictionary<MomentumRail3D, (RailChoice Choice, bool Incoming)> _railRoutes = new();
+    private readonly Dictionary<MomentumRail3D, (RailChoice Choice, int Segment)> _railRoutes = new();
     private readonly List<RouteCheckpoint3D> _sequencePlates = new();
     private AudioStreamPlayer3D? _railAudio;
     private Transform3D _spawnTransform;
@@ -37,6 +37,7 @@ public partial class Room14Runtime : RoomRuntime
     private RailChoice _activeRail;
     private bool _completedIncomingRail;
     private bool _completedOutgoingRail;
+    private bool _completedUpperRail;
     private bool _switchedRail;
     private bool _runSolutionSmoke;
     private bool _runCorrectionSmoke;
@@ -80,8 +81,8 @@ public partial class Room14Runtime : RoomRuntime
 
         foreach (MomentumRail3D rail in _routeRails)
         {
-            (RailChoice choice, bool incoming) = _railRoutes[rail];
-            ConnectRail(rail, choice, incoming);
+            (RailChoice choice, int segment) = _railRoutes[rail];
+            ConnectRail(rail, choice, segment);
         }
 
         if (_runSolutionSmoke || _runCorrectionSmoke)
@@ -177,7 +178,7 @@ public partial class Room14Runtime : RoomRuntime
 
         TrackRailRide();
         TryCompleteGoal();
-        if (IsComplete)
+        if (IsComplete || IsExitTraversalPending)
         {
             if (!RouteRequirementsMet())
             {
@@ -242,7 +243,7 @@ public partial class Room14Runtime : RoomRuntime
         }
     }
 
-    private void ConnectRail(MomentumRail3D rail, RailChoice choice, bool incoming)
+    private void ConnectRail(MomentumRail3D rail, RailChoice choice, int segment)
     {
         rail.Attached += body =>
         {
@@ -278,14 +279,22 @@ public partial class Room14Runtime : RoomRuntime
 
             if (_activeSegmentTicks >= RequiredSegmentTicks)
             {
-                if (incoming)
+                if (segment == 0)
                 {
                     _completedIncomingRail = true;
                 }
-                else if (_completedIncomingRail)
+                else if (segment == 1 && _completedIncomingRail)
                 {
                     _completedOutgoingRail = true;
                 }
+                else if (segment == 2 && _completedOutgoingRail)
+                {
+                    _completedUpperRail = true;
+                }
+            }
+            if (segment == 1)
+            {
+                body.LinearVelocity = new Vector3(body.LinearVelocity.X, 0.0f, -7.0f);
             }
             _activeRail = RailChoice.None;
             if (_runSolutionSmoke || _runCorrectionSmoke)
@@ -305,18 +314,19 @@ public partial class Room14Runtime : RoomRuntime
 
     private bool RouteRequirementsMet()
     {
-        return _completedIncomingRail && _completedOutgoingRail && _nextSequencePlate == _sequencePlates.Count;
+        return _completedIncomingRail && _completedOutgoingRail && _completedUpperRail && _nextSequencePlate == _sequencePlates.Count;
     }
 
     private bool CleanRouteMet() =>
         _firstChoice != RailChoice.None &&
         _completedIncomingRail &&
         _completedOutgoingRail &&
+        _completedUpperRail &&
         !_switchedRail &&
-        _attachmentCount == 2;
+        _attachmentCount == 3;
 
     private string DescribeEvidence() =>
-        $"first={_firstChoice}, active={_activeRail}, switched={_switchedRail}, attachments={_attachmentCount}, incoming={_completedIncomingRail}, outgoing={_completedOutgoingRail}, segment_ticks={_activeSegmentTicks}, plates={_nextSequencePlate}/{_sequencePlates.Count}";
+        $"first={_firstChoice}, active={_activeRail}, switched={_switchedRail}, attachments={_attachmentCount}, incoming={_completedIncomingRail}, outgoing={_completedOutgoingRail}, upper={_completedUpperRail}, segment_ticks={_activeSegmentTicks}, plates={_nextSequencePlate}/{_sequencePlates.Count}";
 
     private Vector2 ResolveTraceInput(int tick)
     {
@@ -357,6 +367,7 @@ public partial class Room14Runtime : RoomRuntime
         _activeRail = RailChoice.None;
         _completedIncomingRail = false;
         _completedOutgoingRail = false;
+        _completedUpperRail = false;
         _switchedRail = false;
         _activeSegmentTicks = 0;
         _attachmentCount = 0;
@@ -404,17 +415,19 @@ public partial class Room14Runtime : RoomRuntime
         RoomGeometry.AddBox(this, "InterchangeExtensionOutgoing", new Vector3(24.0f, 0.5f, 4.0f), new Vector3(0.0f, 12.0f, -57.0f), Vector3.Zero, metal, pale.Darkened(0.08f), 0.4f, 0.66f);
         AddSideWalls("Interchange", new Vector3(0.0f, 12.925f, -48.0f), 22.0f, Vector3.Zero, 12.18f, copper, frame);
 
-        RoomGeometry.AddBox(this, "FinalDeck", new Vector3(18.0f, 0.5f, 85.0f), new Vector3(0.0f, 15.75f, -107.5f), Vector3.Zero, metal, pale.Darkened(0.02f), 0.4f, 0.66f);
-        AddSideWalls("Final", new Vector3(0.0f, 16.675f, -107.5f), 85.0f, Vector3.Zero, 9.18f, metal, frame);
+        RoomGeometry.AddBox(this, "UpperInterchange", new Vector3(24.0f, 0.5f, 18.0f), new Vector3(0.0f, 15.75f, -79.0f), Vector3.Zero, metal, pale.Darkened(0.06f), 0.4f, 0.66f);
+        AddSideWalls("UpperInterchange", new Vector3(0.0f, 16.675f, -79.0f), 18.0f, Vector3.Zero, 12.18f, copper, frame);
+        RoomGeometry.AddBox(this, "FinalDeck", new Vector3(18.0f, 0.5f, 48.0f), new Vector3(0.0f, 19.75f, -126.0f), Vector3.Zero, metal, pale.Darkened(0.02f), 0.4f, 0.66f);
+        AddSideWalls("Final", new Vector3(0.0f, 20.675f, -126.0f), 48.0f, Vector3.Zero, 9.18f, metal, frame);
 
-        (RailChoice Choice, float IncomingX, float InterchangeX, float OutgoingX, float LandingX, Color Color)[] routes =
+        (RailChoice Choice, float IncomingX, float InterchangeX, float OutgoingX, float UpperX, float FinalX, Color Color)[] routes =
         {
-            (RailChoice.Violet, -6.0f, -6.0f, -6.0f, -6.0f, new Color("b894d0")),
-            (RailChoice.Amber, -2.0f, -2.0f, 2.0f, 2.0f, new Color("c09365")),
-            (RailChoice.Teal, 2.0f, 2.0f, -2.0f, -2.0f, new Color("78a99c")),
-            (RailChoice.Rose, 6.0f, 6.0f, 6.0f, 6.0f, new Color("c8798d")),
+            (RailChoice.Violet, -6.0f, -6.0f, -6.0f, -6.0f, -2.0f, new Color("b894d0")),
+            (RailChoice.Amber, -2.0f, -2.0f, 2.0f, 2.0f, 6.0f, new Color("c09365")),
+            (RailChoice.Teal, 2.0f, 2.0f, -2.0f, -2.0f, -6.0f, new Color("78a99c")),
+            (RailChoice.Rose, 6.0f, 6.0f, 6.0f, 6.0f, 2.0f, new Color("c8798d")),
         };
-        foreach ((RailChoice choice, float incomingX, float interchangeX, float outgoingX, float landingX, Color color) in routes)
+        foreach ((RailChoice choice, float incomingX, float interchangeX, float outgoingX, float upperX, float finalX, Color color) in routes)
         {
             AddInterchangeStripe($"{choice}ChoiceGuide", new Vector3(incomingX, 5.28f, 12.0f), new Vector3(incomingX, 5.28f, 3.2f), color);
             MomentumRail3D incoming = CreateRail(
@@ -425,28 +438,39 @@ public partial class Room14Runtime : RoomRuntime
                 14.5f,
                 color,
                 coilCount: 10);
-            RegisterRouteRail(incoming, choice, incoming: true);
+            RegisterRouteRail(incoming, choice, segment: 0);
 
             AddInterchangeStripe($"{choice}InterchangeStripe", new Vector3(interchangeX, 12.28f, -41.2f), new Vector3(outgoingX, 12.28f, -54.0f), color);
 
             MomentumRail3D outgoing = CreateRail(
                 $"{choice}OutgoingRail",
-                new Vector3(outgoingX, 13.1f, -54.5f),
-                new Vector3(landingX, 17.0f, -68.0f),
+                new Vector3(outgoingX, 13.1f, -58.5f),
+                new Vector3(upperX, 17.0f, -71.0f),
                 0.95f,
                 14.5f,
                 color,
                 coilCount: 7);
-            RegisterRouteRail(outgoing, choice, incoming: false);
-            AddInterchangeStripe($"{choice}LandingGuide", new Vector3(landingX, 16.03f, -68.0f), new Vector3(landingX, 16.03f, -76.0f), color);
+            RegisterRouteRail(outgoing, choice, segment: 1);
+            AddInterchangeStripe($"{choice}UpperInterchangeStripe", new Vector3(upperX, 16.03f, -71.0f), new Vector3(finalX, 16.03f, -87.2f), color);
+
+            MomentumRail3D upper = CreateRail(
+                $"{choice}UpperRail",
+                new Vector3(finalX, 17.0f, -87.5f),
+                new Vector3(finalX, 21.0f, -103.0f),
+                0.95f,
+                14.5f,
+                color,
+                coilCount: 7);
+            RegisterRouteRail(upper, choice, segment: 2);
+            AddInterchangeStripe($"{choice}LandingGuide", new Vector3(finalX, 20.03f, -103.0f), new Vector3(finalX, 20.03f, -112.0f), color);
         }
 
-        AddSlalomBarrier("FinalSlalomOne", -89.0f, openingRight: true, copper, frame);
-        AddSequencePlate("FinalSwitchOne", 0, new Vector3(6.0f, 16.68f, -98.0f));
-        AddSlalomBarrier("FinalSlalomTwo", -106.0f, openingRight: false, copper, frame);
-        AddSequencePlate("FinalSwitchTwo", 1, new Vector3(-6.0f, 16.68f, -114.0f));
-        AddSlalomBarrier("FinalSlalomThree", -136.0f, openingRight: true, copper, frame);
-        AddSequencePlate("FinalSwitchThree", 2, new Vector3(5.5f, 16.68f, -142.0f));
+        AddSlalomBarrier("FinalSlalomOne", -115.0f, openingRight: true, copper, frame, 19.75f);
+        AddSequencePlate("FinalSwitchOne", 0, new Vector3(6.0f, 20.68f, -120.0f));
+        AddSlalomBarrier("FinalSlalomTwo", -128.0f, openingRight: false, copper, frame, 19.75f);
+        AddSequencePlate("FinalSwitchTwo", 1, new Vector3(-6.0f, 20.68f, -133.0f));
+        AddSlalomBarrier("FinalSlalomThree", -140.0f, openingRight: true, copper, frame, 19.75f);
+        AddSequencePlate("FinalSwitchThree", 2, new Vector3(5.5f, 20.68f, -144.0f));
 
         if (!_runSolutionSmoke && !_runCorrectionSmoke)
         {
@@ -463,7 +487,7 @@ public partial class Room14Runtime : RoomRuntime
         }
     }
 
-    private void AddSlalomBarrier(string name, float z, bool openingRight, string texture, Color tint)
+    private void AddSlalomBarrier(string name, float z, bool openingRight, string texture, Color tint, float floorY)
     {
         const float blockedWidth = 11.4f;
         float centerX = openingRight ? -3.3f : 3.3f;
@@ -471,7 +495,7 @@ public partial class Room14Runtime : RoomRuntime
             this,
             name,
             new Vector3(blockedWidth, 2.6f, 0.55f),
-            new Vector3(centerX, 17.3f, z),
+            new Vector3(centerX, floorY + 1.55f, z),
             Vector3.Zero,
             texture,
             tint,
@@ -491,13 +515,13 @@ public partial class Room14Runtime : RoomRuntime
     {
         if (useExplicitX)
         {
-            RoomGeometry.AddBox(this, $"{prefix}SideWall", new Vector3(0.36f, 1.35f, length), center, rotation, texture, tint, 0.42f, 0.62f);
+            RoomGeometry.AddWall(this, $"{prefix}SideWall", new Vector3(0.36f, 1.35f, length), center, rotation, texture, tint, 0.42f, 0.62f);
             return;
         }
 
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(
+            RoomGeometry.AddWall(
                 this,
                 $"{prefix}SideWall{(side < 0.0f ? "Left" : "Right")}",
                 new Vector3(0.36f, 1.35f, length),
@@ -526,6 +550,7 @@ public partial class Room14Runtime : RoomRuntime
             LocalEnd = end,
             CaptureRadius = captureRadius,
             MinimumSpeed = minimumSpeed,
+            RideClearance = 0.35f,
             CollisionMask = 1,
         };
         AddChild(rail);
@@ -533,10 +558,10 @@ public partial class Room14Runtime : RoomRuntime
         return rail;
     }
 
-    private void RegisterRouteRail(MomentumRail3D rail, RailChoice choice, bool incoming)
+    private void RegisterRouteRail(MomentumRail3D rail, RailChoice choice, int segment)
     {
         _routeRails.Add(rail);
-        _railRoutes[rail] = (choice, incoming);
+        _railRoutes[rail] = (choice, segment);
     }
 
     private void AddInterchangeStripe(string name, Vector3 start, Vector3 end, Color color)
@@ -565,10 +590,14 @@ public partial class Room14Runtime : RoomRuntime
     private void AddRailVisuals(string prefix, Vector3 start, Vector3 end, Color color, int coilCount)
     {
         const string metal = "res://assets/textures/brushed_metal.png";
-        Vector3 path = end - start;
+        Vector3 fullPath = end - start;
+        Vector3 fullDirection = fullPath.Normalized();
+        Vector3 visualStart = start + (fullDirection * 0.65f);
+        Vector3 visualEnd = end - (fullDirection * 0.65f);
+        Vector3 path = visualEnd - visualStart;
         float length = path.Length();
         Vector3 direction = path.Normalized();
-        Vector3 center = (start + end) * 0.5f;
+        Vector3 center = (visualStart + visualEnd) * 0.5f;
         Basis pathBasis = new(new Quaternion(Vector3.Back, direction));
         Vector3 lateral = pathBasis.X.Normalized();
 
@@ -578,7 +607,7 @@ public partial class Room14Runtime : RoomRuntime
                 this,
                 $"{prefix}GuideBeam{(side < 0.0f ? "Left" : "Right")}",
                 new Vector3(0.18f, 0.18f, length),
-                center - (Vector3.Up * 0.48f) + (lateral * side * 0.42f),
+                center - (Vector3.Up * 0.28f) + (lateral * side * 0.42f),
                 Vector3.Zero,
                 metal,
                 color.Lerp(Colors.White, 0.18f),
@@ -596,7 +625,7 @@ public partial class Room14Runtime : RoomRuntime
             Name = name,
             CheckpointIndex = index,
             Position = position,
-            TriggerSize = new Vector3(5.0f, 1.5f, 4.2f),
+            TriggerSize = new Vector3(6.5f, 1.5f, 5.0f),
             FrameTint = RoomGeometry.SequenceButtonFrameTint,
             FlatFloorMarker = true,
             FloorMarkerInset = 0.10f,
@@ -607,7 +636,7 @@ public partial class Room14Runtime : RoomRuntime
             {
                 return;
             }
-            if (entered.CheckpointIndex != _nextSequencePlate) { entered.FlashDenied(); return; }
+            if (entered.CheckpointIndex != _nextSequencePlate) { return; }
             entered.Activate();
             _nextSequencePlate++;
             if (_runSolutionSmoke || _runCorrectionSmoke)
@@ -627,7 +656,7 @@ public partial class Room14Runtime : RoomRuntime
         // The door plane now sits directly in the carved front shell wall at
         // Z=-150.  Keeping the goal 1.08 m inside matches AddGoalExitDoor and
         // removes the former pocket of wall geometry in front of the frame.
-        Vector3 goalPosition = new(5.5f, 16.9f, -148.92f);
+        Vector3 goalPosition = new(4.0f, 20.9f, -148.92f);
         Area3D goal = new()
         {
             Name = "GoalCup",
@@ -636,7 +665,8 @@ public partial class Room14Runtime : RoomRuntime
             CollisionMask = 1,
             Monitoring = true,
         };
-        goal.AddChild(new CollisionShape3D { Shape = new CylinderShape3D { Radius = 2.0f, Height = 2.7f } });
+        CollisionShape3D goalCollision = new() { Shape = new CylinderShape3D { Radius = 2.5f, Height = 2.7f } };
+        goal.AddChild(goalCollision);
         goal.BodyEntered += body =>
         {
             if (body is PlayerBall)
@@ -665,7 +695,12 @@ public partial class Room14Runtime : RoomRuntime
     private bool _goalOverlapsPlayer()
     {
         Area3D? goal = GetNodeOrNull<Area3D>("GoalCup");
-        return goal is not null && goal.GetOverlappingBodies().Contains(_player);
+        if (goal is null)
+        {
+            return false;
+        }
+        Vector3 position = _player.Position;
+        return Mathf.Abs(position.X) <= 9.0f && position.Y >= 19.0f && position.Y <= 23.0f && position.Z <= -142.0f;
     }
 
     private void FailSolutionSmoke(string message)

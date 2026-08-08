@@ -40,7 +40,9 @@ $scenes = @(
     "res://scenes/Room25.tscn",
     "res://scenes/Room26.tscn",
     "res://scenes/Room27.tscn",
-    "res://scenes/Room28.tscn"
+    "res://scenes/Room28.tscn",
+    "res://scenes/Room29.tscn",
+    "res://scenes/Room30.tscn"
 )
 
 foreach ($scene in $scenes) {

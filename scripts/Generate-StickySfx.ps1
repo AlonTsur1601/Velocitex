@@ -2,73 +2,88 @@ param()
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
-$outputDirectory = Join-Path $root "assets\audio\sfx"
-$outputPath = Join-Path $outputDirectory "surface_sticky_contact.wav"
-New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
-
-$sampleRate = 44100
-$durationSeconds = 0.42
-$frameCount = [int]($sampleRate * $durationSeconds)
-$channelCount = 2
-$samples = [int16[]]::new($frameCount * $channelCount)
-$random = [System.Random]::new(73129)
-$filteredNoiseLeft = 0.0
-$filteredNoiseRight = 0.0
-
-for ($index = 0; $index -lt $frameCount; $index++) {
-    $time = $index / [double]$sampleRate
-    $normalized = $time / $durationSeconds
-    $attack = [Math]::Min($time / 0.004, 1.0)
-    $decay = [Math]::Pow([Math]::Max(1.0 - $normalized, 0.0), 1.45)
-    $envelope = $attack * $decay
-
-    $whiteNoiseLeft = ($random.NextDouble() * 2.0) - 1.0
-    $whiteNoiseRight = ($random.NextDouble() * 2.0) - 1.0
-    $filteredNoiseLeft += ($whiteNoiseLeft - $filteredNoiseLeft) * 0.075
-    $filteredNoiseRight += ($whiteNoiseRight - $filteredNoiseRight) * 0.075
-    $textureLeft = ($whiteNoiseLeft - $filteredNoiseLeft) * 0.58
-    $textureRight = ($whiteNoiseRight - $filteredNoiseRight) * 0.58
-
-    $snapAEnvelope = [Math]::Exp(-[Math]::Abs($time - 0.105) * 112.0)
-    $snapBEnvelope = [Math]::Exp(-[Math]::Abs($time - 0.238) * 138.0)
-    $snapA = [Math]::Sin(2.0 * [Math]::PI * 520.0 * $time) * $snapAEnvelope * 0.22
-    $snapB = [Math]::Sin(2.0 * [Math]::PI * 760.0 * $time) * $snapBEnvelope * 0.16
-    $tack = [Math]::Sin(2.0 * [Math]::PI * 410.0 * $time) * [Math]::Exp(-11.0 * $time) * 0.18
-
-    $leftValue = ($envelope * (($textureLeft * 0.72) + $tack)) + ($snapA * 0.95) + ($snapB * 0.58)
-    $rightValue = ($envelope * (($textureRight * 0.72) + ($tack * 0.94))) + ($snapA * 0.58) + ($snapB * 0.95)
-    $leftClipped = [Math]::Tanh($leftValue * 1.34) * 0.76
-    $rightClipped = [Math]::Tanh($rightValue * 1.34) * 0.76
-    $leftClamped = [Math]::Max(-1.0, [Math]::Min(1.0, $leftClipped))
-    $rightClamped = [Math]::Max(-1.0, [Math]::Min(1.0, $rightClipped))
-    $samples[$index * 2] = [int16]([Math]::Round($leftClamped * 32767.0))
-    $samples[($index * 2) + 1] = [int16]([Math]::Round($rightClamped * 32767.0))
+$sourcePath = Join-Path $root "assets\audio\source\slime_foley_reference_cc0.wav"
+$outputPath = Join-Path $root "assets\audio\sfx\surface_sticky_contact.wav"
+$bytes = [IO.File]::ReadAllBytes($sourcePath)
+$sourceChannels = [BitConverter]::ToInt16($bytes, 22)
+$sourceRate = [BitConverter]::ToInt32($bytes, 24)
+$bits = [BitConverter]::ToInt16($bytes, 34)
+$chunkOffset = 12
+$dataOffset = 0
+while ($chunkOffset + 8 -le $bytes.Length) {
+    $chunkId = [Text.Encoding]::ASCII.GetString($bytes, $chunkOffset, 4)
+    $chunkLength = [BitConverter]::ToInt32($bytes, $chunkOffset + 4)
+    if ($chunkId -eq "data") { $dataOffset = $chunkOffset + 8; break }
+    $chunkOffset += 8 + $chunkLength + ($chunkLength % 2)
 }
+if ($sourceChannels -ne 1 -or $bits -ne 16 -or $dataOffset -eq 0) {
+    throw "The CC0 slime Foley source must be mono 16-bit PCM with a standard WAV header."
+}
+$source = [double[]]::new(($bytes.Length - $dataOffset) / 2)
+for ($index = 0; $index -lt $source.Length; $index++) { $source[$index] = [BitConverter]::ToInt16($bytes, $dataOffset + ($index * 2)) / 32768.0 }
 
-$stream = [System.IO.File]::Open($outputPath, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write)
-$writer = [System.IO.BinaryWriter]::new($stream)
-try {
-    $dataLength = $frameCount * $channelCount * 2
-    $writer.Write([System.Text.Encoding]::ASCII.GetBytes("RIFF"))
-    $writer.Write([int](36 + $dataLength))
-    $writer.Write([System.Text.Encoding]::ASCII.GetBytes("WAVE"))
-    $writer.Write([System.Text.Encoding]::ASCII.GetBytes("fmt "))
-    $writer.Write([int]16)
-    $writer.Write([int16]1)
-    $writer.Write([int16]$channelCount)
-    $writer.Write([int]$sampleRate)
-    $writer.Write([int]($sampleRate * $channelCount * 2))
-    $writer.Write([int16]($channelCount * 2))
-    $writer.Write([int16]16)
-    $writer.Write([System.Text.Encoding]::ASCII.GetBytes("data"))
-    $writer.Write([int]$dataLength)
-    foreach ($sample in $samples) {
-        $writer.Write($sample)
+$outputRate = 44100
+$durationSeconds = 1.08
+$frameCount = [int]($outputRate * $durationSeconds)
+$left = [double[]]::new($frameCount)
+$right = [double[]]::new($frameCount)
+$events = @(
+    @{ Source=10.72; At=0.00; Length=0.82; Speed=0.86; Gain=1.00; Reverse=$false },
+    @{ Source=14.66; At=0.20; Length=0.70; Speed=1.14; Gain=0.58; Reverse=$true },
+    @{ Source=9.42; At=0.50; Length=0.48; Speed=0.94; Gain=0.44; Reverse=$false }
+)
+foreach ($event in $events) {
+    $eventFrames = [int]($event.Length * $outputRate)
+    for ($localFrame = 0; $localFrame -lt $eventFrames; $localFrame++) {
+        $outputFrame = [int]($event.At * $outputRate) + $localFrame
+        if ($outputFrame -ge $frameCount) { break }
+        $progress = $localFrame / [double]([Math]::Max(1, $eventFrames - 1))
+        $attack = [Math]::Min($progress / 0.025, 1.0)
+        $release = [Math]::Pow([Math]::Max(1.0 - $progress, 0.0), 0.72)
+        $envelope = $attack * $release
+        $sourceProgress = if ($event.Reverse) { 1.0 - $progress } else { $progress }
+        $sourcePosition = ($event.Source + ($sourceProgress * $event.Length * $event.Speed)) * $sourceRate
+        $sourceIndex = [int][Math]::Floor($sourcePosition)
+        if ($sourceIndex -lt 0 -or $sourceIndex + 2 -ge $source.Length) { continue }
+        $fraction = $sourcePosition - $sourceIndex
+        $sample = ($source[$sourceIndex] * (1.0 - $fraction)) + ($source[$sourceIndex + 1] * $fraction)
+        $rightIndex = [Math]::Min($source.Length - 1, $sourceIndex + 97)
+        $rightSample = ($sample * 0.62) + ($source[$rightIndex] * 0.38)
+        $left[$outputFrame] += $sample * $envelope * $event.Gain
+        $right[$outputFrame] += $rightSample * $envelope * $event.Gain
     }
 }
-finally {
-    $writer.Dispose()
-    $stream.Dispose()
+
+$filterAlpha = 1.0 - [Math]::Exp((-2.0 * [Math]::PI * 1800.0) / $outputRate)
+$leftStageOne = 0.0; $leftStageTwo = 0.0; $rightStageOne = 0.0; $rightStageTwo = 0.0
+for ($index = 0; $index -lt $frameCount; $index++) {
+    $leftStageOne += $filterAlpha * ($left[$index] - $leftStageOne)
+    $leftStageTwo += $filterAlpha * ($leftStageOne - $leftStageTwo)
+    $rightStageOne += $filterAlpha * ($right[$index] - $rightStageOne)
+    $rightStageTwo += $filterAlpha * ($rightStageOne - $rightStageTwo)
+    $left[$index] = $leftStageTwo
+    $right[$index] = $rightStageTwo
 }
 
-Write-Output "STICKY_SFX_GENERATION_PASS: $outputPath ($frameCount stereo frames at ${sampleRate}Hz)."
+$peak = 0.0
+for ($index = 0; $index -lt $frameCount; $index++) {
+    $peak = [Math]::Max($peak, [Math]::Abs($left[$index])); $peak = [Math]::Max($peak, [Math]::Abs($right[$index]))
+}
+$gain = if ($peak -gt 0.0) { 0.72 / $peak } else { 1.0 }
+$samples = [int16[]]::new($frameCount * 2)
+for ($index = 0; $index -lt $frameCount; $index++) {
+    $samples[$index * 2] = [int16]([Math]::Round([Math]::Tanh($left[$index] * $gain) * 29400.0))
+    $samples[$index * 2 + 1] = [int16]([Math]::Round([Math]::Tanh($right[$index] * $gain) * 29400.0))
+}
+
+$stream = [IO.File]::Open($outputPath, [IO.FileMode]::Create, [IO.FileAccess]::Write)
+$writer = [IO.BinaryWriter]::new($stream)
+try {
+    $dataLength = $frameCount * 4
+    $writer.Write([Text.Encoding]::ASCII.GetBytes("RIFF")); $writer.Write([int](36 + $dataLength)); $writer.Write([Text.Encoding]::ASCII.GetBytes("WAVEfmt ")); $writer.Write([int]16)
+    $writer.Write([int16]1); $writer.Write([int16]2); $writer.Write([int]$outputRate); $writer.Write([int]($outputRate * 4)); $writer.Write([int16]4); $writer.Write([int16]16)
+    $writer.Write([Text.Encoding]::ASCII.GetBytes("data")); $writer.Write([int]$dataLength); foreach ($sample in $samples) { $writer.Write($sample) }
+}
+finally { $writer.Dispose(); $stream.Dispose() }
+
+Write-Output "STICKY_SFX_GENERATION_PASS: three transformed Foley squeezes form an original sticky contact -> $outputPath"

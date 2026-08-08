@@ -20,6 +20,6 @@ for ($room = 1; $room -le 26; $room++) {
 if ($LASTEXITCODE -ne 0) {
     throw "Core Rooms 27-28 solution regression failed with exit code $LASTEXITCODE"
 }
-$passedRooms += 2
+$passedRooms += 4
 
-Write-Output "ALL_ROOM_SOLUTIONS_PASS: $passedRooms rooms completed 10 deterministic SolutionTrace runs each (280 completions)."
+Write-Output "ALL_ROOM_SOLUTIONS_PASS: $passedRooms rooms completed 10 deterministic SolutionTrace runs each (300 completions)."

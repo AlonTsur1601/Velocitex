@@ -9,13 +9,20 @@ public partial class MomentumRail3D : Area3D
     [Export] public Vector3 LocalEnd { get; set; } = new(0.0f, 5.0f, -10.0f);
     [Export] public float CaptureRadius { get; set; } = 2.2f;
     [Export] public float MinimumSpeed { get; set; } = 13.0f;
+    [Export] public float RideClearance { get; set; }
+    [Export] public bool ReleaseOnBodyExit { get; set; } = true;
 
     public event Action<RigidBody3D>? Attached;
     public event Action<RigidBody3D>? Released;
 
     private readonly Dictionary<RigidBody3D, RailRide> _attachedBodies = new();
 
-    private readonly record struct RailRide(float StoredGravityScale, float DirectionSign);
+    private sealed class RailRide(float storedGravityScale, float directionSign)
+    {
+        public float StoredGravityScale { get; } = storedGravityScale;
+        public float DirectionSign { get; } = directionSign;
+        public float ClearanceOffset { get; set; }
+    }
 
     public override void _Ready()
     {
@@ -35,6 +42,7 @@ public partial class MomentumRail3D : Area3D
         {
             if (GodotObject.IsInstanceValid(body))
             {
+                body.GlobalPosition -= Vector3.Up * ride.ClearanceOffset;
                 body.GravityScale = ride.StoredGravityScale;
             }
             ClearActiveClaim(body);
@@ -65,9 +73,14 @@ public partial class MomentumRail3D : Area3D
 
             Vector3 travelStart = ride.DirectionSign > 0.0f ? start : end;
             Vector3 travelDirection = direction * ride.DirectionSign;
-            float progress = (body.GlobalPosition - travelStart).Dot(travelDirection) / length;
-            Vector3 closest = travelStart + travelDirection * Mathf.Clamp(progress, 0.0f, 1.0f) * length;
-            Vector3 correction = closest - body.GlobalPosition;
+            Vector3 baselinePosition = body.GlobalPosition - Vector3.Up * ride.ClearanceOffset;
+            float progress = (baselinePosition - travelStart).Dot(travelDirection) / length;
+            float clampedProgress = Mathf.Clamp(progress, 0.0f, 1.0f);
+            Vector3 closest = travelStart + travelDirection * clampedProgress * length;
+            float clearanceOffset = Mathf.Sin(clampedProgress * Mathf.Pi) * RideClearance;
+            body.GlobalPosition += Vector3.Up * (clearanceOffset - ride.ClearanceOffset);
+            ride.ClearanceOffset = clearanceOffset;
+            Vector3 correction = closest - baselinePosition;
             if (progress >= 0.975f)
             {
                 ReleaseBody(body, ride, travelDirection);
@@ -93,8 +106,9 @@ public partial class MomentumRail3D : Area3D
 
     public void ResetBody(RigidBody3D body)
     {
-        if (_attachedBodies.Remove(body, out RailRide ride))
+        if (_attachedBodies.Remove(body, out RailRide? ride) && ride is not null)
         {
+            body.GlobalPosition -= Vector3.Up * ride.ClearanceOffset;
             body.GravityScale = ride.StoredGravityScale;
             ClearActiveClaim(body);
         }
@@ -146,7 +160,12 @@ public partial class MomentumRail3D : Area3D
 
     private void OnBodyExited(Node3D body)
     {
-        if (body is not RigidBody3D rigidBody || !_attachedBodies.TryGetValue(rigidBody, out RailRide ride))
+        if (!ReleaseOnBodyExit)
+        {
+            return;
+        }
+
+        if (body is not RigidBody3D rigidBody || !_attachedBodies.TryGetValue(rigidBody, out RailRide? ride) || ride is null)
         {
             return;
         }
@@ -164,6 +183,7 @@ public partial class MomentumRail3D : Area3D
 
         ClearActiveClaim(body);
         float speed = Mathf.Max(MinimumSpeed, body.LinearVelocity.Dot(direction));
+        body.GlobalPosition -= Vector3.Up * ride.ClearanceOffset;
         body.GravityScale = ride.StoredGravityScale;
         body.LinearVelocity = direction * speed;
         Released?.Invoke(body);

@@ -1,3 +1,8 @@
+param(
+    [ValidatePattern("^\d+\.\d+\.\d+$")]
+    [string]$Version
+)
+
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $godot = Get-ChildItem -LiteralPath (Join-Path $root ".tools\Godot") -Recurse -Filter "Godot*_mono_win64_console.exe" | Select-Object -First 1
@@ -10,7 +15,11 @@ $env:NUGET_PACKAGES = Join-Path $root ".packages\nuget"
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = "1"
 $env:DOTNET_NOLOGO = "1"
 
-& (Join-Path $PSScriptRoot "Build.ps1")
+if ($Version) {
+    & (Join-Path $PSScriptRoot "Build.ps1") -Version $Version
+} else {
+    & (Join-Path $PSScriptRoot "Build.ps1")
+}
 if ($LASTEXITCODE -ne 0) {
     throw "Project build failed with code $LASTEXITCODE."
 }
@@ -69,8 +78,17 @@ if (-not (Test-Path -LiteralPath $outputExe)) {
     throw "Velocitex.exe was not created. $details"
 }
 
+$updaterPublish = Join-Path $root "builds\windows\updater-publish"
+if (Test-Path -LiteralPath $updaterPublish) { Remove-Item -LiteralPath $updaterPublish -Recurse -Force }
+dotnet publish (Join-Path $root "tools\VelocitexUpdater\VelocitexUpdater.csproj") --configuration Release --runtime win-x64 --self-contained true --output $updaterPublish
+if ($LASTEXITCODE -ne 0) { throw "Velocitex updater publish failed with code $LASTEXITCODE." }
+$updaterExe = Join-Path $updaterPublish "VelocitexUpdater.exe"
+if (-not (Test-Path -LiteralPath $updaterExe)) { throw "Velocitex updater executable was not created." }
+Copy-Item -LiteralPath $updaterExe -Destination (Join-Path $outputRoot "VelocitexUpdater.exe") -Force
+Remove-Item -LiteralPath $updaterPublish -Recurse -Force
+
 $exportedFiles = @(Get-ChildItem -LiteralPath $outputRoot -Recurse -File)
-foreach ($runtimeFile in @("hostfxr.dll", "coreclr.dll", "Velocitex.dll")) {
+foreach ($runtimeFile in @("hostfxr.dll", "coreclr.dll", "Velocitex.dll", "VelocitexUpdater.exe")) {
     if ($exportedFiles.Name -notcontains $runtimeFile) {
         throw "Windows export is incomplete: $runtimeFile is missing."
     }
@@ -78,7 +96,7 @@ foreach ($runtimeFile in @("hostfxr.dll", "coreclr.dll", "Velocitex.dll")) {
 
 $smokeOut = Join-Path $outputRoot "smoke-stdout.log"
 $smokeErr = Join-Path $outputRoot "smoke-stderr.log"
-$smoke = Start-Process -FilePath $outputExe -ArgumentList @("--headless", "--quit-after", "3") `
+$smoke = Start-Process -FilePath $outputExe -ArgumentList @("--headless", "--quit-after", "3", "--", "--updater-location-smoke") `
     -WindowStyle Hidden -PassThru -RedirectStandardOutput $smokeOut -RedirectStandardError $smokeErr
 if (-not $smoke.WaitForExit(20000)) {
     Stop-Process -Id $smoke.Id -Force
@@ -92,6 +110,9 @@ if ($null -ne $smoke.ExitCode -and $smoke.ExitCode -ne 0) {
 if ((Test-Path -LiteralPath $smokeErr) -and (Get-Item -LiteralPath $smokeErr).Length -gt 0) {
     throw "Exported Velocitex.exe reported runtime warnings or errors: $(Get-Content -LiteralPath $smokeErr -Raw)"
 }
+if ((Get-Content -LiteralPath $smokeOut -Raw) -notmatch "UPDATER_LOCATION_SMOKE_PASS") {
+    throw "Exported Velocitex.exe could not locate its bundled updater: $(Get-Content -LiteralPath $smokeOut -Raw)"
+}
 
 foreach ($log in @($exportOut, $exportErr, $smokeOut, $smokeErr)) {
     if (Test-Path -LiteralPath $log) {
@@ -99,6 +120,29 @@ foreach ($log in @($exportOut, $exportErr, $smokeOut, $smokeErr)) {
     }
 }
 
+$releaseZip = Join-Path $outputRoot "Velocitex.zip"
+if (Test-Path -LiteralPath $releaseZip) {
+    Remove-Item -LiteralPath $releaseZip -Force
+}
+
+$archiveInputs = @(Get-ChildItem -LiteralPath $outputRoot -Force | Where-Object { $_.FullName -ne $releaseZip })
+Compress-Archive -LiteralPath $archiveInputs.FullName -DestinationPath $releaseZip -CompressionLevel Fastest
+if (-not (Test-Path -LiteralPath $releaseZip)) {
+    throw "Release archive was not created: $releaseZip"
+}
+
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$archive = [System.IO.Compression.ZipFile]::OpenRead($releaseZip)
+try {
+    foreach ($requiredEntry in @("Velocitex.exe", "Velocitex.pck", "VelocitexUpdater.exe")) {
+        if ($archive.Entries.FullName -notcontains $requiredEntry) {
+            throw "Release archive is incomplete: $requiredEntry is missing."
+        }
+    }
+} finally {
+    $archive.Dispose()
+}
+
 $fileCount = (Get-ChildItem -LiteralPath $outputRoot -Recurse -File).Count
 $totalBytes = (Get-ChildItem -LiteralPath $outputRoot -Recurse -File | Measure-Object Length -Sum).Sum
-Write-Output "WINDOWS_EXPORT_PASS: $outputExe ($fileCount files, $([Math]::Round($totalBytes / 1MB, 1)) MB)"
+Write-Output "WINDOWS_EXPORT_PASS: $outputExe ($fileCount files, $([Math]::Round($totalBytes / 1MB, 1)) MB); RELEASE_ZIP_PASS: $releaseZip ($([Math]::Round((Get-Item -LiteralPath $releaseZip).Length / 1MB, 1)) MB)"

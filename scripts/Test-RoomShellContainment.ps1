@@ -6,11 +6,11 @@ if (-not $godot) {
     throw "Portable Godot console executable was not found."
 }
 
-$rooms = if ($args.Count -gt 0) { @($args | ForEach-Object { [int]$_ }) } else { @(1..28) }
+$rooms = if ($args.Count -gt 0) { @($args | ForEach-Object { [int]$_ }) } else { @(1..30) }
 $results = [System.Collections.Generic.List[string]]::new()
 foreach ($room in $rooms) {
-    if ($room -lt 1 -or $room -gt 28) {
-        throw "Room number $room is outside the supported 01-28 range."
+    if ($room -lt 1 -or $room -gt 30) {
+        throw "Room number $room is outside the supported 01-30 range."
     }
 
     $ErrorActionPreference = "Continue"

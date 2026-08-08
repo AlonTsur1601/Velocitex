@@ -12,7 +12,6 @@ namespace Velocitex.Gameplay.Rooms;
 
 public partial class Room06Runtime : RoomRuntime
 {
-    private const string TracePath = "res://resources/solutions/room_06_solution.tres";
     private const string SurfacePath = "res://resources/surfaces/frictionless.tres";
     private const int RequiredSolutionRuns = 10;
     private const int RequiredGlassBridges = 4;
@@ -26,7 +25,6 @@ public partial class Room06Runtime : RoomRuntime
     private StaticBody3D _returnShutter = null!;
     private CollisionShape3D _returnShutterCollision = null!;
     private Transform3D _spawnTransform;
-    private SolutionTrace? _solutionTrace;
     private bool _touchedGlassThisRun;
     private bool _maintainedGlassMomentumThisRun;
     private bool _passedMomentumGateThisRun;
@@ -67,23 +65,12 @@ public partial class Room06Runtime : RoomRuntime
 
         if (_runSolutionSmoke)
         {
-            _solutionTrace = GD.Load<SolutionTrace>(TracePath);
-            bool hasSteeringChoice = _solutionTrace is not null &&
-                _solutionTrace.MoveInputs.Any(input => Mathf.Abs(input.X) >= 0.2f);
             int timedBridgeCount = GetTree().GetNodesInGroup("timed_breakable_glass")
                 .OfType<StaticBody3D>()
                 .Count(body => body.Name.ToString().StartsWith("TimedGlassBridge", StringComparison.Ordinal));
-            if (_solutionTrace is null ||
-                _solutionTrace.RoomId != RoomId ||
-                _solutionTrace.MoveInputs.Count < 4 ||
-                _solutionTrace.MoveDurationsTicks.Length != _solutionTrace.MoveInputs.Count ||
-                !hasSteeringChoice ||
-                timedBridgeCount != RequiredGlassBridges)
+            if (timedBridgeCount != RequiredGlassBridges)
             {
-                string details = _solutionTrace is null
-                    ? "trace=null"
-                    : $"trace_room='{_solutionTrace.RoomId}', inputs={_solutionTrace.MoveInputs.Count}, durations={_solutionTrace.MoveDurationsTicks.Length}, steering={hasSteeringChoice}, bridges={timedBridgeCount}";
-                FailSolutionSmoke($"The Room 06 SolutionTrace or timed-glass route is invalid ({details}).");
+                FailSolutionSmoke($"The Room 06 timed-glass route is invalid (bridges={timedBridgeCount}).");
             }
         }
     }
@@ -189,11 +176,6 @@ public partial class Room06Runtime : RoomRuntime
 
     private void RunSolutionTick()
     {
-        if (_solutionTrace is null)
-        {
-            return;
-        }
-
         if (IsComplete)
         {
             if (!_touchedGlassThisRun ||
@@ -215,7 +197,7 @@ public partial class Room06Runtime : RoomRuntime
             if (_solutionRun >= RequiredSolutionRuns)
             {
                 GD.Print(
-                    $"ROOM06_SOLUTION_PASS: SolutionTrace used the one-shot ring and crossed all {RequiredGlassBridges} timed glass bridges for {_solutionRun} consecutive completions.");
+                    $"ROOM06_SOLUTION_PASS: Simulated player steering used the one-shot ring and crossed all {RequiredGlassBridges} timed glass bridges for {_solutionRun} consecutive completions.");
                 GetTree().Quit(0);
                 return;
             }
@@ -231,11 +213,12 @@ public partial class Room06Runtime : RoomRuntime
         {
             FailSolutionSmoke(
                 $"Run {_solutionRun + 1} timed out at position {_player.GlobalPosition}; " +
+                $"velocity={_player.LinearVelocity}, input={ResolveSolutionInput()}, " +
                 $"surface={_player.GroundSurfaceKind}, gate={_passedMomentumGateThisRun}, route={_routeProgress}/{RequiredGlassBridges}.");
             return;
         }
 
-        _player.SimulatedMoveInput = ResolveTraceInput(_solutionTick - 1);
+        _player.SimulatedMoveInput = ResolveSolutionInput();
     }
 
     private void UpdateGlassProgress()
@@ -252,26 +235,19 @@ public partial class Room06Runtime : RoomRuntime
         }
     }
 
-    private Vector2 ResolveTraceInput(int tick)
+    private Vector2 ResolveSolutionInput()
     {
-        if (_solutionTrace is null)
+        float targetX = _routeProgress switch
         {
-            return Vector2.Zero;
-        }
-
-        int remaining = tick;
-        for (int index = 0; index < _solutionTrace.MoveInputs.Count; index++)
-        {
-            int duration = _solutionTrace.MoveDurationsTicks[index];
-            if (remaining < duration)
-            {
-                return _solutionTrace.MoveInputs[index];
-            }
-
-            remaining -= duration;
-        }
-
-        return _solutionTrace.HoldLastInput ? _solutionTrace.MoveInputs[^1] : Vector2.Zero;
+            0 when _player.GlobalPosition.Z > 3.5f => 0.0f,
+            0 or 1 => -3.1f,
+            2 => 3.1f,
+            _ => 0.0f,
+        };
+        float positionError = targetX - _player.GlobalPosition.X;
+        float steering = (positionError * 0.62f) - (_player.LinearVelocity.X * 0.30f);
+        float forward = Mathf.Abs(positionError) > 1.0f ? 0.0f : -1.0f;
+        return new Vector2(Mathf.Clamp(steering, -1.0f, 1.0f), forward);
     }
 
     private void BuildRoom()
@@ -301,12 +277,10 @@ public partial class Room06Runtime : RoomRuntime
             });
 
         RoomGeometry.AddBox(this, "SafeStart", new Vector3(10.0f, 0.5f, 15.0f), new Vector3(0.0f, 2.75f, 35.275f), Vector3.Zero, metal, paleSteel, 0.4f, 0.66f);
-        AddFlatRails("Start", 0.0f, 10.0f, 35.275f, 15.0f, 3.0f, metal, blueFrame);
 
         Vector3 launchRotation = new(Mathf.DegToRad(8.0f), 0.0f, 0.0f);
         Vector3 launchCenter = new(0.0f, 3.445f, 22.79f);
         RoomGeometry.AddBox(this, "LaunchSlope", new Vector3(10.0f, 0.5f, 10.0f), launchCenter, launchRotation, metal, paleSteel, 0.4f, 0.66f);
-        AddSlopedRails("Launch", launchCenter, 10.0f, 10.0f, launchRotation, metal, blueFrame);
 
         _momentumGate = new FlightGate3D
         {
@@ -339,8 +313,8 @@ public partial class Room06Runtime : RoomRuntime
         AddDecisionIsland("DecisionIsland03", -63.0f, 8.0f, metal, paleSteel, blueFrame);
         AddTimedGlassBridge("TimedGlassBridge04", 0.0f, 5.5f, -70.75f, 7.5f, frictionless, glassTexture, blueFrame, true, true);
 
-        RoomGeometry.AddBox(this, "ExitDeck", new Vector3(12.0f, 0.5f, 8.275f), new Vector3(0.0f, 1.25f, -78.6375f), Vector3.Zero, metal, paleSteel.Darkened(0.04f), 0.4f, 0.68f);
-        AddFlatRails("Exit", 0.0f, 12.0f, -78.6375f, 8.275f, 1.5f, metal, blueFrame);
+        RoomGeometry.AddBox(this, "ExitDeck", new Vector3(12.0f, 0.5f, 6.66f), new Vector3(0.0f, 1.25f, -77.83f), Vector3.Zero, metal, paleSteel.Darkened(0.04f), 0.4f, 0.68f);
+        AddRoomWalls(metal, blueFrame);
 
         AddRouteSensor("GlassRoute01", 0, new Vector3(0.0f, 2.15f, -4.0f), new Vector3(5.4f, 2.8f, 2.0f));
         AddRouteSensor("GlassRoute02", 1, new Vector3(-3.1f, 2.15f, -29.0f), new Vector3(4.9f, 2.8f, 2.0f));
@@ -397,7 +371,6 @@ public partial class Room06Runtime : RoomRuntime
         material.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
         material.AlbedoColor = new Color(0.56f, 0.76f, 0.82f, 0.74f);
 
-        AddFlatRails(name, centerX, width, centerZ, length, 1.5f, "res://assets/textures/brushed_metal.png", frameTint, addLeftRail, addRightRail);
         AddGlassUnderframe(name, centerX, width, centerZ, length, frameTint);
         AddSheenBand(name, (ProfiledSurfaceBody)bridge, centerX, width, centerZ, length);
     }
@@ -405,58 +378,28 @@ public partial class Room06Runtime : RoomRuntime
     private void AddDecisionIsland(string name, float centerZ, float length, string texture, Color tint, Color frameTint)
     {
         RoomGeometry.AddBox(this, name, new Vector3(12.0f, 0.5f, length), new Vector3(0.0f, 1.25f, centerZ), Vector3.Zero, texture, tint, 0.4f, 0.66f);
-        AddFlatRails(name, 0.0f, 12.0f, centerZ, length, 1.5f, texture, frameTint);
     }
 
-    private void AddFlatRails(
-        string prefix,
-        float centerX,
-        float width,
-        float centerZ,
-        float length,
-        float surfaceTopY,
-        string texture,
-        Color tint,
-        bool addLeftRail = true,
-        bool addRightRail = true)
+    private void AddRoomWalls(string texture, Color tint)
     {
-        foreach (float side in new[] { -1.0f, 1.0f })
-        {
-            if ((side < 0.0f && !addLeftRail) || (side > 0.0f && !addRightRail))
+        RoomGeometry.AddPlatformWallLayout(
+            this,
+            new[]
             {
-                continue;
-            }
-
-            RoomGeometry.AddBox(
-                this,
-                $"{prefix}Rail{(side < 0.0f ? "Left" : "Right")}",
-                new Vector3(0.36f, 1.0f, length),
-                new Vector3(centerX + (side * ((width * 0.5f) + 0.18f)), surfaceTopY + 0.5f, centerZ),
-                Vector3.Zero,
-                texture,
-                tint,
-                0.42f,
-                0.62f);
-        }
-    }
-
-    private void AddSlopedRails(string prefix, Vector3 surfaceCenter, float width, float length, Vector3 rotation, string texture, Color tint)
-    {
-        Basis basis = Basis.FromEuler(rotation);
-        foreach (float side in new[] { -1.0f, 1.0f })
-        {
-            Vector3 position = surfaceCenter + (basis * new Vector3(side * ((width * 0.5f) + 0.18f), 0.75f, 0.0f));
-            RoomGeometry.AddBox(
-                this,
-                $"{prefix}Rail{(side < 0.0f ? "Left" : "Right")}",
-                new Vector3(0.36f, 1.0f, length),
-                position,
-                rotation,
-                texture,
-                tint,
-                0.42f,
-                0.62f);
-        }
+                new PlatformWallSelection("SafeStart", PlatformWallEdge.Left, "StartSideWallLeft"),
+                new PlatformWallSelection("SafeStart", PlatformWallEdge.Right, "StartSideWallRight"),
+                new PlatformWallSelection("LaunchSlope", PlatformWallEdge.Left, "LaunchSideWallLeft"),
+                new PlatformWallSelection("LaunchSlope", PlatformWallEdge.Right, "LaunchSideWallRight"),
+                new PlatformWallSelection("DecisionIsland01", PlatformWallEdge.Left, "OuterLeftSideWall01"),
+                new PlatformWallSelection("DecisionIsland01", PlatformWallEdge.Right, "OuterRightSideWall01"),
+                new PlatformWallSelection("DecisionIsland02", PlatformWallEdge.Left, "OuterLeftSideWall02"),
+                new PlatformWallSelection("DecisionIsland02", PlatformWallEdge.Right, "OuterRightSideWall02"),
+                new PlatformWallSelection("DecisionIsland03", PlatformWallEdge.Left, "OuterLeftSideWall03"),
+                new PlatformWallSelection("DecisionIsland03", PlatformWallEdge.Right, "OuterRightSideWall03"),
+                new PlatformWallSelection("ExitDeck", PlatformWallEdge.Left, "OuterLeftSideWallExit"),
+                new PlatformWallSelection("ExitDeck", PlatformWallEdge.Right, "OuterRightSideWallExit"),
+            },
+            new PlatformWallStyle(0.36f, 1.0f, texture, tint, 0.42f, 0.62f));
     }
 
     private void AddGlassUnderframe(string prefix, float centerX, float width, float centerZ, float length, Color tint)

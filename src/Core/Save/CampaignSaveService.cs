@@ -7,7 +7,7 @@ namespace Velocitex.Core.Save;
 
 public static class CampaignSaveService
 {
-    public const int MaximumRoomCount = 28;
+    public const int MaximumRoomCount = 30;
     public const int MaximumSnapshotCount = 5;
     public const string DefaultRoot = "user://campaign";
 
@@ -46,6 +46,51 @@ public static class CampaignSaveService
             PruneOldestSnapshots(absoluteRoot);
             string finalPath = Path.Combine(absoluteRoot, $"{stem}.json");
             AtomicWrite(finalPath, JsonSerializer.Serialize(snapshot, JsonOptions));
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
+        {
+            error = exception.Message;
+            return false;
+        }
+    }
+
+    public static bool UpdateRoomStartElapsed(
+        int roomNumber,
+        double campaignElapsedSeconds,
+        out string? error,
+        string root = DefaultRoot)
+    {
+        error = null;
+        try
+        {
+            string absoluteRoot = ResolveRoot(root);
+            if (!Directory.Exists(absoluteRoot))
+            {
+                return true;
+            }
+
+            CampaignSnapshot? snapshot = LoadAll(out _, root)
+                .Where(candidate => candidate.Kind == SnapshotKind.RoomStart && candidate.RoomNumber == roomNumber)
+                .OrderByDescending(candidate => candidate.SavedAtUtc)
+                .FirstOrDefault();
+            if (snapshot is null)
+            {
+                return true;
+            }
+
+            CampaignSnapshot updated = new()
+            {
+                Version = snapshot.Version,
+                RoomId = snapshot.RoomId,
+                RoomName = snapshot.RoomName,
+                RoomNumber = snapshot.RoomNumber,
+                Kind = snapshot.Kind,
+                SavedAtUtc = snapshot.SavedAtUtc,
+                CampaignElapsedSeconds = Math.Max(0.0, campaignElapsedSeconds),
+                ThumbnailPath = snapshot.ThumbnailPath,
+            };
+            AtomicWrite(Path.Combine(absoluteRoot, $"{GetStem(snapshot)}.json"), JsonSerializer.Serialize(updated, JsonOptions));
             return true;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
@@ -101,10 +146,15 @@ public static class CampaignSaveService
             return new HashSet<int>();
         }
 
-        return Directory.EnumerateFiles(absoluteRoot, "*.json")
-            .Select(path => TryLoadPath(path, out CampaignSnapshot? snapshot, out _) ? snapshot : null)
-            .Where(snapshot => snapshot?.Kind == SnapshotKind.RoomComplete)
-            .Select(snapshot => snapshot!.RoomNumber)
+        string completedRoomsPath = Path.Combine(absoluteRoot, "completed_rooms.txt");
+        if (!File.Exists(completedRoomsPath))
+        {
+            return new HashSet<int>();
+        }
+
+        return File.ReadLines(completedRoomsPath)
+            .Select(value => int.TryParse(value, out int roomNumber) ? roomNumber : 0)
+            .Where(roomNumber => roomNumber is >= 1 and <= MaximumRoomCount)
             .ToHashSet();
     }
 
@@ -114,6 +164,36 @@ public static class CampaignSaveService
         string path = Path.Combine(directory, "completed_rooms.txt");
         HashSet<int> rooms = File.Exists(path) ? File.ReadAllLines(path).Select(v => int.TryParse(v, out int n) ? n : 0).Where(n => n is >= 1 and <= MaximumRoomCount).ToHashSet() : new HashSet<int>();
         rooms.Add(roomNumber); File.WriteAllLines(path, rooms.OrderBy(n => n).Select(n => n.ToString()));
+    }
+
+    public static IReadOnlySet<int> GetReachedCheckpoints(string root = DefaultRoot)
+    {
+        return LoadAll(out _, root)
+            .Where(snapshot => CampaignModes.IsCheckpoint(snapshot.RoomNumber))
+            .Select(snapshot => snapshot.RoomNumber)
+            .ToHashSet();
+    }
+
+    public static bool RecordRunFailure(out string? error, string root = DefaultRoot)
+    {
+        error = null;
+        try
+        {
+            string directory = ResolveRoot(root);
+            Directory.CreateDirectory(directory);
+            File.WriteAllText(Path.Combine(directory, "run_failed.txt"), "1");
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            error = exception.Message;
+            return false;
+        }
+    }
+
+    public static bool HasRunFailure(string root = DefaultRoot)
+    {
+        return File.Exists(Path.Combine(ResolveRoot(root), "run_failed.txt"));
     }
     public static bool DeleteAll(out string? error, string root = DefaultRoot)
     {
@@ -168,6 +248,8 @@ public static class CampaignSaveService
 
                 DeleteSnapshotFiles(path);
             }
+
+            DeleteCompletedRoomsAfter(absoluteRoot, snapshot.RoomNumber);
 
             return true;
         }
@@ -304,6 +386,11 @@ public static class CampaignSaveService
             return true;
         }
 
+        if (string.Equals(fileName, "run_failed.txt", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
         if (!fileName.StartsWith("room-", StringComparison.OrdinalIgnoreCase) &&
             !fileName.StartsWith("complete-", StringComparison.OrdinalIgnoreCase))
         {
@@ -329,6 +416,29 @@ public static class CampaignSaveService
                 File.Delete(path);
             }
         }
+    }
+
+    private static void DeleteCompletedRoomsAfter(string absoluteRoot, int roomNumber)
+    {
+        string path = Path.Combine(absoluteRoot, "completed_rooms.txt");
+        if (!File.Exists(path))
+        {
+            return;
+        }
+
+        int[] retainedRooms = File.ReadLines(path)
+            .Select(value => int.TryParse(value, out int completedRoom) ? completedRoom : 0)
+            .Where(completedRoom => completedRoom >= 1 && completedRoom <= roomNumber)
+            .Distinct()
+            .OrderBy(completedRoom => completedRoom)
+            .ToArray();
+        if (retainedRooms.Length == 0)
+        {
+            File.Delete(path);
+            return;
+        }
+
+        File.WriteAllLines(path, retainedRooms.Select(completedRoom => completedRoom.ToString()));
     }
 
     private static string GetStem(CampaignSnapshot snapshot)

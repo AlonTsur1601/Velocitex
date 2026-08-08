@@ -5,10 +5,14 @@ namespace Velocitex.Gameplay.Rooms;
 
 public partial class RouteCheckpoint3D : Area3D
 {
-    private const float DeniedFlashDuration = 0.48f;
-    private const float DeniedFlashInterval = 0.12f;
+    private const float DeniedFlashDuration = 0.64f;
+    private const float DeniedFlashInterval = 0.08f;
     private const float PlayerBallRadius = 0.6f;
-    private const float FloorPressTolerance = 0.04f;
+    private const float FloorPressAboveTolerance = 0.16f;
+    private const float FloorPressBelowTolerance = 0.46f;
+    private const float PressedPlateOffset = -0.16f;
+    private const string PhysicalFloorButtonGroup = "physical_floor_buttons";
+    private const string AcceptedButtonPhysicsFrameMetadata = "velocitex_accepted_button_physics_frame";
 
     public event Action<RouteCheckpoint3D, PlayerBall>? Entered;
 
@@ -18,11 +22,17 @@ public partial class RouteCheckpoint3D : Area3D
     public bool FlatFloorMarker { get; set; }
     public bool RequireFloorContact { get; set; } = true;
     public bool AllowAreaPressFallback { get; set; }
+    // Rooms with moving or high-speed routes can perform their own exact visible-plate
+    // check.  Keeping the Area3D callback enabled there causes a late duplicate press.
+    public bool AutomaticPressEnabled { get; set; } = true;
     public bool ShowFloorButtonIndicators { get; set; }
     public float FloorMarkerInset { get; set; }
-    public bool IsPhysicalFloorButton => FlatFloorMarker && RequireFloorContact;
+    public bool IsPhysicalFloorButton => FlatFloorMarker && (RequireFloorContact || ShowFloorButtonIndicators);
     public bool IsActivated { get; private set; }
     public bool IsDeniedFeedbackActive => _deniedFlashTime > 0.0f;
+    public bool IsShowingIdleVisual => _innerPlate is not null && _innerPlate.MaterialOverride == _idleMaterial;
+    public bool IsShowingDeniedRed => _innerPlate is not null &&
+        (_innerPlate.MaterialOverride == _deniedMaterial || _innerPlate.MaterialOverride == _deniedDimMaterial);
 
     private readonly List<Node3D> _latches = new();
     private readonly HashSet<ulong> _handledFloorContacts = new();
@@ -36,7 +46,7 @@ public partial class RouteCheckpoint3D : Area3D
     private Material _deniedDimMaterial = null!;
     private float _activationAmount;
     private float _deniedFlashTime;
-    private bool _isPressAttempt;
+    private float _deniedFlashElapsed;
 
     public override void _Ready()
     {
@@ -44,11 +54,10 @@ public partial class RouteCheckpoint3D : Area3D
         CollisionMask = 1;
         Monitoring = true;
         Monitorable = false;
-
-        AddChild(new CollisionShape3D
+        if (IsPhysicalFloorButton)
         {
-            Shape = new BoxShape3D { Size = TriggerSize },
-        });
+            AddToGroup(PhysicalFloorButtonGroup);
+        }
 
         StandardMaterial3D frame = RoomGeometry.CreateMaterial(
             "res://assets/textures/copper_rivets.svg",
@@ -68,25 +77,42 @@ public partial class RouteCheckpoint3D : Area3D
             0.5f);
         _deniedMaterial = RoomGeometry.CreateMaterial(
             string.Empty,
-            new Color("e23f45"),
+            new Color("d71920"),
             0.06f,
             0.42f,
             emissionEnabled: true,
-            emission: new Color("8f1018"));
+            emission: new Color("8f080e"));
         _deniedDimMaterial = RoomGeometry.CreateMaterial(
             string.Empty,
-            new Color("8f1f28"),
-            0.08f,
+            new Color("7d090e"),
+            0.12f,
             0.48f,
             emissionEnabled: true,
-            emission: new Color("4f080d"));
-
+            emission: new Color("360104"));
         Vector3 plateSize = new(
             Mathf.Max(1.8f, TriggerSize.X * 0.72f),
             0.12f,
             Mathf.Max(1.2f, TriggerSize.Z * 0.72f));
-        _framePlate = RoomGeometry.AddVisualBox(this, "FramePlate", plateSize + new Vector3(0.38f, 0.04f, 0.38f), new Vector3(0.0f, -TriggerSize.Y * 0.42f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, frame);
-        _innerPlate = RoomGeometry.AddVisualBox(this, "InsetPlate", plateSize, new Vector3(0.0f, (-TriggerSize.Y * 0.42f) + 0.08f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, _idleMaterial as StandardMaterial3D);
+        Vector3 platePosition = new(0.0f, -TriggerSize.Y * 0.42f, 0.0f);
+        CollisionShape3D triggerShape = new()
+        {
+            // A floor button must only react to a ball standing on its visible plate.
+            // The route-sized volume used previously overlapped nearby ramps and
+            // buttons, which could report an out-of-order press before the player
+            // reached the intended button.
+            Shape = new BoxShape3D
+            {
+                Size = IsPhysicalFloorButton
+                    ? new Vector3(plateSize.X, 0.50f, plateSize.Z)
+                    : TriggerSize,
+            },
+            Position = IsPhysicalFloorButton
+                ? platePosition - new Vector3(0.0f, 0.11f, 0.0f)
+                : Vector3.Zero,
+        };
+        AddChild(triggerShape);
+        _framePlate = RoomGeometry.AddVisualBox(this, "FramePlate", plateSize + new Vector3(0.38f, 0.04f, 0.38f), platePosition, Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, frame);
+        _innerPlate = RoomGeometry.AddVisualBox(this, "InsetPlate", plateSize, platePosition + new Vector3(0.0f, 0.08f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, _idleMaterial as StandardMaterial3D);
 
         if (!FlatFloorMarker)
         {
@@ -125,11 +151,14 @@ public partial class RouteCheckpoint3D : Area3D
             }
         }
 
-        if (!IsPhysicalFloorButton || AllowAreaPressFallback)
+        if (AutomaticPressEnabled && IsPhysicalFloorButton)
+        {
+            BodyEntered += OnPhysicalBodyEntered;
+        }
+        else if (AutomaticPressEnabled && AllowAreaPressFallback)
         {
             BodyEntered += OnBodyEntered;
         }
-
         _activationAudio = new AudioStreamPlayer3D
         {
             Name = "ActivationClickSfx",
@@ -144,19 +173,24 @@ public partial class RouteCheckpoint3D : Area3D
 
     public override void _Process(double delta)
     {
-        float target = IsActivated ? 1.0f : 0.0f;
-        _activationAmount = Mathf.MoveToward(_activationAmount, target, (float)delta * 5.0f);
-        _deniedFlashTime = Mathf.Max(0.0f, _deniedFlashTime - (float)delta);
-        float deniedElapsed = DeniedFlashDuration - _deniedFlashTime;
+        _activationAmount = IsActivated
+            ? 1.0f
+            : Mathf.MoveToward(_activationAmount, 0.0f, (float)delta * 5.0f);
+        if (_deniedFlashTime > 0.0f)
+        {
+            _deniedFlashElapsed += (float)delta;
+            _deniedFlashTime = Mathf.Max(0.0f, _deniedFlashTime - (float)delta);
+        }
         bool deniedActive = _deniedFlashTime > 0.0f;
-        bool brightDenied = (int)(deniedElapsed / DeniedFlashInterval) % 2 == 0;
-        Material deniedPhaseMaterial = brightDenied ? _deniedMaterial : _deniedDimMaterial;
+        bool deniedRedPhase = ((int)(_deniedFlashElapsed / DeniedFlashInterval) & 1) == 0;
         _framePlate.MaterialOverride = _frameMaterial;
-        _innerPlate.MaterialOverride = deniedActive ? deniedPhaseMaterial : (IsActivated ? _activeMaterial : _idleMaterial);
+        _innerPlate.MaterialOverride = deniedActive
+            ? (deniedRedPhase ? _deniedMaterial : _deniedDimMaterial)
+            : (IsActivated ? _activeMaterial : _idleMaterial);
         SetSequencePipsVisible(true);
         _innerPlate.Position = new Vector3(
             _innerPlate.Position.X,
-            (-TriggerSize.Y * 0.42f) + Mathf.Lerp(0.08f, -0.02f, _activationAmount),
+            (-TriggerSize.Y * 0.42f) + Mathf.Lerp(0.08f, PressedPlateOffset, _activationAmount),
             _innerPlate.Position.Z);
         for (int index = 0; index < _latches.Count; index++)
         {
@@ -167,7 +201,7 @@ public partial class RouteCheckpoint3D : Area3D
 
     public override void _PhysicsProcess(double delta)
     {
-        if (IsPhysicalFloorButton && !IsActivated)
+        if (AutomaticPressEnabled && IsPhysicalFloorButton)
         {
             ProcessFloorContacts();
         }
@@ -181,18 +215,23 @@ public partial class RouteCheckpoint3D : Area3D
         }
 
         IsActivated = true;
-        _deniedFlashTime = 0.0f;
-        _framePlate.MaterialOverride = _frameMaterial;
-        _innerPlate.MaterialOverride = _activeMaterial;
-        SetSequencePipsVisible(true);
+        foreach (Node node in GetTree().GetNodesInGroup(PhysicalFloorButtonGroup))
+        {
+            if (node is RouteCheckpoint3D checkpoint && checkpoint != this)
+            {
+                checkpoint.ClearDeniedFeedback();
+            }
+        }
+        ApplyAcceptedPressVisualImmediately();
         _activationAudio?.Play();
     }
 
-    public void FlashDenied()
+    internal void ApplyDeniedFeedback()
     {
         if (!IsActivated)
         {
             _deniedFlashTime = DeniedFlashDuration;
+            _deniedFlashElapsed = 0.0f;
             _framePlate.MaterialOverride = _frameMaterial;
             _innerPlate.MaterialOverride = _deniedMaterial;
             SetSequencePipsVisible(true);
@@ -201,7 +240,30 @@ public partial class RouteCheckpoint3D : Area3D
 
     public void Press(PlayerBall player)
     {
-        DispatchPress(player);
+        RouteCheckpointPressResult result = RouteCheckpointPressPolicy.Apply(this, player, () => DispatchPress(player));
+        if (result == RouteCheckpointPressResult.Activated)
+        {
+            player.SetMeta(AcceptedButtonPhysicsFrameMetadata, Engine.GetPhysicsFrames());
+            ClearAllDeniedFeedback();
+            ApplyAcceptedPressVisualImmediately();
+        }
+    }
+
+    internal static bool PlayerAlreadyActivatedButtonThisPhysicsFrame(PlayerBall player)
+    {
+        return player.HasMeta(AcceptedButtonPhysicsFrameMetadata) &&
+            player.GetMeta(AcceptedButtonPhysicsFrameMetadata).AsUInt64() == Engine.GetPhysicsFrames();
+    }
+
+    private void ClearAllDeniedFeedback()
+    {
+        foreach (Node node in GetTree().GetNodesInGroup(PhysicalFloorButtonGroup))
+        {
+            if (node is RouteCheckpoint3D checkpoint)
+            {
+                checkpoint.ClearDeniedFeedback();
+            }
+        }
     }
 
     private void SetSequencePipsVisible(bool visible)
@@ -220,6 +282,7 @@ public partial class RouteCheckpoint3D : Area3D
         IsActivated = false;
         _activationAmount = 0.0f;
         _deniedFlashTime = 0.0f;
+        _deniedFlashElapsed = 0.0f;
         _framePlate.MaterialOverride = _frameMaterial;
         _innerPlate.MaterialOverride = _idleMaterial;
         SetSequencePipsVisible(true);
@@ -228,7 +291,11 @@ public partial class RouteCheckpoint3D : Area3D
 
     public override void _ExitTree()
     {
-        if (!IsPhysicalFloorButton || AllowAreaPressFallback)
+        if (AutomaticPressEnabled && IsPhysicalFloorButton)
+        {
+            BodyEntered -= OnPhysicalBodyEntered;
+        }
+        else if (AutomaticPressEnabled && AllowAreaPressFallback)
         {
             BodyEntered -= OnBodyEntered;
         }
@@ -239,39 +306,146 @@ public partial class RouteCheckpoint3D : Area3D
             _activationAudio.Stream = null;
         }
         _latches.Clear();
+        RemoveFromGroup(PhysicalFloorButtonGroup);
         _handledFloorContacts.Clear();
     }
 
     private void ProcessFloorContacts()
     {
         PlayerBall[] overlappingPlayers = GetOverlappingBodies().OfType<PlayerBall>().ToArray();
-        HashSet<ulong> overlappingIds = overlappingPlayers.Select(player => player.GetInstanceId()).ToHashSet();
-        _handledFloorContacts.RemoveWhere(id => !overlappingIds.Contains(id));
+        HashSet<ulong> touchingIds = new();
         foreach (PlayerBall player in overlappingPlayers)
         {
             ulong id = player.GetInstanceId();
-            bool touchingPlate = player.GlobalPosition.Y - PlayerBallRadius <=
-                _innerPlate.GlobalPosition.Y + FloorPressTolerance;
-            if (!touchingPlate || _handledFloorContacts.Contains(id))
+            if (!IsWithinFloorPressHeight(player))
+            {
+                continue;
+            }
+
+            touchingIds.Add(id);
+            if (IsActivated || _handledFloorContacts.Contains(id) || !IsClosestTouchedFloorButton(player))
             {
                 continue;
             }
 
             _handledFloorContacts.Add(id);
-            DispatchPress(player);
+            Press(player);
         }
+
+        foreach (ulong id in _handledFloorContacts.Where(id => !touchingIds.Contains(id)).ToArray())
+        {
+            _handledFloorContacts.Remove(id);
+        }
+    }
+
+    private bool IsClosestTouchedFloorButton(PlayerBall player)
+    {
+        RouteCheckpoint3D? closest = null;
+        float closestDistanceSquared = float.PositiveInfinity;
+        foreach (Node node in GetTree().GetNodesInGroup(PhysicalFloorButtonGroup))
+        {
+            if (node is not RouteCheckpoint3D checkpoint ||
+                !checkpoint.IsPlayerOnVisiblePlate(player))
+            {
+                continue;
+            }
+
+            Vector3 idlePlatePosition = checkpoint.GetIdlePlateGlobalPosition();
+            float distanceSquared = new Vector2(
+                player.GlobalPosition.X - idlePlatePosition.X,
+                player.GlobalPosition.Z - idlePlatePosition.Z).LengthSquared();
+            if (distanceSquared < closestDistanceSquared ||
+                (Mathf.IsEqualApprox(distanceSquared, closestDistanceSquared) &&
+                 (closest is null || checkpoint.GetInstanceId() < closest.GetInstanceId())))
+            {
+                closest = checkpoint;
+                closestDistanceSquared = distanceSquared;
+            }
+        }
+
+        return closest == this;
+    }
+
+    private bool IsPlayerOnVisiblePlate(PlayerBall player)
+    {
+        if (!IsWithinFloorPressHeight(player))
+        {
+            return false;
+        }
+
+        Vector3 localPlayer = ToLocal(player.GlobalPosition);
+        float halfWidth = Mathf.Max(1.8f, TriggerSize.X * 0.72f) * 0.5f;
+        float halfDepth = Mathf.Max(1.2f, TriggerSize.Z * 0.72f) * 0.5f;
+        return Mathf.Abs(localPlayer.X - _innerPlate.Position.X) <= halfWidth + PlayerBallRadius &&
+            Mathf.Abs(localPlayer.Z - _innerPlate.Position.Z) <= halfDepth + PlayerBallRadius;
+    }
+
+    private bool IsWithinFloorPressHeight(PlayerBall player)
+    {
+        // Use the plate's fixed idle height for contact arbitration.  A valid
+        // button depresses in this same physics tick; measuring against its new
+        // lower transform could otherwise let an overlapping invalid button
+        // claim the contact immediately afterwards and flash red.
+        float bottomOffset = (player.GlobalPosition.Y - PlayerBallRadius) - GetIdlePlateGlobalPosition().Y;
+        if (bottomOffset < -FloorPressBelowTolerance || bottomOffset > FloorPressAboveTolerance)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private Vector3 GetIdlePlateGlobalPosition()
+    {
+        return ToGlobal(new Vector3(
+            _innerPlate.Position.X,
+            (-TriggerSize.Y * 0.42f) + 0.08f,
+            _innerPlate.Position.Z));
     }
 
     private void DispatchPress(PlayerBall player)
     {
-        _isPressAttempt = true;
-        try
+        OnBodyEntered(player);
+    }
+
+    private void OnPhysicalBodyEntered(Node3D body)
+    {
+        if (body is not PlayerBall player || IsActivated || !IsWithinFloorPressHeight(player))
         {
-            OnBodyEntered(player);
+            return;
         }
-        finally
+
+        ulong id = player.GetInstanceId();
+        if (_handledFloorContacts.Contains(id) || !IsClosestTouchedFloorButton(player))
         {
-            _isPressAttempt = false;
+            return;
+        }
+
+        _handledFloorContacts.Add(id);
+        Press(player);
+    }
+
+    private void ApplyAcceptedPressVisualImmediately()
+    {
+        _activationAmount = 1.0f;
+        ClearDeniedFeedback();
+        _framePlate.MaterialOverride = _frameMaterial;
+        _innerPlate.MaterialOverride = _activeMaterial;
+        SetSequencePipsVisible(true);
+        _innerPlate.Position = new Vector3(
+            _innerPlate.Position.X,
+            (-TriggerSize.Y * 0.42f) + PressedPlateOffset,
+            _innerPlate.Position.Z);
+        _innerPlate.ForceUpdateTransform();
+    }
+
+    private void ClearDeniedFeedback()
+    {
+        _deniedFlashTime = 0.0f;
+        _deniedFlashElapsed = 0.0f;
+        if (!IsActivated && IsInstanceValid(_innerPlate))
+        {
+            _innerPlate.MaterialOverride = _idleMaterial;
         }
     }
 
@@ -280,10 +454,6 @@ public partial class RouteCheckpoint3D : Area3D
         if (!IsActivated && body is PlayerBall player)
         {
             Entered?.Invoke(this, player);
-            if (!IsActivated && _isPressAttempt)
-            {
-                FlashDenied();
-            }
         }
     }
 }

@@ -47,11 +47,28 @@ public partial class Room02RouteFeedbackSmokeTest : Node
             return;
         }
 
+        await MovePlayerBelowPlate(player, checkpoints[2]);
+        if (checkpoints[2].IsActivated || checkpoints[2].IsDeniedFeedbackActive)
+        {
+            MeshInstance3D belowPlate = checkpoints[2].GetNode<MeshInstance3D>("InsetPlate");
+            float bottomOffset = (player.GlobalPosition.Y - 0.6f) - belowPlate.GlobalPosition.Y;
+            Fail($"Passing beneath a raised floor button triggered its route event. player={player.GlobalPosition}, plate={belowPlate.GlobalPosition}, bottomOffset={bottomOffset:0.###}.");
+            return;
+        }
+        await MovePlayerAway(player);
+
         MeshInstance3D wrongPlate = checkpoints[2].GetNode<MeshInstance3D>("InsetPlate");
         MeshInstance3D wrongFrame = checkpoints[2].GetNode<MeshInstance3D>("FramePlate");
         Material? idleMaterial = wrongPlate.MaterialOverride;
         Material? frameMaterial = wrongFrame.MaterialOverride;
         await MovePlayerTo(player, checkpoints[2], Vector3.Zero);
+        if (!checkpoints[2].IsActivated &&
+            checkpoints[2].IsDeniedFeedbackActive &&
+            wrongPlate.MaterialOverride == idleMaterial)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        }
         if (checkpoints[2].IsActivated || wrongPlate.MaterialOverride == idleMaterial)
         {
             Fail($"An out-of-order button activated or failed to flash its red error material. activated={checkpoints[2].IsActivated}, denied={checkpoints[2].IsDeniedFeedbackActive}, grounded={player.IsGrounded}, playerY={player.GlobalPosition.Y:0.###}, plateY={wrongPlate.GlobalPosition.Y:0.###}.");
@@ -89,6 +106,12 @@ public partial class Room02RouteFeedbackSmokeTest : Node
                 Fail($"Route button {index + 1} did not activate in the intended order.");
                 return;
             }
+        }
+
+        await MovePlayerAway(player);
+        if (!await VerifyOverlappingFloorButtonSelection(room, player))
+        {
+            return;
         }
 
         float pipHeightAfterActivation = GetPipHeightAbovePlate(checkpoints[0]);
@@ -143,6 +166,87 @@ public partial class Room02RouteFeedbackSmokeTest : Node
         player.LinearVelocity = velocity;
         await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
         await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+    }
+
+    private async Task MovePlayerBelowPlate(PlayerBall player, RouteCheckpoint3D checkpoint)
+    {
+        player.Freeze = true;
+        player.GravityScale = 0.0f;
+        MeshInstance3D plate = checkpoint.GetNode<MeshInstance3D>("InsetPlate");
+        player.GlobalPosition = new Vector3(
+            plate.GlobalPosition.X,
+            plate.GlobalPosition.Y,
+            plate.GlobalPosition.Z);
+        player.LinearVelocity = Vector3.Zero;
+        await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+        await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+    }
+
+    private async Task<bool> VerifyOverlappingFloorButtonSelection(RoomRuntime room, PlayerBall player)
+    {
+        RouteCheckpoint3D wrongButton = new()
+        {
+            Name = "OverlappingWrongButton",
+            Position = new Vector3(40.0f, 7.0f, 0.0f),
+            TriggerSize = new Vector3(3.0f, 3.0f, 3.0f),
+            FlatFloorMarker = true,
+        };
+        RouteCheckpoint3D intendedButton = new()
+        {
+            Name = "OverlappingIntendedButton",
+            Position = new Vector3(40.6f, 7.0f, 0.0f),
+            TriggerSize = new Vector3(3.0f, 3.0f, 3.0f),
+            FlatFloorMarker = true,
+        };
+        intendedButton.Entered += (button, _) => button.Activate();
+        room.AddChild(wrongButton);
+        room.AddChild(intendedButton);
+        await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+
+        MeshInstance3D wrongInsetPlate = wrongButton.GetNode<MeshInstance3D>("InsetPlate");
+        MeshInstance3D intendedPlate = intendedButton.GetNode<MeshInstance3D>("InsetPlate");
+        player.Freeze = false;
+        player.GravityScale = 0.0f;
+        player.GlobalPosition = new Vector3(
+            intendedPlate.GlobalPosition.X,
+            intendedPlate.GlobalPosition.Y + 0.6f,
+            intendedPlate.GlobalPosition.Z);
+        player.LinearVelocity = Vector3.Zero;
+        await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+        await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+
+        if (!intendedButton.IsActivated || wrongButton.IsDeniedFeedbackActive)
+        {
+            Fail($"Overlapping floor buttons selected the wrong plate. intendedActivated={intendedButton.IsActivated}, wrongDenied={wrongButton.IsDeniedFeedbackActive}.");
+            return false;
+        }
+
+        wrongButton.ResetCheckpoint();
+        intendedButton.ResetCheckpoint();
+        intendedButton.Press(player);
+        float expectedPressedY = (-intendedButton.TriggerSize.Y * 0.42f) - 0.16f;
+        if (!intendedButton.IsActivated || !Mathf.IsEqualApprox(intendedPlate.Position.Y, expectedPressedY))
+        {
+            Fail($"A valid floor button did not depress in its activation frame. activated={intendedButton.IsActivated}, actualY={intendedPlate.Position.Y:0.###}, expectedY={expectedPressedY:0.###}.");
+            return false;
+        }
+
+        intendedButton.ResetCheckpoint();
+        wrongButton.Press(player);
+        float expectedWrongIdleY = (-wrongButton.TriggerSize.Y * 0.42f) + 0.08f;
+        if (!Mathf.IsEqualApprox(wrongInsetPlate.Position.Y, expectedWrongIdleY))
+        {
+            Fail($"An out-of-order floor button depressed instead of remaining raised. actualY={wrongInsetPlate.Position.Y:0.###}, expectedY={expectedWrongIdleY:0.###}.");
+            return false;
+        }
+        if (!wrongButton.IsDeniedFeedbackActive)
+        {
+            Fail("An out-of-order floor button did not show its immediate red feedback.");
+            return false;
+        }
+
+        return true;
     }
 
     private static IEnumerable<Node> EnumerateDescendants(Node node)

@@ -11,6 +11,9 @@ public sealed class PlayerProfile
     public string SecondaryColorId { get; set; } = "vanilla";
     public string PatternId { get; set; } = "none";
     public string TrailId { get; set; } = "off";
+    public string FinishId { get; set; } = "normal";
+    public string TrailStyleId { get; set; } = "normal";
+    public string CrownId { get; set; } = "none-crown";
     public int CleanRoomStreak { get; set; }
     public DateTimeOffset UpdatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
 }

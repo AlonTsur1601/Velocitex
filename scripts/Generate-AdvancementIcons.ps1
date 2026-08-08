@@ -18,7 +18,7 @@ $icons = [ordered]@{
     "perfect-stop" = '<circle cx="48" cy="48" r="29"/><circle cx="48" cy="48" r="16"/><circle cx="48" cy="48" r="5" fill="#70d3cf" stroke="none"/><path d="M48 10v9M48 77v9M10 48h9M77 48h9"/>'
     "blue-streak" = '<path d="m18 27 20 21-20 21M40 27l20 21-20 21M62 27l16 21-16 21"/><path d="M8 16h30M8 80h30" stroke="#70d3cf"/>'
     "double-bounce" = '<circle cx="31" cy="35" r="9"/><circle cx="65" cy="35" r="9"/><path d="M15 73c6-22 27-22 33 0 6-22 27-22 33 0"/><path d="M31 48v9M65 48v9" stroke="#70d3cf"/>'
-    "feather-touch" = '<path d="M70 17C43 18 25 37 25 65c18 2 36-8 45-48Z"/><path d="M20 78c13-19 27-31 45-45M34 61l-1-15M48 49l0-14M42 56l15 1M53 43l13 1"/>'
+    "feather-touch" = '<path d="M70 17C48 19 30 34 27 56c-1 8 2 14 8 17 19-5 34-25 35-56Z" stroke-width="4"/><path d="M21 81C34 63 49 45 67 23M35 64L27 55M35 64L43 69M45 51L32 41M45 51L61 48M56 37L46 28M56 37L68 34" stroke-width="4"/>'
     "against-the-wind" = '<path d="M11 34h44c10 0 10-15 1-15-5 0-8 3-8 7M11 49h62c12 0 12 18 1 18-6 0-9-4-9-8M11 64h33"/><circle cx="24" cy="49" r="8" fill="#70d3cf" stroke="#fff0c7"/>'
     "perfect-switch" = '<path d="M48 81V50M48 50 25 23M48 50l23-27"/><path d="M25 23h15M25 23v15M71 23H56M71 23v15"/><circle cx="48" cy="66" r="7" fill="#70d3cf" stroke="#fff0c7"/>'
     "bullseye" = '<circle cx="48" cy="48" r="31"/><circle cx="48" cy="48" r="18"/><circle cx="48" cy="48" r="6" fill="#70d3cf" stroke="none"/><path d="m70 26 13-13M71 13h12v12"/>'
@@ -28,14 +28,45 @@ $icons = [ordered]@{
     "full-account" = '<path d="M19 62a32 32 0 0 1 58 0"/><path d="M28 57a22 22 0 0 1 40 0"/><path d="m48 58 17-24" stroke="#70d3cf"/><circle cx="48" cy="58" r="6"/><path d="M19 72h58"/>'
     "sugar-breaker" = '<path d="M19 18h58v60H19z"/><path d="m48 18-7 19 11 7-13 14 8 20M41 37l-17 8M52 44l20-9M39 58l-15 8M47 61l18 8" stroke="#70d3cf"/>'
     "vacuum-packed" = '<path d="M77 22C40 12 17 31 20 54c3 22 31 29 46 15 13-12 3-32-12-32-12 0-18 13-11 21 5 6 15 3 15-4"/><path d="m70 15 8 7-10 5"/><circle cx="48" cy="53" r="5" fill="#70d3cf" stroke="none"/>'
+    "jawbreaker" = '<path d="M48 14 72 28v22c0 16-10 27-24 34-14-7-24-18-24-34V28Z"/><circle cx="48" cy="47" r="14" fill="#70d3cf"/><path d="M48 33v28M34 47h28"/>'
+    "smooth-operator" = '<path d="M15 67c16-29 29-5 43-30 7-12 15-13 23-8"/><circle cx="18" cy="65" r="7" fill="#70d3cf"/><path d="M14 78h68M13 22h70"/>'
+    "final-inspection" = '<circle cx="43" cy="43" r="24"/><path d="m60 60 20 20M31 43l8 8 17-19" stroke="#70d3cf"/>'
 }
 
-$header = '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><rect x="3" y="3" width="90" height="90" rx="18" fill="#22383d" stroke="#70d3cf" stroke-width="4"/><g fill="none" stroke="#fff0c7" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">'
+$palettes = @{
+    "fresh-from-the-globe" = @("#213b36", "#62c9aa", "#75dfbd", "#fff0c7")
+    "clean-wrapper" = @("#3b2632", "#e78aaa", "#f1a6bf", "#fff0d7")
+    "five-star-batch" = @("#3c3420", "#e4bb45", "#ffd86c", "#fff4c9")
+    "speeding-sweet" = @("#183642", "#48bfe0", "#66d8f4", "#eafaff")
+    "terminal-sugar" = @("#402b20", "#ffb347", "#ffd05f", "#fff0c7")
+    "straight-as-glass" = @("#1d3640", "#7bcbe5", "#a9e8f4", "#effcff")
+    "perfect-stop" = @("#40271d", "#d88a45", "#f0aa61", "#fff0cf")
+    "blue-streak" = @("#172b49", "#4d91ed", "#70b5ff", "#edf6ff")
+    "double-bounce" = @("#39213d", "#d070d8", "#e69bec", "#fff0ff")
+    "feather-touch" = @("#233448", "#85bce8", "#add8f7", "#f3fbff")
+    "against-the-wind" = @("#243747", "#73b6dd", "#9bd5f1", "#effaff")
+    "perfect-switch" = @("#352745", "#b891e8", "#d0adf5", "#fff1ff")
+    "bullseye" = @("#411f25", "#e65c68", "#ff7b84", "#fff0d7")
+    "untouchable" = @("#3d2920", "#ec8a45", "#ffac66", "#fff1d7")
+    "moving-with-it" = @("#26343b", "#8caab7", "#acc4ce", "#f3fbff")
+    "piston-perfect" = @("#3d2a22", "#cf7d45", "#e99a5d", "#fff0d2")
+    "full-account" = @("#3b3320", "#d9b64c", "#f2d267", "#fff4c7")
+    "sugar-breaker" = @("#3c2427", "#df6870", "#f28a90", "#fff0d2")
+    "vacuum-packed" = @("#252a47", "#858cde", "#a8adf0", "#f2f1ff")
+    "jawbreaker" = @("#38223f", "#cf73dd", "#e995f1", "#fff0ff")
+    "smooth-operator" = @("#1d3540", "#58b8d5", "#78d4eb", "#effcff")
+    "final-inspection" = @("#273b2d", "#75c98a", "#91dfa2", "#f2ffe9")
+}
+
 $footer = '</g></svg>'
 $utf8 = New-Object Text.UTF8Encoding($false)
 foreach ($entry in $icons.GetEnumerator()) {
     $path = Join-Path $resolvedOutput ($entry.Key + ".svg")
-    [IO.File]::WriteAllText($path, $header + $entry.Value + $footer, $utf8)
+    $palette = $palettes[$entry.Key]
+    if ($null -eq $palette) { $palette = @("#22383d", "#70d3cf", "#70d3cf", "#fff0c7") }
+    $header = '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><rect x="3" y="3" width="90" height="90" rx="18" fill="' + $palette[0] + '" stroke="' + $palette[1] + '" stroke-width="4"/><g fill="none" stroke="' + $palette[3] + '" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">'
+    $art = $entry.Value.Replace('#70d3cf', $palette[2]).Replace('#fff0c7', $palette[3])
+    [IO.File]::WriteAllText($path, $header + $art + $footer, $utf8)
 }
 
 Write-Output "GENERATED_ADVANCEMENT_ICONS=$($icons.Count)"

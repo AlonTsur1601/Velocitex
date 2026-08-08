@@ -1,6 +1,7 @@
 using Godot;
 using Velocitex.Core.Profile;
 using Velocitex.Core.Save;
+using Velocitex.Gameplay.Visual;
 
 namespace Velocitex.UI.Visual;
 
@@ -12,11 +13,16 @@ public partial class CandyPreview3D : Node3D
     public bool MotionEnabled { get; set; } = true;
     public string AppliedPatternId { get; private set; } = "none";
     public string AppliedTrailId { get; private set; } = "off";
+    public string AppliedCrownId => _crown?.AppliedCrownId ?? "none-crown";
+    public bool IsCrownVisible => _crown?.Visible == true;
+    public Vector3 CrownLocalPosition => _crown?.Position ?? Vector3.Zero;
+    public Vector3 BallLocalPosition => _ball?.Position ?? Vector3.Zero;
 
     private MeshInstance3D _ball = null!;
     private Node3D _trailRoot = null!;
     private ShaderMaterial _candyMaterial = null!;
     private StandardMaterial3D _trailMaterial = null!;
+    private CandyCrown3D _crown = null!;
     private float _elapsed;
 
     public override void _Ready()
@@ -27,6 +33,15 @@ public partial class CandyPreview3D : Node3D
         _candyMaterial = (ShaderMaterial)_ball.MaterialOverride.Duplicate();
         _ball.MaterialOverride = _candyMaterial;
         BuildTrailDots();
+        // Center on the actual preview mesh (which is intentionally offset in
+        // its viewport) and place the band directly on its 0.90 m radius.
+        _crown = new CandyCrown3D
+        {
+            Name = "Crown",
+            Position = _ball.Position + Vector3.Up * 0.91f,
+            Scale = Vector3.One * CandyCrown3D.VisualScale,
+        };
+        AddChild(_crown);
     }
 
     public override void _Process(double delta)
@@ -57,6 +72,7 @@ public partial class CandyPreview3D : Node3D
         AppliedPatternId = profile.PatternId;
         AppliedTrailId = profile.TrailId;
         CandyVisualStyle.ApplyCandyMaterial(_candyMaterial, profile);
+        _crown.Apply(profile.CrownId);
 
         bool showTrail = !string.Equals(trail.Id, "off", StringComparison.Ordinal);
         _trailRoot.Visible = showTrail;

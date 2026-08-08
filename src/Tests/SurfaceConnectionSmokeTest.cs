@@ -1,5 +1,6 @@
 using Godot;
 using Velocitex.Gameplay.Player;
+using Velocitex.Gameplay.Rooms;
 
 namespace Velocitex.Tests;
 
@@ -9,8 +10,17 @@ public partial class SurfaceConnectionSmokeTest : Node
     private const float DetectionHeight = 2.0f;
     private const float MaximumSeamGap = 0.01f;
     private const float MaximumSeamStep = 0.01f;
+    private const float MinimumGeneratedWallVisualHeight = 0.86f;
+    private const float MaximumGeneratedWallVisualHeight = 0.88f;
+    private const float MaximumGeneratedWallTotalOverhang = 1.91f;
 
     private readonly record struct Surface(StaticBody3D Body, BoxShape3D Shape, bool IsSloped);
+    private readonly record struct Barrier(
+        StaticBody3D Body,
+        Vector3 SupportSize,
+        Vector3 VisualSize,
+        Vector3 VisualOffset);
+    private readonly record struct StructuralWall(StaticBody3D Body, BoxShape3D Shape);
     private readonly record struct Edge(Vector3 Start, Vector3 End, Vector2 Outward);
     private readonly record struct Seam(
         Surface A,
@@ -46,7 +56,8 @@ public partial class SurfaceConnectionSmokeTest : Node
             {
                 GD.Print(
                     $"SURFACE_CONNECTION_ROOM_PASS: Room {room:00} audited {result.SurfaceCount} rolling surfaces and " +
-                    $"{result.SeamCount} adjoining seams; worst gap={result.WorstGap:F3} m, worst step={result.WorstStep:F3} m, " +
+                    $"{result.SeamCount} adjoining seams plus {result.BarrierCount} supported edge barriers; " +
+                    $"worst gap={result.WorstGap:F3} m, worst step={result.WorstStep:F3} m, " +
                     $"start-wall gap={result.StartWallGap:F3} m.");
             }
 
@@ -72,7 +83,7 @@ public partial class SurfaceConnectionSmokeTest : Node
             .FirstOrDefault(argument => argument.StartsWith("--surface-room=", StringComparison.Ordinal));
         if (requested is not null &&
             int.TryParse(requested["--surface-room=".Length..], out int room) &&
-            room is >= 1 and <= 28)
+            room is >= 1 and <= 30)
         {
             return new[] { room };
         }
@@ -91,6 +102,7 @@ public partial class SurfaceConnectionSmokeTest : Node
         int IssueCount,
         int SurfaceCount,
         int SeamCount,
+        int BarrierCount,
         float WorstGap,
         float WorstStep,
         float StartWallGap);
@@ -99,6 +111,9 @@ public partial class SurfaceConnectionSmokeTest : Node
     {
         List<Surface> surfaces = new();
         CollectSurfaces(root, surfaces);
+        List<Barrier> barriers = new();
+        CollectBarriers(root, barriers);
+        List<StructuralWall> structuralWalls = CollectStructuralWalls(root);
         List<Seam> seams = new();
 
         for (int first = 0; first < surfaces.Count; first++)
@@ -154,7 +169,385 @@ public partial class SurfaceConnectionSmokeTest : Node
             GD.PushError($"SURFACE_START_WALL: Room {room:00} leaves a {startWallGap:F3} m nuisance gap behind the starting surface.");
         }
 
-        return new AuditResult(issues, surfaces.Count, seams.Count, worstGap, worstStep, startWallGap);
+        foreach (Barrier barrier in barriers)
+        {
+            if (barrier.Body.HasMeta(RoomGeometry.GeneratedPlatformWallMetadata))
+            {
+                bool runsAlongX = barrier.SupportSize.X >= barrier.SupportSize.Z;
+                float supportLength = runsAlongX ? barrier.SupportSize.X : barrier.SupportSize.Z;
+                float visualLength = runsAlongX ? barrier.VisualSize.X : barrier.VisualSize.Z;
+                float totalOverhang = visualLength - supportLength;
+                if (barrier.VisualSize.Y < MinimumGeneratedWallVisualHeight)
+                {
+                    issues++;
+                    GD.PushError(
+                        $"SURFACE_BARRIER_HEIGHT: Room {room:00} {barrier.Body.Name} is only " +
+                        $"{barrier.VisualSize.Y:F3} m high instead of the shared tall-wall height.");
+                }
+                if (barrier.VisualSize.Y > MaximumGeneratedWallVisualHeight)
+                {
+                    issues++;
+                    GD.PushError(
+                        $"SURFACE_BARRIER_HEIGHT: Room {room:00} {barrier.Body.Name} is " +
+                        $"{barrier.VisualSize.Y:F3} m high instead of the shared normal-wall height.");
+                }
+                CollisionShape3D? generatedHitbox = barrier.Body.GetNodeOrNull<CollisionShape3D>("GeneratedWallHitbox");
+                BoxShape3D? generatedHitboxBox = generatedHitbox?.Shape as BoxShape3D;
+                if (generatedHitbox is null || generatedHitboxBox is null ||
+                    generatedHitboxBox.Size.DistanceTo(barrier.VisualSize) > 0.001f ||
+                    generatedHitbox.Position.DistanceTo(barrier.VisualOffset) > 0.001f)
+                {
+                    issues++;
+                    GD.PushError(
+                        $"SURFACE_BARRIER_HITBOX: Room {room:00} {barrier.Body.Name} does not have a hitbox matching its generated visual wall; " +
+                        $"found={generatedHitbox is not null}, size={generatedHitboxBox?.Size}, expected-size={barrier.VisualSize}, " +
+                        $"offset={generatedHitbox?.Position}, expected-offset={barrier.VisualOffset}.");
+                }
+                if (totalOverhang > MaximumGeneratedWallTotalOverhang)
+                {
+                    issues++;
+                    GD.PushError(
+                        $"SURFACE_BARRIER_OVERHANG: Room {room:00} {barrier.Body.Name} extends " +
+                        $"{totalOverhang:F3} m beyond its authored wall guide.");
+                }
+            }
+
+            if (IsBarrierSupported(barrier, surfaces, structuralWalls, out string supportDetails))
+            {
+                continue;
+            }
+
+            issues++;
+            GD.PushError(
+                $"SURFACE_BARRIER_SUPPORT: Room {room:00} {barrier.Body.Name} loses contact with its supporting floor; {supportDetails}.");
+        }
+
+        foreach (Barrier barrier in barriers)
+        {
+            if (TryFindNearbyDisconnectedBarrierEnd(barrier, barriers, structuralWalls, out string connectionDetails))
+            {
+                issues++;
+                GD.PushError($"SURFACE_BARRIER_CONNECTION: Room {room:00} {barrier.Body.Name} has a nearby disconnected end; {connectionDetails}.");
+            }
+        }
+
+        issues += AuditSharedWindFans(room, root);
+
+        return new AuditResult(issues, surfaces.Count, seams.Count, barriers.Count, worstGap, worstStep, startWallGap);
+    }
+
+    private static int AuditSharedWindFans(int room, Node root)
+    {
+        int expectedCount = room switch
+        {
+            13 => 3,
+            15 => 3,
+            26 => 1,
+            _ => 0,
+        };
+        if (expectedCount == 0)
+        {
+            return 0;
+        }
+
+        List<Node3D> housings = new();
+        CollectWindFanHousings(root, housings);
+        bool sharedModel = housings.Count == expectedCount && housings.All(housing =>
+            housing.GetNodeOrNull<MeshInstance3D>("Hub") is not null &&
+            housing.GetNodeOrNull<Node3D>("Guard") is Node3D guard && guard.GetChildCount() == 16 &&
+            housing.GetNodeOrNull<Node3D>("Rotor") is Node3D rotor && rotor.GetChildCount() == 5);
+        if (sharedModel)
+        {
+            GD.Print($"SHARED_WIND_FAN_PASS: Room {room:00} uses the canonical hub, 16-segment guard and five-blade rotor for all {housings.Count} fans.");
+            return 0;
+        }
+
+        GD.PushError($"SHARED_WIND_FAN_FAIL: Room {room:00} found {housings.Count}/{expectedCount} canonical fan housings.");
+        return 1;
+    }
+
+    private static void CollectWindFanHousings(Node node, List<Node3D> housings)
+    {
+        string name = node.Name.ToString();
+        if (node is Node3D housing &&
+            (name.StartsWith("WindFanHousing", StringComparison.Ordinal) || name == "VacuumFan"))
+        {
+            housings.Add(housing);
+        }
+        foreach (Node child in node.GetChildren())
+        {
+            CollectWindFanHousings(child, housings);
+        }
+    }
+
+    private static bool TryFindNearbyDisconnectedBarrierEnd(
+        Barrier barrier,
+        List<Barrier> barriers,
+        List<StructuralWall> structuralWalls,
+        out string details)
+    {
+        bool runsAlongX = barrier.SupportSize.X >= barrier.SupportSize.Z;
+        float supportLongHalf = (runsAlongX ? barrier.SupportSize.X : barrier.SupportSize.Z) * 0.5f;
+        float visualLongHalf = (runsAlongX ? barrier.VisualSize.X : barrier.VisualSize.Z) * 0.5f;
+        foreach (float endSign in new[] { -1.0f, 1.0f })
+        {
+            Vector3 localSupportEnd = runsAlongX
+                ? new Vector3(endSign * supportLongHalf, 0.0f, 0.0f)
+                : new Vector3(0.0f, 0.0f, endSign * supportLongHalf);
+            // Keep lateral/base snapping, but exclude the longitudinal centre
+            // shift introduced by one-sided visual overlap.
+            Vector3 logicalVisualOffset = barrier.VisualOffset;
+            if (runsAlongX)
+            {
+                logicalVisualOffset.X = 0.0f;
+            }
+            else
+            {
+                logicalVisualOffset.Z = 0.0f;
+            }
+            Vector3 worldSupportEnd = barrier.Body.ToGlobal(localSupportEnd + logicalVisualOffset);
+            Vector3 localAhead = localSupportEnd + (runsAlongX
+                ? new Vector3(endSign * 0.25f, 0.0f, 0.0f)
+                : new Vector3(0.0f, 0.0f, endSign * 0.25f));
+            Vector3 worldAhead = barrier.Body.ToGlobal(localAhead + logicalVisualOffset);
+            float nearestGap = float.PositiveInfinity;
+            string nearestName = string.Empty;
+            foreach (Barrier other in barriers)
+            {
+                if (other.Body == barrier.Body)
+                {
+                    continue;
+                }
+                float gap = DistanceToBox(worldSupportEnd, other.Body, other.SupportSize, other.VisualOffset);
+                float gapAhead = DistanceToBox(worldAhead, other.Body, other.SupportSize, other.VisualOffset);
+                if (gapAhead >= gap - 0.01f)
+                {
+                    continue;
+                }
+                if (gap < nearestGap)
+                {
+                    nearestGap = gap;
+                    nearestName = other.Body.Name.ToString();
+                }
+            }
+            foreach (StructuralWall wall in structuralWalls)
+            {
+                float gap = DistanceToBox(worldSupportEnd, wall.Body, wall.Shape.Size);
+                float gapAhead = DistanceToBox(worldAhead, wall.Body, wall.Shape.Size);
+                if (gapAhead >= gap - 0.01f)
+                {
+                    continue;
+                }
+                if (gap < nearestGap)
+                {
+                    nearestGap = gap;
+                    nearestName = wall.Body.Name.ToString();
+                }
+            }
+            if (nearestGap <= 1.0f && !VisualBarrierEndTouchesAnother(
+                    barrier,
+                    runsAlongX,
+                    endSign,
+                    visualLongHalf,
+                    barriers,
+                    structuralWalls))
+            {
+                details = $"{(endSign < 0.0f ? "start" : "end")} is {nearestGap:F3} m from {nearestName}";
+                return true;
+            }
+        }
+        details = string.Empty;
+        return false;
+    }
+
+    private static bool VisualBarrierEndTouchesAnother(
+        Barrier barrier,
+        bool runsAlongX,
+        float endSign,
+        float visualLongHalf,
+        List<Barrier> barriers,
+        List<StructuralWall> structuralWalls)
+    {
+        // Sloped and flat wall boxes can meet farther inside the sloped box
+        // even when their authored collision endpoints are adjacent.
+        float sampleLength = Mathf.Min(3.0f, visualLongHalf * 2.0f);
+        float visualThinHalf = (runsAlongX ? barrier.VisualSize.Z : barrier.VisualSize.X) * 0.5f;
+        const float sampleStep = 0.025f;
+        for (float inward = 0.0f; inward <= sampleLength + 0.001f; inward += sampleStep)
+        {
+            float longOffset = endSign * (visualLongHalf - inward);
+            foreach (float thinOffset in new[] { -visualThinHalf, 0.0f, visualThinHalf })
+            {
+                Vector3 localSample = runsAlongX
+                    ? new Vector3(longOffset, 0.0f, thinOffset)
+                    : new Vector3(thinOffset, 0.0f, longOffset);
+                Vector3 worldSample = barrier.Body.ToGlobal(localSample + barrier.VisualOffset);
+                if (barriers.Any(other => other.Body != barrier.Body &&
+                        DistanceToBox(worldSample, other.Body, other.VisualSize, other.VisualOffset) <= 0.02f) ||
+                    structuralWalls.Any(wall => DistanceToBox(worldSample, wall.Body, wall.Shape.Size) <= 0.02f))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static float DistanceToBox(Vector3 worldPoint, Node3D body, Vector3 size)
+    {
+        return DistanceToBox(worldPoint, body, size, Vector3.Zero);
+    }
+
+    private static float DistanceToBox(
+        Vector3 worldPoint,
+        Node3D body,
+        Vector3 size,
+        Vector3 localOffset)
+    {
+        Vector3 local = body.ToLocal(worldPoint) - localOffset;
+        Vector3 half = size * 0.5f;
+        Vector3 outside = new(
+            Mathf.Max(Mathf.Abs(local.X) - half.X, 0.0f),
+            Mathf.Max(Mathf.Abs(local.Y) - half.Y, 0.0f),
+            Mathf.Max(Mathf.Abs(local.Z) - half.Z, 0.0f));
+        return outside.Length();
+    }
+
+    private static bool IsBarrierSupported(
+        Barrier barrier,
+        List<Surface> surfaces,
+        List<StructuralWall> structuralWalls,
+        out string details)
+    {
+        if (barrier.Body.Name.ToString().Contains("Junction", StringComparison.OrdinalIgnoreCase) ||
+            barrier.Body.Name.ToString().StartsWith("GeneratedRailJoin", StringComparison.Ordinal))
+        {
+            details = "wall-to-wall junction filler";
+            return true;
+        }
+        details = "no nearby rolling surface";
+        bool runsAlongX = barrier.SupportSize.X >= barrier.SupportSize.Z;
+        float longHalf = (runsAlongX ? barrier.SupportSize.X : barrier.SupportSize.Z) * 0.5f;
+        float thinHalf = (runsAlongX ? barrier.SupportSize.Z : barrier.SupportSize.X) * 0.5f;
+        Vector3 supportVisualOffset = barrier.VisualOffset;
+        if (runsAlongX)
+        {
+            supportVisualOffset.X = 0.0f;
+        }
+        else
+        {
+            supportVisualOffset.Z = 0.0f;
+        }
+        // Generated wall visuals deliberately overlap neighbouring wall ends
+        // by up to 0.275 m so a camera cannot expose a hairline seam. Audit
+        // the supported wall body just inside that cosmetic end overlap.
+        float endInset = Mathf.Min(0.30f, longHalf * 0.1f);
+        foreach (float longOffset in new[]
+        {
+            -longHalf + endInset,
+            -longHalf * 0.5f,
+            0.0f,
+            longHalf * 0.5f,
+            longHalf - endInset,
+        })
+        {
+            bool supportedAtSample = false;
+            float bestScore = float.PositiveInfinity;
+            string nearestDetails = "no nearby rolling surface";
+            foreach (float thinOffset in new[] { -thinHalf, 0.0f, thinHalf })
+            {
+                Vector3 localBottom = runsAlongX
+                    ? new Vector3(longOffset, -barrier.SupportSize.Y * 0.5f, thinOffset)
+                    : new Vector3(thinOffset, -barrier.SupportSize.Y * 0.5f, longOffset);
+                Vector3 bottomPoint = barrier.Body.ToGlobal(localBottom + supportVisualOffset);
+                if (IsBackedByStructuralWall(bottomPoint, structuralWalls))
+                {
+                    supportedAtSample = true;
+                    break;
+                }
+                foreach (Surface surface in surfaces)
+                {
+                    if (surface.Body == barrier.Body)
+                    {
+                        continue;
+                    }
+
+                    Vector3 local = surface.Body.ToLocal(bottomPoint);
+                    float horizontalTolerance = 0.015f;
+                    float xOverrun = Mathf.Max(0.0f, Mathf.Abs(local.X) - surface.Shape.Size.X * 0.5f);
+                    float zOverrun = Mathf.Max(0.0f, Mathf.Abs(local.Z) - surface.Shape.Size.Z * 0.5f);
+                    float supportGap = local.Y - (surface.Shape.Size.Y * 0.5f);
+                    float score = xOverrun + zOverrun + Mathf.Abs(supportGap);
+                    if (score < bestScore)
+                    {
+                        bestScore = score;
+                        nearestDetails = $"nearest={surface.Body.Name}, x-overrun={xOverrun:F3} m, z-overrun={zOverrun:F3} m, vertical-gap={supportGap:F3} m";
+                    }
+                    if (Mathf.Abs(local.X) > surface.Shape.Size.X * 0.5f + horizontalTolerance ||
+                        Mathf.Abs(local.Z) > surface.Shape.Size.Z * 0.5f + horizontalTolerance)
+                    {
+                        continue;
+                    }
+
+                    if (supportGap >= -1.10f && supportGap <= 0.02f)
+                    {
+                        supportedAtSample = true;
+                        break;
+                    }
+                }
+
+                if (supportedAtSample) { break; }
+            }
+
+            if (!supportedAtSample)
+            {
+                details = $"unsupported {(longOffset < 0.0f ? "start" : longOffset > 0.0f ? "end" : "midpoint")} sample at local offset {longOffset:F3} m; {nearestDetails}";
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool IsBackedByStructuralWall(Vector3 point, List<StructuralWall> walls)
+    {
+        const float tolerance = 0.08f;
+        foreach (StructuralWall wall in walls)
+        {
+            Vector3 local = wall.Body.ToLocal(point);
+            Vector3 half = wall.Shape.Size * 0.5f;
+            if (Mathf.Abs(local.X) <= half.X + tolerance &&
+                Mathf.Abs(local.Y) <= half.Y + tolerance &&
+                Mathf.Abs(local.Z) <= half.Z + tolerance)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static List<StructuralWall> CollectStructuralWalls(Node root)
+    {
+        string[] wallNames = { "LeftWall", "RightWall", "BackWall", "ExitWall" };
+        List<StructuralWall> walls = new();
+        foreach (StaticBody3D body in EnumerateDescendants(root).OfType<StaticBody3D>())
+        {
+            if (!wallNames.Contains(body.Name.ToString(), StringComparer.Ordinal))
+            {
+                continue;
+            }
+
+            foreach (CollisionShape3D collision in body.GetChildren().OfType<CollisionShape3D>())
+            {
+                if (!collision.Disabled && collision.Shape is BoxShape3D box)
+                {
+                    walls.Add(new StructuralWall(body, box));
+                }
+            }
+        }
+
+        return walls;
     }
 
     private static float MeasureStartWallGap(Node root)
@@ -287,7 +680,8 @@ public partial class SurfaceConnectionSmokeTest : Node
         {
             foreach (CollisionShape3D collision in body.GetChildren().OfType<CollisionShape3D>())
             {
-                if (collision.Disabled || collision.Shape is not BoxShape3D box || !IsRollingSurface(body, box))
+                if (collision.Disabled || collision.Shape is not BoxShape3D box ||
+                    IsBarrierBox(body.Name.ToString(), box) || !IsRollingSurface(body, box))
                 {
                     continue;
                 }
@@ -302,6 +696,61 @@ public partial class SurfaceConnectionSmokeTest : Node
         {
             CollectSurfaces(child, surfaces);
         }
+    }
+
+    private static void CollectBarriers(Node node, List<Barrier> barriers)
+    {
+        if (node is StaticBody3D body && IsEdgeBarrier(body.Name.ToString()))
+        {
+            foreach (CollisionShape3D collision in body.GetChildren().OfType<CollisionShape3D>())
+            {
+                if (collision.Disabled || collision.Shape is not BoxShape3D box)
+                {
+                    continue;
+                }
+
+                if (IsBarrierBox(body.Name.ToString(), box))
+                {
+                    Vector3 supportedBaseSize = body.HasMeta(RoomGeometry.BarrierBaseSeamSizeMetadata)
+                        ? body.GetMeta(RoomGeometry.BarrierBaseSeamSizeMetadata).AsVector3()
+                        : box.Size;
+                    Vector3 guideSize = body.HasMeta(RoomGeometry.GeneratedPlatformWallGuideSizeMetadata)
+                        ? body.GetMeta(RoomGeometry.GeneratedPlatformWallGuideSizeMetadata).AsVector3()
+                        : box.Size;
+                    Vector3 supportSize = new(guideSize.X, supportedBaseSize.Y, guideSize.Z);
+                    Vector3 visualOffset = body.HasMeta(RoomGeometry.BarrierBaseSeamOffsetMetadata)
+                        ? body.GetMeta(RoomGeometry.BarrierBaseSeamOffsetMetadata).AsVector3()
+                        : Vector3.Zero;
+                    barriers.Add(new Barrier(body, supportSize, supportedBaseSize, visualOffset));
+                    break;
+                }
+            }
+        }
+
+        foreach (Node child in node.GetChildren())
+        {
+            CollectBarriers(child, barriers);
+        }
+    }
+
+    private static bool IsEdgeBarrier(string name)
+    {
+        string[] fragments = { "Rail", "SideWall", "Guard", "Kerb", "Rim" };
+        return fragments.Any(fragment => name.Contains(fragment, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsBarrierBox(string name, BoxShape3D box)
+    {
+        float longHorizontal = Mathf.Max(box.Size.X, box.Size.Z);
+        float shortHorizontal = Mathf.Min(box.Size.X, box.Size.Z);
+        float minimumLength = name.StartsWith("GeneratedRailJoin", StringComparison.Ordinal) ||
+            name.Contains("StepRail", StringComparison.OrdinalIgnoreCase)
+            ? 0.2f
+            : 1.0f;
+        return IsEdgeBarrier(name) &&
+            longHorizontal >= minimumLength &&
+            shortHorizontal <= 0.8f &&
+            box.Size.Y >= 0.35f;
     }
 
     private static bool IsRollingSurface(StaticBody3D body, BoxShape3D shape)
@@ -519,8 +968,8 @@ public partial class SurfaceConnectionSmokeTest : Node
     {
         string[] excluded =
         {
-            "Rail", "Wall", "Ceiling", "Beam", "Frame", "Rim", "Stop", "Barrier", "Divider", "Kerb",
-            "Pillar", "Post", "Hazard", "Gate", "Slat", "Arm", "Mount", "Fin", "Brace", "Tooth", "Pocket",
+            "Wall", "Ceiling", "Beam", "Frame", "Rim", "Stop", "Barrier", "Divider", "Kerb",
+            "Pillar", "Post", "Hazard", "Gate", "Slat", "Arm", "Mount", "Brace", "Tooth", "Pocket",
             "DoorLeaf", "Handle", "Marker", "Latch", "Rib", "Blade", "Cable", "Mass", "Counterweight",
         };
         return excluded.Any(fragment => name.Contains(fragment, StringComparison.OrdinalIgnoreCase));

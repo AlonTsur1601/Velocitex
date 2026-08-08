@@ -38,6 +38,7 @@ public partial class Room26Runtime : RoomRuntime
     private bool _enteredVacuum;
     private bool _landedExit;
     private bool _touchedChamberWall;
+    private bool _cannonHit;
     private bool _showPrompts;
     private bool _highContrastPrompts;
     private int _nextGate;
@@ -81,6 +82,16 @@ public partial class Room26Runtime : RoomRuntime
         _vacuumValve.Activated += OpenVacuumValve;
         _cannon.Fired += body => _cannonFired |= body == _player && _valveOpened;
         _vacuum.RigidBodyEntered += body => _enteredVacuum |= body == _player && _valveOpened && _cannonFired;
+        foreach (InterferenceCannon3D cannon in _interferenceCannons)
+        {
+            cannon.PlayerHit += player =>
+            {
+                if (player == _player)
+                {
+                    RegisterCannonHit();
+                }
+            };
+        }
         _vacuum.SetPhysicsProcess(false);
 
         if (_solutionSmoke)
@@ -153,7 +164,7 @@ public partial class Room26Runtime : RoomRuntime
         _maximumRise = Mathf.Max(_maximumRise, _player.GlobalPosition.Y - _spawn.Origin.Y);
         Vector3 position = _player.GlobalPosition;
         if (_enteredVacuum && (Mathf.Abs(position.X) >= 12.35f || position.Y >= 34.2f)) { _touchedChamberWall = true; }
-        if (_enteredVacuum && _nextGate == RequiredGates && _player.IsGrounded && position.Y >= 8.75f && position.Y <= 9.35f && position.Z <= -45.0f && position.Z >= -83.5f)
+        if (_enteredVacuum && _nextGate == RequiredGates && _player.IsGrounded && position.Y >= 8.75f && position.Y <= 9.35f && position.Z <= -57.0f && position.Z >= -95.5f)
         {
             _landedExit = true;
         }
@@ -236,12 +247,12 @@ public partial class Room26Runtime : RoomRuntime
         _enteredVacuum = false;
         _landedExit = false;
         _touchedChamberWall = false;
+        _cannonHit = false;
         _nextGate = 0;
         _maximumRise = 0.0f;
-        foreach (Area3D gate in _airGates)
+        foreach (FlightGate3D gate in _airGates.OfType<FlightGate3D>())
         {
-            gate.SetMeta("activated", false);
-            gate.GetNode<MeshInstance3D>("Ring").Scale = Vector3.One;
+            gate.ResetGate();
         }
     }
 
@@ -260,14 +271,24 @@ public partial class Room26Runtime : RoomRuntime
         _nextGate = RequiredGates;
         _maximumRise = 17.0f;
         _landedExit = true;
-        _goal.EmitSignal(Area3D.SignalName.BodyEntered, _player);
+        RegisterCannonHit();
+        _player.GlobalPosition = _goal.GlobalPosition;
+        TrackFlight();
         if (!IsComplete && !IsExitTraversalPending) { FailMechanics("The complete four-ring low-gravity flight did not open the exit."); return; }
-        bool cannonGrid = _interferenceCannons.Count == 12 &&
-            _interferenceCannons.Select(cannon => cannon.CadenceTicks).Distinct().Count() == 12 &&
-            _interferenceCannons.All(cannon => cannon.HasSolidBodyHitbox && cannon.InitialDelayTicks <= 34 && cannon.UsesRandomizedTiming);
+        if (!_cannonHit || CompletedAdvancementIds.Contains("vacuum-packed")) { FailMechanics("A surviving cannon hit either was not recorded or incorrectly awarded Vacuum Packed."); return; }
+        bool cannonGrid = _interferenceCannons.Count == 726 &&
+            _interferenceCannons.Select(cannon => cannon.CadenceTicks).Distinct().Count() >= 100 &&
+            _interferenceCannons.Select(cannon => cannon.ScheduledFirstFireTick).Distinct().Count() >= 100 &&
+            _interferenceCannons.All(cannon => cannon.HasSolidBodyHitbox && cannon.InitialDelayTicks <= 189 && cannon.UsesRandomizedTiming);
         if (!cannonGrid || !_cannon.HasSolidBodyHitbox) { FailMechanics($"The cannon hitboxes or airborne grid are incomplete: {_interferenceCannons.Count} interference cannons, launcher={_cannon.HasSolidBodyHitbox}."); return; }
-        GD.Print("ROOM26_MECHANICS_PASS: direct entry, valve-only and valve-plus-cannon entry failed; four low-gravity rings, early crossfire, sufficient rise and exit landing were required.");
+        GD.Print("ROOM26_MECHANICS_PASS: direct entry, valve-only and valve-plus-cannon entry failed; a surviving crossfire hit still opened the exit after the full four-ring flight.");
         GetTree().Quit(0);
+    }
+
+    private void RegisterCannonHit()
+    {
+        _cannonHit = true;
+        _touchedChamberWall = true;
     }
 
     private void RunShellSmoke()
@@ -293,17 +314,17 @@ public partial class Room26Runtime : RoomRuntime
         const string metal = "res://assets/textures/brushed_metal.png";
         const string concrete = "res://assets/textures/industrial_concrete.png";
         Color frame = new("315563");
-        RoomGeometry.AddClosedRoomShell(this, "RoomShell", new Vector3(0.0f, 0.0f, -16.0f), new Vector2(28.0f, 142.0f), -3.0f, 36.0f, concrete, new Color("486c77"), new Color("183943"), body =>
+        RoomGeometry.AddClosedRoomShell(this, "RoomShell", new Vector3(0.0f, 0.0f, -24.0f), new Vector2(28.0f, 158.0f), -3.0f, 36.35f, concrete, new Color("486c77"), new Color("183943"), body =>
         {
             if (body is PlayerBall) { RestartRoom(); }
         });
         RoomGeometry.AddBox(this, "StartDeck", new Vector3(27.5f, 0.5f, 22.0f), new Vector3(0.0f, 4.25f, 44.0f), Vector3.Zero, metal, new Color("a3b6bb"), 0.42f, 0.64f);
-        RoomGeometry.AddBox(this, "ExitDeck", new Vector3(20.0f, 0.5f, 35.5f), new Vector3(2.0f, 8.25f, -62.75f), Vector3.Zero, metal, new Color("9dafb5"), 0.42f, 0.64f);
+        RoomGeometry.AddBox(this, "ExitDeck", new Vector3(20.0f, 0.5f, 33.27f), new Vector3(2.0f, 8.25f, -73.635f), Vector3.Zero, metal, new Color("9dafb5"), 0.42f, 0.64f);
 
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(this, $"StartRail{side}", new Vector3(0.42f, 1.8f, 22.0f), new Vector3(side * 13.58f, 5.35f, 44.0f), Vector3.Zero, metal, frame, 0.42f, 0.64f);
-            RoomGeometry.AddBox(this, $"ExitRail{side}", new Vector3(0.42f, 1.8f, 35.5f), new Vector3(2.0f + (side * 10.18f), 9.35f, -62.75f), Vector3.Zero, metal, frame, 0.42f, 0.64f);
+            RoomGeometry.AddWall(this, $"StartRail{side}", new Vector3(0.42f, 1.8f, 22.0f), new Vector3(side * 13.58f, 5.35f, 44.0f), Vector3.Zero, metal, frame, 0.42f, 0.64f);
+            RoomGeometry.AddWall(this, $"ExitRail{side}", new Vector3(0.42f, 1.8f, 33.27f), new Vector3(2.0f + (side * 10.18f), 9.35f, -73.635f), Vector3.Zero, metal, frame, 0.42f, 0.64f);
         }
 
         _vacuumValve = new MechanicalLever { Name = "VacuumValve", Position = new Vector3(-5.8f, 4.5f, 49.0f), ActivationRadius = 6.5f };
@@ -323,15 +344,15 @@ public partial class Room26Runtime : RoomRuntime
         _vacuum.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = new Vector3(26.0f, 34.0f, 112.0f) } });
         AddChild(_vacuum);
 
-        AddAirGate("LowGravityRingOne", 0, new Vector3(-1.5f, 21.0f, 13.0f), new Color("69d5df"));
-        AddAirGate("LowGravityRingTwo", 1, new Vector3(2.2f, 31.2f, -10.0f), new Color("d6a76b"));
-        AddAirGate("LowGravityRingThree", 2, new Vector3(2.5f, 25.0f, -34.0f), new Color("75cfa9"));
-        AddAirGate("LowGravityRingFour", 3, new Vector3(4.0f, 12.0f, -53.0f), new Color("c18acb"));
+        AddAirGate("LowGravityRingOne", 0, new Vector3(-1.5f, 21.0f, 13.0f));
+        AddAirGate("LowGravityRingTwo", 1, new Vector3(2.2f, 31.2f, -10.0f));
+        AddAirGate("LowGravityRingThree", 2, new Vector3(2.5f, 25.0f, -34.0f));
+        AddAirGate("LowGravityRingFour", 3, new Vector3(4.0f, 12.0f, -53.0f));
         BuildAirborneCrossfire();
         ForceVolume3D landingGravity = new()
         {
             Name = "ExitLandingStrongGravity",
-            Position = new Vector3(2.0f, 21.0f, -66.5f),
+            Position = new Vector3(2.0f, 21.0f, -78.5f),
             CollisionLayer = 0,
             CollisionMask = 1,
             Profile = GD.Load<ForceVolumeProfile>("res://resources/force_volumes/strong_gravity.tres"),
@@ -352,40 +373,54 @@ public partial class Room26Runtime : RoomRuntime
             RoomGeometry.AddVisualBox(duct, "Top", new Vector3(24.8f, 0.42f, 0.42f), new Vector3(0.0f, 4.0f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, ductMaterial);
         }
 
-        StandardMaterial3D fanMaterial = RoomGeometry.CreateMaterial("res://assets/textures/copper_rivets.svg", new Color("4f8190"), 0.38f, 0.6f);
-        Node3D fan = new() { Name = "VacuumFan", Position = new Vector3(0.0f, 28.0f, -51.0f) };
-        AddChild(fan);
-        for (int index = 0; index < 6; index++)
-        {
-            RoomGeometry.AddVisualBox(fan, $"Blade{index + 1}", new Vector3(0.55f, 5.5f, 0.25f), Vector3.Zero, new Vector3(0.0f, 0.0f, index * Mathf.Pi / 3.0f), string.Empty, Colors.White, 0.0f, 1.0f, fanMaterial);
-        }
+        StandardMaterial3D fanHubMaterial = RoomGeometry.CreateMaterial("res://assets/textures/copper_rivets.svg", new Color("607985"), 0.4f, 0.58f);
+        StandardMaterial3D fanBladeMaterial = RoomGeometry.CreateMaterial("res://assets/textures/brushed_metal.png", new Color("b7c6cc"), 0.42f, 0.62f);
+        RoomGeometry.AddWindFan(this, "VacuumFan", new Vector3(0.0f, 28.0f, -51.0f), Vector3.Zero, 1.85f, fanHubMaterial, fanBladeMaterial);
     }
 
     private void BuildAirborneCrossfire()
     {
-        float[] columnZ = { 16.0f, 2.0f, -12.0f, -26.0f, -40.0f, -54.0f };
+        float[] columnZ = Enumerable.Range(0, 33).Select(index => Mathf.Lerp(16.0f, -54.0f, index / 32.0f)).ToArray();
+        float[] cannonY = Enumerable.Range(0, 11).Select(index => index * 3.2f).ToArray();
         for (int column = 0; column < columnZ.Length; column++)
         {
-            for (int sideIndex = 0; sideIndex < 2; sideIndex++)
+            float routeY = ResolveCrossfireRouteY(columnZ[column]);
+            float verticalShift = Mathf.PosMod(routeY - 4.2f, 3.2f);
+            if (verticalShift > 1.6f) { verticalShift -= 3.2f; }
+            for (int row = 0; row < cannonY.Length; row++)
             {
-                float side = sideIndex == 0 ? -1.0f : 1.0f;
-                float y = 13.0f + ((column % 3) * 8.5f);
-                InterferenceCannon3D cannon = new()
+                for (int sideIndex = 0; sideIndex < 2; sideIndex++)
                 {
-                    Name = $"AirborneInterferenceCannon{column + 1}_{sideIndex + 1}",
-                    Position = new Vector3(side * 10.6f, y, columnZ[column]),
-                    MuzzleOffset = new Vector3(-side * 3.0f, 2.6f, 0.0f),
-                    ProjectileVelocity = new Vector3(-side * 23.0f, 0.0f, 0.0f),
-                    InitialDelayTicks = 8 + (column * 4) + sideIndex,
-                    CadenceTicks = 93 + (((column * 2) + sideIndex) * 3),
-                    ProjectileLifetimeTicks = 72,
-                    PoolSize = 3,
-                    EnableAudio = !_solutionSmoke && (column + sideIndex) % 3 == 0,
-                };
-                AddChild(cannon);
-                _interferenceCannons.Add(cannon);
+                    int index = ((column * cannonY.Length) + row) * 2 + sideIndex;
+                    float side = sideIndex == 0 ? -1.0f : 1.0f;
+                    InterferenceCannon3D cannon = new()
+                    {
+                        Name = $"AirborneInterferenceCannon{column + 1}x{row + 1}_{(side < 0.0f ? "L" : "R")}",
+                        Position = new Vector3(side * 13.3f, cannonY[row] + verticalShift, columnZ[column]),
+                        MuzzleOffset = new Vector3(-side * 3.0f, 2.6f, 0.0f),
+                        ProjectileVelocity = new Vector3(-side * 23.0f, 0.0f, 0.0f),
+                        InitialDelayTicks = 10 + ((index * 7) % 180),
+                        CadenceTicks = 90 + ((index * 13) % 120),
+                        ProjectileLifetimeTicks = 72,
+                        PoolSize = 2,
+                        EnableAudio = !_solutionSmoke && index % 12 == 0,
+                        EnableWarningLight = index % 8 == 0,
+                        UseBatchedDenseVisuals = true,
+                    };
+                    AddChild(cannon);
+                    _interferenceCannons.Add(cannon);
+                }
             }
         }
+        InterferenceCannon3D.AddDenseVisualBatch(this, _interferenceCannons);
+    }
+
+    private static float ResolveCrossfireRouteY(float z)
+    {
+        if (z >= 13.0f) { return Mathf.Lerp(19.5f, 21.0f, Mathf.Clamp((16.0f - z) / 3.0f, 0.0f, 1.0f)); }
+        if (z >= -10.0f) { return Mathf.Lerp(21.0f, 31.2f, (13.0f - z) / 23.0f); }
+        if (z >= -34.0f) { return Mathf.Lerp(31.2f, 25.0f, (-10.0f - z) / 24.0f); }
+        return Mathf.Lerp(25.0f, 12.0f, Mathf.Clamp((-34.0f - z) / 19.0f, 0.0f, 1.0f));
     }
 
     private void AddLowGravityMotes()
@@ -393,9 +428,9 @@ public partial class Room26Runtime : RoomRuntime
         StandardMaterial3D material = new()
         {
             ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            AlbedoColor = new Color("c6eadc"),
+            AlbedoColor = Colors.White,
             EmissionEnabled = true,
-            Emission = new Color("659b88"),
+            Emission = new Color("dfefff"),
         };
         ParticleProcessMaterial process = new()
         {
@@ -419,25 +454,23 @@ public partial class Room26Runtime : RoomRuntime
         });
     }
 
-    private void AddAirGate(string name, int index, Vector3 position, Color tint)
+    private void AddAirGate(string name, int index, Vector3 position)
     {
-        Area3D gate = new() { Name = name, Position = position, CollisionLayer = 0, CollisionMask = 1, Monitoring = true };
-        gate.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = new Vector3(9.2f, 9.2f, 3.5f) } });
-        StandardMaterial3D material = RoomGeometry.CreateMaterial("res://assets/textures/copper_rivets.svg", tint, 0.24f, 0.5f, emissionEnabled: true, emission: tint.Darkened(0.65f));
-        MeshInstance3D ring = new()
+        FlightGate3D gate = new()
         {
-            Name = "Ring",
-            Rotation = new Vector3(Mathf.Pi / 2.0f, 0.0f, 0.0f),
-            Mesh = new TorusMesh { InnerRadius = 4.35f, OuterRadius = 4.75f, Rings = 32, RingSegments = 10 },
-            MaterialOverride = material,
-            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+            Name = name,
+            Position = position,
+            Radius = 4.35f,
+            OpeningContactMargin = 0.60f,
+            EnableAudio = !_solutionSmoke,
         };
-        gate.AddChild(ring);
-        gate.BodyEntered += body =>
+        gate.Passed += player =>
         {
-            if (body != _player || index != _nextGate || !_enteredVacuum) { return; }
-            gate.SetMeta("activated", true);
-            ring.Scale = Vector3.One * 1.12f;
+            if (player != _player || index != _nextGate || !_enteredVacuum)
+            {
+                gate.ResetGate();
+                return;
+            }
             _nextGate++;
             if (_solutionSmoke) { GD.Print($"ROOM26_GATE_TRACE: gate={_nextGate}/{RequiredGates}, tick={_solutionTick}, position={_player.GlobalPosition}."); }
         };
@@ -447,7 +480,7 @@ public partial class Room26Runtime : RoomRuntime
 
     private void BuildGoal()
     {
-        Vector3 position = new(0.0f, 9.35f, -78.0f);
+        Vector3 position = new(0.0f, 9.35f, -90.0f);
         _goal = new Area3D { Name = "GoalCup", Position = position, CollisionLayer = 0, CollisionMask = 1, Monitoring = true };
         _goal.AddChild(new CollisionShape3D { Shape = new CylinderShape3D { Radius = 2.0f, Height = 3.0f } });
         _goal.BodyEntered += body =>

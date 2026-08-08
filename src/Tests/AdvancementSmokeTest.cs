@@ -11,16 +11,16 @@ public partial class AdvancementSmokeTest : Node
     public override void _Ready()
     {
         ProfileStore.DeleteTestFiles(TestPath);
-        if (AdvancementCatalog.All.Count != 20 ||
-            AdvancementCatalog.All.Select(item => item.Id).Distinct(StringComparer.Ordinal).Count() != 20 ||
-            AdvancementCatalog.All.Select(item => item.RewardCosmeticId).Distinct(StringComparer.Ordinal).Count() != 20)
+        if (AdvancementCatalog.All.Count != 26 ||
+            AdvancementCatalog.All.Select(item => item.Id).Distinct(StringComparer.Ordinal).Count() != 26 ||
+            AdvancementCatalog.All.Any(item => item.RewardCosmeticId is null))
         {
-            Fail("Advancement IDs or rewards are not a unique set of 20.");
+            Fail("Advancement IDs or their regular cosmetic rewards are incomplete.");
             return;
         }
 
-        if (AdvancementCatalog.All.Any(item =>
-            CosmeticCatalog.FindById(item.RewardCosmeticId) is not { UnlockedByDefault: false }))
+        if (AdvancementCatalog.All.Where(item => item.RewardCosmeticId is not null).Any(item =>
+            CosmeticCatalog.FindById(item.RewardCosmeticId!) is not { UnlockedByDefault: false }))
         {
             Fail("An advancement reward is missing or incorrectly unlocked by default.");
             return;
@@ -31,6 +31,34 @@ public partial class AdvancementSmokeTest : Node
             item.Description.Contains("centre", StringComparison.OrdinalIgnoreCase)))
         {
             Fail("Advancement descriptions must use American English meters/center spelling.");
+            return;
+        }
+
+        Dictionary<string, string> roomSpecificDescriptions = new()
+        {
+            ["fresh-from-the-globe"] = "Room 01",
+            ["five-star-batch"] = "Rooms 01",
+            ["straight-as-glass"] = "Room 06",
+            ["perfect-stop"] = "Room 07",
+            ["blue-streak"] = "Room 08",
+            ["feather-touch"] = "Room 11",
+            ["against-the-wind"] = "Room 13",
+            ["perfect-switch"] = "Room 14",
+            ["bullseye"] = "Room 16",
+            ["untouchable"] = "Room 17",
+            ["moving-with-it"] = "Room 18",
+            ["piston-perfect"] = "Room 19",
+            ["clean-assembly"] = "Room 20",
+            ["full-account"] = "Room 23",
+            ["sugar-breaker"] = "Room 24",
+            ["vacuum-packed"] = "Room 26",
+            ["smooth-operator"] = "Room 29",
+            ["final-inspection"] = "Room 30",
+        };
+        if (roomSpecificDescriptions.Any(pair =>
+            AdvancementCatalog.Find(pair.Key)?.Description.Contains(pair.Value, StringComparison.Ordinal) != true))
+        {
+            Fail("Every room-specific achievement description must identify the room by number.");
             return;
         }
 
@@ -74,10 +102,10 @@ public partial class AdvancementSmokeTest : Node
             }
         }
 
-        if (completeProfile.UnlockedAdvancementIds.Count != 20 ||
-            completeProfile.UnlockedCosmeticIds.Count != 39)
+        if (completeProfile.UnlockedAdvancementIds.Count != 26 ||
+            completeProfile.UnlockedCosmeticIds.Count != 47)
         {
-            Fail("Unlocking all 20 advancements did not produce all 20 unique rewards.");
+            Fail("Unlocking all 26 advancements did not produce the expected cosmetic rewards.");
             return;
         }
 
@@ -98,7 +126,7 @@ public partial class AdvancementSmokeTest : Node
         }
 
         ProfileStore.DeleteTestFiles(TestPath);
-        GD.Print("ADVANCEMENT_SMOKE_PASS: all 20 positive and negative unlock paths, unique rewards and persistence work.");
+        GD.Print("ADVANCEMENT_SMOKE_PASS: all 26 unique achievement rewards and profile persistence work.");
         GetTree().Quit(0);
     }
 

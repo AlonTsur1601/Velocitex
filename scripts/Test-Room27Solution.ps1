@@ -11,4 +11,4 @@ for ($run = 1; $run -le 10; $run++) {
     if ($exitCode -ne 0) { throw "Room 27 solution smoke run $run failed with $exitCode" }
     if (($output -join "`n") -notmatch "ROOM27_SOLUTION_PASS") { throw "Room 27 solution smoke run $run did not complete." }
 }
-Write-Output "ROOM27_REPEATABILITY_PASS: the four-field polarity weave completed in 10 clean processes."
+Write-Output "ROOM27_REPEATABILITY_PASS: the four-rail route completed in 10 clean processes."

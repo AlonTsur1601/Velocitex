@@ -305,17 +305,21 @@ public partial class Room03Runtime : RoomRuntime
         // shell. Its front edge remains flush with LaunchSlope1.
         AddCourseBox("SafeStart", new Vector3(17.0f, 0.5f, 8.588f), new Vector3(0.0f, 17.948910f, 35.981f), Vector3.Zero, metal, paleSteel);
         Color startWallTint = new("626d6b");
-        foreach (float side in new[] { -1.0f, 1.0f })
-        {
-            RoomGeometry.AddBox(this, $"StartSideWall{side}", new Vector3(0.34f, 1.2f, 8.588f), new Vector3(side * 8.67f, 18.82f, 35.981f), Vector3.Zero, metal, startWallTint, 0.44f, 0.64f);
-        }
+        RoomGeometry.AddPlatformWallLayout(
+            this,
+            new[]
+            {
+                new PlatformWallSelection("SafeStart", PlatformWallEdge.Left, "StartSideWallLeft"),
+                new PlatformWallSelection("SafeStart", PlatformWallEdge.Right, "StartSideWallRight"),
+            },
+            new PlatformWallStyle(0.34f, 1.2f, metal, startWallTint, 0.44f, 0.64f));
         AddCourseBox("LaunchSlope1", new Vector3(17.0f, 0.5f, 17.0f), new Vector3(0.0f, 15.9f, 23.5f), new Vector3(Mathf.DegToRad(-14.0f), 0.0f, 0.0f), caramel, new Color("b67b50"));
         AddCourseBox("LaunchLip1", new Vector3(17.0f, 0.32f, 2.092006f), new Vector3(0.0f, 13.926f, 14.146003f), Vector3.Zero, caramel, new Color("b67b50"));
         AddCourseBox("Landing1", new Vector3(17.0f, 0.6f, 9.313f), new Vector3(0.0f, 13.0f, 6.3435f - GapExtension), Vector3.Zero, metal, paleSteel);
 
         AddCourseBox("LaunchSlope2", new Vector3(17.0f, 0.5f, 17.0f), new Vector3(0.0f, 11.001f, -6.5f - GapExtension), new Vector3(Mathf.DegToRad(-14.0f), 0.0f, 0.0f), caramel, new Color("ad744d"));
         AddCourseBox("LaunchLip2", new Vector3(17.0f, 0.32f, 2.092006f), new Vector3(0.0f, 9.027f, -15.853997f - GapExtension), Vector3.Zero, caramel, new Color("ad744d"));
-        AddCourseBox("Landing2", new Vector3(17.0f, 0.6f, 10.7f), new Vector3(3.4f, 8.0f, -24.0f - (GapExtension * 2.0f)), Vector3.Zero, metal, new Color("93a09e"));
+        AddCourseBox("Landing2", new Vector3(17.0f, 0.6f, 12.4f), new Vector3(3.4f, 8.0f, -23.15f - (GapExtension * 2.0f)), Vector3.Zero, metal, new Color("93a09e"));
 
         AddCourseBox("LaunchSlope3", new Vector3(17.0f, 0.5f, 17.0f), new Vector3(3.4f, 6.001f, -37.537033f - (GapExtension * 2.0f)), new Vector3(Mathf.DegToRad(-14.0f), 0.0f, 0.0f), caramel, new Color("a66c48"));
         AddCourseBox("LaunchLip3", new Vector3(17.0f, 0.32f, 2.054973f), new Vector3(3.4f, 4.027f, -46.872514f - (GapExtension * 2.0f)), Vector3.Zero, caramel, new Color("a66c48"));

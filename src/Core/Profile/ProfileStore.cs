@@ -70,6 +70,11 @@ public static class ProfileStore
 
     public static PlayerProfile Normalize(PlayerProfile profile)
     {
+        if (profile.UnlockedAdvancementIds.Remove("iron-candy"))
+        {
+            profile.UnlockedAdvancementIds.Add("jawbreaker");
+        }
+
         foreach (string cosmeticId in CosmeticCatalog.CreateBaseUnlockSet())
         {
             profile.UnlockedCosmeticIds.Add(cosmeticId);
@@ -79,6 +84,9 @@ public static class ProfileStore
         profile.SecondaryColorId = NormalizeSelection(profile, CosmeticKind.Color, profile.SecondaryColorId, "vanilla");
         profile.PatternId = NormalizeSelection(profile, CosmeticKind.Pattern, profile.PatternId, "none");
         profile.TrailId = NormalizeSelection(profile, CosmeticKind.Trail, profile.TrailId, "off");
+        profile.FinishId = NormalizeSelection(profile, CosmeticKind.Finish, profile.FinishId, "normal");
+        profile.TrailStyleId = NormalizeSelection(profile, CosmeticKind.TrailStyle, profile.TrailStyleId, "normal");
+        profile.CrownId = NormalizeSelection(profile, CosmeticKind.Crown, profile.CrownId, "none-crown");
         profile.CleanRoomStreak = Math.Max(0, profile.CleanRoomStreak);
         return profile;
     }

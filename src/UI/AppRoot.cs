@@ -4,6 +4,7 @@ using Velocitex.Core.Profile;
 using Velocitex.Core.Rooms;
 using Velocitex.Core.Save;
 using Velocitex.Core.Settings;
+using Velocitex.Core.Updates;
 using Velocitex.Gameplay.Camera;
 using Velocitex.Gameplay.Player;
 using Velocitex.Story;
@@ -55,15 +56,24 @@ public partial class AppRoot : Node
     private GridContainer _secondaryColorGrid = null!;
     private GridContainer _patternGrid = null!;
     private GridContainer _trailGrid = null!;
+    private GridContainer _finishGrid = null!;
+    private GridContainer _trailStyleGrid = null!;
+    private GridContainer _crownGrid = null!;
     private ScrollContainer _customizeScroll = null!;
     private readonly List<CosmeticSwatchButton> _primaryColorButtons = new();
     private readonly List<CosmeticSwatchButton> _secondaryColorButtons = new();
     private readonly List<CosmeticSwatchButton> _patternButtons = new();
     private readonly List<CosmeticSwatchButton> _trailButtons = new();
+    private readonly List<CosmeticSwatchButton> _finishButtons = new();
+    private readonly List<CosmeticSwatchButton> _trailStyleButtons = new();
+    private readonly List<CosmeticSwatchButton> _crownButtons = new();
     private string _selectedPrimaryColorId = "cherry";
     private string _selectedSecondaryColorId = "vanilla";
     private string _selectedPatternId = "none";
     private string _selectedTrailId = "off";
+    private string _selectedFinishId = "normal";
+    private string _selectedTrailStyleId = "normal";
+    private string _selectedCrownId = "none-crown";
     private Label _customizeStatus = null!;
     private CandyPreview3D _candyPreview = null!;
     private Label _browserHeader = null!;
@@ -97,9 +107,16 @@ public partial class AppRoot : Node
     private CheckButton _disableFlashesCheck = null!;
     private CheckButton _highContrastCheck = null!;
     private CheckButton _trailCheck = null!;
+    private Label _updateVersionLabel = null!;
+    private Label _updateStatusLabel = null!;
+    private ProgressBar _updateDownloadProgress = null!;
+    private Button _updateCheckButton = null!;
+    private MenuConfirmationPopup _updateConfirmation = null!;
+    private ReleaseUpdateInfo? _availableUpdate;
+    private bool _updateCheckInProgress;
     private readonly Dictionary<StringName, Button> _bindingButtons = new();
-    private ConfirmationDialog _quitConfirmation = null!;
-    private ConfirmationDialog _newGameConfirmation = null!;
+    private MenuConfirmationPopup _quitConfirmation = null!;
+    private MenuConfirmationPopup _newGameConfirmation = null!;
     private AcceptDialog _roomCompleteDialog = null!;
     private AcceptDialog _unavailableDialog = null!;
     private AudioStreamPlayer _roomDialogueVoice = null!;
@@ -124,6 +141,7 @@ public partial class AppRoot : Node
     private MenuOrigin _customizeOrigin;
     private MenuOrigin _advancementsOrigin;
     private double _campaignElapsedSeconds;
+    private double _nextElapsedSaveAt;
     private bool _roomCompletionHandled;
     private bool _runUiSmoke;
     private bool _runSaveSmoke;
@@ -148,6 +166,7 @@ public partial class AppRoot : Node
     private bool _campaignFlowSmokePending;
     private bool _loadingRoom;
     private bool _populatingCustomize;
+    private bool _customizationOptionsBuilt;
     private float _loadingVisualTime;
     private double _lastLoadingRevealToExitSeconds;
     private float _startupWordCenterError;
@@ -170,7 +189,16 @@ public partial class AppRoot : Node
     private int _roomTransferGeneration;
     private bool _roomTransferRunning;
     private readonly List<AdvancementDefinition> _deferredRoomStartNotifications = new();
+    private readonly List<AdvancementDefinition> _deferredMainMenuNotifications = new();
     private string _campaignRoot = CampaignSaveService.DefaultRoot;
+    private string? _campaignRootOverride;
+    private CampaignMode _campaignMode = CampaignMode.Normal;
+    private Button _extrasButton = null!;
+    private Button _hardModeButton = null!;
+    private Button _extremeModeButton = null!;
+    private PanelContainer _playMenuPanel = null!;
+    private Label _campaignModeDescription = null!;
+    private bool _extrasExpanded;
     private string _profilePath = ProfileStore.DefaultPath;
     private bool _waitingForKey;
     private StringName _bindingAction = string.Empty;
@@ -187,16 +215,37 @@ public partial class AppRoot : Node
         SecondaryColor,
         Pattern,
         Trail,
+        Finish,
+        TrailStyle,
+        Crown,
     }
 
     public override void _Ready()
     {
         ProcessMode = ProcessModeEnum.Always;
         string[] userArguments = OS.GetCmdlineUserArgs();
+        if (Array.Exists(userArguments, argument => argument == "--updater-location-smoke"))
+        {
+            SetProcess(false);
+            SetPhysicsProcess(false);
+            string? updaterPath = ReleaseUpdateService.FindInstalledUpdaterPath();
+            if (updaterPath is null)
+            {
+                GD.PushError($"UPDATER_LOCATION_SMOKE_FAIL: process={System.Environment.ProcessPath}, base={AppContext.BaseDirectory}");
+                GetTree().Quit(1);
+            }
+            else
+            {
+                GD.Print($"UPDATER_LOCATION_SMOKE_PASS: {updaterPath}");
+                GetTree().Quit(0);
+            }
+            return;
+        }
         InputDefaults.EnsureActions();
         CacheNodes();
         PopulateOptions();
         ConnectSignals();
+        CreateCampaignModeButtons();
 
         _runUiSmoke = Array.Exists(userArguments, argument => argument == "--ui-smoke");
         _runSaveSmoke = Array.Exists(userArguments, argument => argument == "--save-smoke");
@@ -223,17 +272,20 @@ public partial class AppRoot : Node
         _runStartupLoadingSmoke = Array.Exists(userArguments, argument => argument == "--startup-loading-smoke");
         if (_runCampaignFlowSmoke)
         {
-            _campaignRoot = "user://campaign-flow-smoke";
+            _campaignRootOverride = "user://campaign-flow-smoke";
+            _campaignRoot = _campaignRootOverride;
         }
         else if (_runUiSmoke)
         {
-            _campaignRoot = "user://campaign-ui-smoke";
+            _campaignRootOverride = "user://campaign-ui-smoke";
+            _campaignRoot = _campaignRootOverride;
             _profilePath = "user://profile-ui-smoke.json";
             ProfileStore.DeleteTestFiles(_profilePath);
         }
         else if (_runRoomTransferSmoke)
         {
-            _campaignRoot = "user://continue-transfer-smoke";
+            _campaignRootOverride = "user://continue-transfer-smoke";
+            _campaignRoot = _campaignRootOverride;
         }
 
         _profile = ProfileStore.Load(out string? profileWarning, _profilePath);
@@ -310,6 +362,7 @@ public partial class AppRoot : Node
         {
             PlayStartupLoadingSequenceAsync();
         }
+        PopulateCustomizationOptions();
         _uiSmokePending = _runUiSmoke;
         _saveSmokePending = _runSaveSmoke;
         _campaignFlowSmokePending = _runCampaignFlowSmoke;
@@ -505,6 +558,11 @@ public partial class AppRoot : Node
         if (_currentRoom is not null && !GetTree().Paused && !_roomCompletionHandled)
         {
             _campaignElapsedSeconds += delta;
+            if (_campaignElapsedSeconds >= _nextElapsedSaveAt)
+            {
+                PersistCurrentRoomElapsed();
+                _nextElapsedSaveAt = _campaignElapsedSeconds + 10.0;
+            }
             PollAdvancementTelemetry();
         }
 
@@ -688,6 +746,9 @@ public partial class AppRoot : Node
         _secondaryColorGrid = GetNode<GridContainer>($"{customizeControls}/SecondaryGrid");
         _patternGrid = GetNode<GridContainer>($"{customizeControls}/PatternGrid");
         _trailGrid = GetNode<GridContainer>($"{customizeControls}/TrailGrid");
+        _finishGrid = GetNode<GridContainer>($"{customizeControls}/FinishGrid");
+        _trailStyleGrid = GetNode<GridContainer>($"{customizeControls}/TrailStyleGrid");
+        _crownGrid = GetNode<GridContainer>($"{customizeControls}/CrownGrid");
         _customizeStatus = GetNode<Label>($"{customizeRoot}/Status");
         _candyPreview = GetNode<CandyPreview3D>($"{customizeRoot}/Body/PreviewFrame/Preview/Viewport/CandyPreview3D");
         _browserHeader = GetNode<Label>("Ui/BrowserMenu/Center/Panel/Layout/Header");
@@ -722,6 +783,10 @@ public partial class AppRoot : Node
         _disableFlashesCheck = GetNode<CheckButton>($"{settingsRoot}/Tabs/ACCESSIBILITY/Grid/DisableFlashesCheck");
         _highContrastCheck = GetNode<CheckButton>($"{settingsRoot}/Tabs/ACCESSIBILITY/Grid/HighContrastCheck");
         _trailCheck = GetNode<CheckButton>($"{settingsRoot}/Tabs/ACCESSIBILITY/Grid/TrailCheck");
+        _updateVersionLabel = GetNode<Label>($"{settingsRoot}/Tabs/UPDATES/Layout/VersionLabel");
+        _updateStatusLabel = GetNode<Label>($"{settingsRoot}/Tabs/UPDATES/Layout/StatusLabel");
+        _updateDownloadProgress = GetNode<ProgressBar>($"{settingsRoot}/Tabs/UPDATES/Layout/DownloadProgress");
+        _updateCheckButton = GetNode<Button>($"{settingsRoot}/Tabs/UPDATES/Layout/CheckButton");
         foreach (CheckButton toggle in SettingsCheckButtons())
         {
             toggle.LayoutDirection = Control.LayoutDirectionEnum.Ltr;
@@ -733,10 +798,36 @@ public partial class AppRoot : Node
         _bindingButtons[InputDefaults.MoveRight] = GetNode<Button>($"{controlsRoot}/RightButton");
         _bindingButtons[InputDefaults.ToggleCamera] = GetNode<Button>($"{controlsRoot}/CameraButton");
         _bindingButtons[InputDefaults.Interact] = GetNode<Button>($"{controlsRoot}/InteractButton");
-        _quitConfirmation = GetNode<ConfirmationDialog>("Ui/QuitConfirmation");
-        _newGameConfirmation = GetNode<ConfirmationDialog>("Ui/NewGameConfirmation");
+        Theme menuTheme = GetNode<Control>("Ui/MainMenu").Theme;
+        CanvasLayer ui = GetNode<CanvasLayer>("Ui");
+        _quitConfirmation = new MenuConfirmationPopup
+        {
+            Title = "QUIT VELOCITEX?",
+            DialogText = "Unsaved room progress will be lost.",
+            OkButtonText = "QUIT",
+            CancelButtonText = "CANCEL",
+            Theme = menuTheme,
+        };
+        ui.AddChild(_quitConfirmation);
+        _newGameConfirmation = new MenuConfirmationPopup
+        {
+            Title = "START A NEW GAME?",
+            DialogText = "All campaign saves will be cleared. Settings, cosmetics and advancements will be kept.",
+            OkButtonText = "NEW GAME",
+            CancelButtonText = "CANCEL",
+            Theme = menuTheme,
+        };
+        ui.AddChild(_newGameConfirmation);
         _roomCompleteDialog = GetNode<AcceptDialog>("Ui/RoomCompleteDialog");
         _unavailableDialog = GetNode<AcceptDialog>("Ui/UnavailableDialog");
+        _updateConfirmation = new MenuConfirmationPopup
+        {
+            Title = "UPDATE AVAILABLE",
+            OkButtonText = "DOWNLOAD & RESTART",
+            CancelButtonText = "CANCEL",
+            Theme = menuTheme,
+        };
+        ui.AddChild(_updateConfirmation);
         _roomDialogueVoice = GetNode<AudioStreamPlayer>("RoomDialogueVoice");
         _menuMusic = GetNode<AudioStreamPlayer>("MenuMusic");
         AudioStreamWav menuStream = (AudioStreamWav)_menuMusic.Stream.Duplicate();
@@ -745,6 +836,7 @@ public partial class AppRoot : Node
         menuStream.LoopMode = AudioStreamWav.LoopModeEnum.Forward;
         _menuMusic.Stream = menuStream;
     }
+
 
     private void BuildRoomTransferOverlay()
     {
@@ -938,7 +1030,7 @@ public partial class AppRoot : Node
         GetNode<Button>("Ui/MainMenu/Center/Panel/Layout/CustomizeButton").Pressed += () => OpenCustomize(MenuOrigin.Main);
         GetNode<Button>("Ui/MainMenu/Center/Panel/Layout/AdvancementsButton").Pressed += () => OpenAdvancements(MenuOrigin.Main);
         GetNode<Button>("Ui/MainMenu/Center/Panel/Layout/SettingsButton").Pressed += () => OpenSettings(MenuOrigin.Main);
-        GetNode<Button>("Ui/MainMenu/Center/Panel/Layout/QuitButton").Pressed += () => _quitConfirmation.PopupCentered();
+        GetNode<Button>("Ui/MainMenu/Center/Panel/Layout/QuitButton").Pressed += () => _quitConfirmation.PopupCentered(new Vector2I(500, 225));
         GetNode<Button>("Ui/PauseMenu/Center/Panel/Layout/ResumeButton").Pressed += ResumeGame;
         GetNode<Button>("Ui/PauseMenu/Center/Panel/Layout/RestartButton").Pressed += RestartRoom;
         GetNode<Button>("Ui/PauseMenu/Center/Panel/Layout/AdvancementsButton").Pressed += () => OpenAdvancements(MenuOrigin.Pause);
@@ -947,8 +1039,8 @@ public partial class AppRoot : Node
         _continueButton.Pressed += ContinueCampaign;
         _loadButton.Pressed += () => ShowLoadBrowser(MenuOrigin.Main);
         _roomSelectButton.Pressed += ShowRoomSelectBrowser;
-        GetNode<Button>("Ui/PlayMenu/Center/Panel/Layout/NewGameButton").Pressed += () => _newGameConfirmation.PopupCentered();
-        GetNode<Button>("Ui/PlayMenu/Center/Panel/Layout/BackButton").Pressed += ShowMainMenu;
+        GetNode<Button>("Ui/PlayMenu/Center/Panel/Layout/NewGameButton").Pressed += () => _newGameConfirmation.PopupCentered(new Vector2I(620, 245));
+        GetNode<Button>("Ui/PlayMenu/Center/Panel/Layout/BackButton").Pressed += HandlePlayMenuBack;
         GetNode<Button>("Ui/BrowserMenu/Center/Panel/Layout/BackButton").Pressed += CloseBrowser;
         GetNode<Button>("Ui/CustomizeMenu/Center/Panel/Layout/Actions/BackButton").Pressed += CloseCustomize;
         GetNode<Button>("Ui/CustomizeMenu/Center/Panel/Layout/Actions/SaveButton").Pressed += SaveCustomization;
@@ -956,6 +1048,8 @@ public partial class AppRoot : Node
         GetNode<Button>("Ui/SettingsMenu/Center/Panel/Layout/Actions/ApplyButton").Pressed += ReadApplyAndSaveSettings;
         GetNode<Button>("Ui/SettingsMenu/Center/Panel/Layout/Actions/DefaultsButton").Pressed += ResetSettingsControls;
         GetNode<Button>("Ui/SettingsMenu/Center/Panel/Layout/Actions/BackButton").Pressed += CloseSettings;
+        _updateCheckButton.Pressed += CheckForUpdatesAsync;
+        _updateConfirmation.Confirmed += DownloadAndRestartAsync;
         _presetOption.ItemSelected += index => ApplyPresetToControls(_presetOption.GetItemId((int)index));
         foreach (CheckButton toggle in SettingsCheckButtons())
         {
@@ -976,6 +1070,63 @@ public partial class AppRoot : Node
     private void StartGame()
     {
         StartRoom(roomNumber: 1, saveRoomStart: !_runUiSmoke, elapsedSeconds: 0.0);
+    }
+
+    private void CreateCampaignModeButtons()
+    {
+        VBoxContainer layout = GetNode<VBoxContainer>("Ui/PlayMenu/Center/Panel/Layout");
+        Label header = GetNode<Label>("Ui/PlayMenu/Center/Panel/Layout/Header");
+        Button back = GetNode<Button>("Ui/PlayMenu/Center/Panel/Layout/BackButton");
+        _playMenuPanel = GetNode<PanelContainer>("Ui/PlayMenu/Center/Panel");
+        _extrasButton = GetNode<Button>("Ui/PlayMenu/Center/Panel/Layout/ExtrasButton");
+        _campaignModeDescription = new Label
+        {
+            Name = "CampaignModeDescription",
+            CustomMinimumSize = new Vector2(0, 42),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            Visible = false,
+        };
+        _campaignModeDescription.AddThemeColorOverride("font_color", new Color("aeb8bc"));
+        _campaignModeDescription.AddThemeFontSizeOverride("font_size", 16);
+        layout.AddChild(_campaignModeDescription); layout.MoveChild(_campaignModeDescription, header.GetIndex() + 1);
+        _hardModeButton = new Button { Name = "HardModeButton", Text = "HARD MODE", CustomMinimumSize = new Vector2(0, 44), Visible = false };
+        _extremeModeButton = new Button { Name = "ExtremeModeButton", Text = "EXTREME MODE", CustomMinimumSize = new Vector2(0, 44), Visible = false };
+        layout.AddChild(_hardModeButton); layout.MoveChild(_hardModeButton, back.GetIndex());
+        layout.AddChild(_extremeModeButton); layout.MoveChild(_extremeModeButton, back.GetIndex());
+        _extrasButton.Pressed += () => { _extrasExpanded = true; UpdatePlayMenuState(); };
+        _hardModeButton.Pressed += () => SelectCampaignMode(CampaignMode.Hard);
+        _extremeModeButton.Pressed += () => SelectCampaignMode(CampaignMode.Extreme);
+    }
+
+    private void SelectCampaignMode(CampaignMode mode)
+    {
+        _campaignMode = mode;
+        _campaignRoot = _campaignRootOverride ?? CampaignModes.Root(mode);
+        _extrasExpanded = false;
+        UpdatePlayMenuState();
+    }
+
+    private void HandlePlayMenuBack()
+    {
+        if (_campaignMode != CampaignMode.Normal)
+        {
+            _campaignMode = CampaignMode.Normal;
+            _campaignRoot = _campaignRootOverride ?? CampaignModes.Root(CampaignMode.Normal);
+            _extrasExpanded = true;
+            UpdatePlayMenuState();
+            return;
+        }
+
+        if (_extrasExpanded)
+        {
+            _extrasExpanded = false;
+            UpdatePlayMenuState();
+            return;
+        }
+
+        ShowMainMenu();
     }
 
     private void StartOpeningSequence()
@@ -1203,7 +1354,12 @@ public partial class AppRoot : Node
             _currentRoom.RoomCompleted += OnRoomCompleted;
             _sceneContainer.AddChild(_gameplayInstance);
             _currentPlayer = _currentRoom.GetNodeOrNull<PlayerBall>("Player");
+            if (_currentPlayer is not null && !IsAutomatedSmokeRun())
+            {
+                _currentPlayer.ResetPerformed += OnCampaignRunReset;
+            }
             _campaignElapsedSeconds = Math.Max(0.0, elapsedSeconds);
+            _nextElapsedSaveAt = _campaignElapsedSeconds + 10.0;
             _roomCompletionHandled = false;
             _pendingCompletionSnapshot = null;
             _mainMenu.Hide();
@@ -1238,6 +1394,10 @@ public partial class AppRoot : Node
                 Godot.Input.MouseMode = Godot.Input.MouseModeEnum.Visible;
             }
             await ShowRoomIntroCardAsync(entry);
+            if (saveRoomStart)
+            {
+                await SaveRoomStartAfterFrameAsync(_currentRoom);
+            }
             FlushDeferredRoomStartNotifications(roomNumber);
         }
         finally
@@ -1258,6 +1418,7 @@ public partial class AppRoot : Node
     private async void PlayStartupLoadingSequenceAsync()
     {
         ulong startedAtMilliseconds = Time.GetTicksMsec();
+        StopMenuMusic();
         _mainMenu.Modulate = new Color(1.0f, 1.0f, 1.0f, 0.0f);
         ShowLoadingScreen();
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
@@ -1275,6 +1436,7 @@ public partial class AppRoot : Node
 
         await ToSignal(GetTree().CreateTimer(LoadingCandyOnlySeconds, processAlways: true), SceneTreeTimer.SignalName.Timeout);
         await FinishStartupLoadingScreenAsync();
+        FlushDeferredMainMenuNotifications();
         if (_endingReturnSmokePending)
         {
             _endingReturnSmokePending = false;
@@ -1312,6 +1474,7 @@ public partial class AppRoot : Node
     private async Task FinishStartupLoadingScreenAsync()
     {
         _loadingProgress.Value = 100.0;
+        StartMenuMusic();
         ulong revealStartedAtMilliseconds = Time.GetTicksMsec();
         float revealSeconds = _settings.ReducedMotion ? 0.35f : 0.72f;
 
@@ -1458,7 +1621,7 @@ public partial class AppRoot : Node
     {
         CanvasLayer? roomHud = _currentRoom?.GetNodeOrNull<CanvasLayer>("Hud");
         roomHud?.Hide();
-        _roomIntroNumber.Text = $"ROOM {room.Number:00} / 28";
+        _roomIntroNumber.Text = $"ROOM {room.Number:00} / {RoomCatalog.All.Count}";
         _roomIntroName.Text = room.DisplayName.ToUpperInvariant();
         _roomIntroCard.Position = new Vector2(0.0f, -150.0f);
         _roomIntroCard.Modulate = new Color(1.0f, 1.0f, 1.0f, 0.0f);
@@ -1536,6 +1699,10 @@ public partial class AppRoot : Node
 
         _roomDialogueVoice.Stop();
 
+        _campaignMode = CampaignMode.Normal;
+        _campaignRoot = _campaignRootOverride ?? CampaignModes.Root(CampaignMode.Normal);
+        _extrasExpanded = false;
+
         _mainMenu.Show();
         _playMenu.Hide();
         _pauseMenu.Hide();
@@ -1576,7 +1743,7 @@ public partial class AppRoot : Node
         }
 
         _menuMusicTween = CreateTween().SetPauseMode(Tween.TweenPauseMode.Process);
-        _menuMusicTween.TweenProperty(_menuMusic, "volume_db", -12.0f, 1.15f)
+        _menuMusicTween.TweenProperty(_menuMusic, "volume_db", -6.0f, 0.35f)
             .SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.Out);
     }
@@ -1593,6 +1760,9 @@ public partial class AppRoot : Node
 
     private void ShowPlayMenu()
     {
+        _campaignMode = CampaignMode.Normal;
+        _campaignRoot = _campaignRootOverride ?? CampaignModes.Root(CampaignMode.Normal);
+        _extrasExpanded = false;
         UpdatePlayMenuState();
         _mainMenu.Hide();
         _playMenu.Show();
@@ -1609,9 +1779,37 @@ public partial class AppRoot : Node
             GD.PushWarning($"Skipped campaign snapshot: {error}");
         }
 
+        bool regularPlay = _campaignMode == CampaignMode.Normal && !_extrasExpanded;
+        bool extrasMenu = _campaignMode == CampaignMode.Normal && _extrasExpanded;
+        bool challengeMenu = _campaignMode != CampaignMode.Normal;
+        Label header = GetNode<Label>("Ui/PlayMenu/Center/Panel/Layout/Header");
+        Button newGameButton = GetNode<Button>("Ui/PlayMenu/Center/Panel/Layout/NewGameButton");
+
+        header.Text = extrasMenu ? "EXTRAS" : _campaignMode switch
+        {
+            CampaignMode.Hard => "HARD MODE",
+            CampaignMode.Extreme => "EXTREME MODE",
+            _ => "PLAY",
+        };
+        _campaignModeDescription.Visible = challengeMenu;
+        _campaignModeDescription.Text = _campaignMode switch
+        {
+            CampaignMode.Hard => "Complete all 30 rooms with a checkpoint only every 5 rooms",
+            CampaignMode.Extreme => "Complete all 30 rooms without checkpoints",
+            _ => string.Empty,
+        };
+        _playMenuPanel.CustomMinimumSize = new Vector2(460, extrasMenu ? 300 : _campaignMode == CampaignMode.Extreme ? 350 : 470);
+        _continueButton.Visible = regularPlay || challengeMenu;
         _continueButton.Disabled = snapshots.Count == 0;
+        _loadButton.Visible = (regularPlay || _campaignMode == CampaignMode.Hard) && CampaignModeRules.AllowsManualLoad(_campaignMode);
         _loadButton.Disabled = snapshots.Count == 0;
-        _roomSelectButton.Disabled = false;
+        _roomSelectButton.Visible = regularPlay || _campaignMode == CampaignMode.Hard;
+        _roomSelectButton.Text = _campaignMode == CampaignMode.Hard ? "SELECT CHECKPOINT" : "SELECT ROOM";
+        _roomSelectButton.Disabled = _campaignMode == CampaignMode.Hard && CampaignSaveService.GetReachedCheckpoints(_campaignRoot).Count == 0;
+        newGameButton.Visible = regularPlay || challengeMenu;
+        _extrasButton.Visible = regularPlay;
+        _hardModeButton.Visible = extrasMenu;
+        _extremeModeButton.Visible = extrasMenu;
     }
 
     private void StartNewGame()
@@ -1622,7 +1820,8 @@ public partial class AppRoot : Node
             return;
         }
 
-        StartOpeningSequence();
+        if (_campaignMode == CampaignMode.Normal) StartOpeningSequence();
+        else StartRoomWithCandyHandoff(roomNumber: 1, saveRoomStart: true, elapsedSeconds: 0.0);
     }
 
     private void ContinueCampaign()
@@ -1665,6 +1864,7 @@ public partial class AppRoot : Node
 
     private void ShowLoadBrowser(MenuOrigin origin)
     {
+        if (!CampaignModeRules.AllowsManualLoad(_campaignMode)) return;
         _browserOrigin = origin;
         _browserHeader.Text = "LOAD GAME";
         ClearBrowserRows();
@@ -1691,11 +1891,14 @@ public partial class AppRoot : Node
     private void ShowRoomSelectBrowser()
     {
         _browserOrigin = MenuOrigin.Main;
-        _browserHeader.Text = "SELECT ROOM";
+        _browserHeader.Text = _campaignMode == CampaignMode.Hard ? "SELECT CHECKPOINT" : "SELECT ROOM";
         ClearBrowserRows();
         int rowCount = 0;
         IReadOnlySet<int> completed = CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot);
-        foreach (RoomCatalogEntry room in RoomCatalog.All.Where(room => completed.Contains(room.Number)))
+        IEnumerable<RoomCatalogEntry> available = _campaignMode == CampaignMode.Hard
+            ? RoomCatalog.All.Where(room => CampaignModes.IsCheckpoint(room.Number) && CampaignSaveService.GetReachedCheckpoints(_campaignRoot).Contains(room.Number))
+            : RoomCatalog.All.Where(room => completed.Contains(room.Number));
+        foreach (RoomCatalogEntry room in available)
         {
             AddRoomSelectRow(room);
             rowCount++;
@@ -1731,6 +1934,12 @@ public partial class AppRoot : Node
         GetTree().Paused = true;
         MuteSfxForPause();
         StartMenuMusic();
+        GetNode<Button>("Ui/PauseMenu/Center/Panel/Layout/RestartButton").Text = _campaignMode switch
+        {
+            CampaignMode.Hard => "RESTART CHECKPOINT",
+            CampaignMode.Extreme => "RESTART",
+            _ => "RESTART ROOM",
+        };
         _pauseMenu.Show();
         ApplyCameraSettings(inputEnabled: false, applyDefaultMode: false);
     }
@@ -1750,9 +1959,39 @@ public partial class AppRoot : Node
 
     private void RestartRoom()
     {
-        _currentRoom?.RestartRoom();
+        if (_currentRoom is not null && _campaignMode != CampaignMode.Normal)
+        {
+            CampaignSaveService.RecordRunFailure(out _, _campaignRoot);
+            int restart = CampaignModeRules.RestartRoomAfterFailure(_campaignMode, _currentRoom.RoomNumber);
+            if (_campaignMode == CampaignMode.Extreme)
+            {
+                CampaignSaveService.DeleteAll(out _, _campaignRoot);
+            }
+            StartRoomWithCandyHandoff(restart, saveRoomStart: CampaignModeRules.SavesRoomStart(_campaignMode, restart), elapsedSeconds: 0.0);
+        }
+        else _currentRoom?.RestartRoom();
 
         ResumeGame();
+    }
+
+    private void OnCampaignRunReset()
+    {
+        if (_currentRoom is null || _loadingRoom)
+        {
+            return;
+        }
+
+        CampaignSaveService.RecordRunFailure(out _, _campaignRoot);
+        if (_campaignMode == CampaignMode.Normal)
+        {
+            return;
+        }
+        int restart = CampaignModeRules.RestartRoomAfterFailure(_campaignMode, _currentRoom.RoomNumber);
+        if (_campaignMode == CampaignMode.Extreme)
+        {
+            CampaignSaveService.DeleteAll(out _, _campaignRoot);
+        }
+        StartRoomWithCandyHandoff(restart, saveRoomStart: CampaignModeRules.SavesRoomStart(_campaignMode, restart), elapsedSeconds: 0.0);
     }
 
     private void MuteSfxForPause()
@@ -1827,6 +2066,8 @@ public partial class AppRoot : Node
     {
         CancelRebind();
         _settingsOrigin = origin;
+        _updateVersionLabel.Text = $"Current version: v{ReleaseUpdateService.CurrentVersion}";
+        _updateStatusLabel.Text = "Check GitHub for a newer version of Velocitex.";
         _settingsHeader.Text = origin == MenuOrigin.Main ? "SETTINGS" : "PAUSED / SETTINGS";
         _mainMenu.Hide();
         _pauseMenu.Hide();
@@ -1852,12 +2093,6 @@ public partial class AppRoot : Node
     private void OpenCustomize(MenuOrigin origin)
     {
         _customizeOrigin = origin;
-        _profile = ProfileStore.Load(out string? warning, _profilePath);
-        if (!string.IsNullOrWhiteSpace(warning))
-        {
-            GD.PushWarning(warning);
-        }
-
         PopulateCustomizationOptions();
         SetCustomizeStatus("CURRENT LOOK", locked: false);
         _candyPreview.MotionEnabled = !_settings.ReducedMotion;
@@ -1894,12 +2129,49 @@ public partial class AppRoot : Node
         _selectedSecondaryColorId = _profile.SecondaryColorId;
         _selectedPatternId = _profile.PatternId;
         _selectedTrailId = _profile.TrailId;
-        BuildCosmeticGrid(_primaryColorGrid, _primaryColorButtons, CosmeticKind.Color, CosmeticSlot.PrimaryColor);
-        BuildCosmeticGrid(_secondaryColorGrid, _secondaryColorButtons, CosmeticKind.Color, CosmeticSlot.SecondaryColor);
-        BuildCosmeticGrid(_patternGrid, _patternButtons, CosmeticKind.Pattern, CosmeticSlot.Pattern);
-        BuildCosmeticGrid(_trailGrid, _trailButtons, CosmeticKind.Trail, CosmeticSlot.Trail);
+        _selectedFinishId = _profile.FinishId;
+        _selectedTrailStyleId = _profile.TrailStyleId;
+        _selectedCrownId = _profile.CrownId;
+        if (!_customizationOptionsBuilt)
+        {
+            BuildCosmeticGrid(_primaryColorGrid, _primaryColorButtons, CosmeticKind.Color, CosmeticSlot.PrimaryColor);
+            BuildCosmeticGrid(_secondaryColorGrid, _secondaryColorButtons, CosmeticKind.Color, CosmeticSlot.SecondaryColor);
+            BuildCosmeticGrid(_patternGrid, _patternButtons, CosmeticKind.Pattern, CosmeticSlot.Pattern);
+            BuildCosmeticGrid(_trailGrid, _trailButtons, CosmeticKind.Trail, CosmeticSlot.Trail);
+            BuildCosmeticGrid(_finishGrid, _finishButtons, CosmeticKind.Finish, CosmeticSlot.Finish);
+            BuildCosmeticGrid(_trailStyleGrid, _trailStyleButtons, CosmeticKind.TrailStyle, CosmeticSlot.TrailStyle);
+            BuildCosmeticGrid(_crownGrid, _crownButtons, CosmeticKind.Crown, CosmeticSlot.Crown);
+            _customizationOptionsBuilt = true;
+        }
+        else
+        {
+            RefreshCosmeticButtonDefinitions(_primaryColorButtons, CosmeticSlot.PrimaryColor);
+            RefreshCosmeticButtonDefinitions(_secondaryColorButtons, CosmeticSlot.SecondaryColor);
+            RefreshCosmeticButtonDefinitions(_patternButtons, CosmeticSlot.Pattern);
+            RefreshCosmeticButtonDefinitions(_trailButtons, CosmeticSlot.Trail);
+            RefreshCosmeticButtonDefinitions(_finishButtons, CosmeticSlot.Finish);
+            RefreshCosmeticButtonDefinitions(_trailStyleButtons, CosmeticSlot.TrailStyle);
+            RefreshCosmeticButtonDefinitions(_crownButtons, CosmeticSlot.Crown);
+        }
         _populatingCustomize = false;
         RefreshCosmeticSwatches();
+    }
+
+    private void RefreshCosmeticButtonDefinitions(List<CosmeticSwatchButton> buttons, CosmeticSlot slot)
+    {
+        Color primary = ResolveCosmeticColor(_selectedPrimaryColorId);
+        Color secondary = ResolveCosmeticColor(_selectedSecondaryColorId);
+        foreach (CosmeticSwatchButton button in buttons)
+        {
+            CosmeticDefinition definition = button.Definition;
+            button.Configure(
+                definition,
+                !_profile.UnlockedCosmeticIds.Contains(definition.Id),
+                string.Equals(SelectedCosmeticId(slot), definition.Id, StringComparison.Ordinal),
+                UnlockRequirementFor(definition),
+                primary,
+                secondary);
+        }
     }
 
     private void BuildCosmeticGrid(
@@ -1918,7 +2190,7 @@ public partial class AppRoot : Node
         foreach (CosmeticDefinition definition in CosmeticCatalog.OfKind(kind))
         {
             bool locked = !_profile.UnlockedCosmeticIds.Contains(definition.Id);
-            string requirement = UnlockRequirementFor(definition.Id);
+            string requirement = UnlockRequirementFor(definition);
             CosmeticSwatchButton button = new()
             {
                 Name = $"{slot}_{definition.Id}",
@@ -1981,6 +2253,15 @@ public partial class AppRoot : Node
             case CosmeticSlot.Trail:
                 _selectedTrailId = cosmeticId;
                 break;
+            case CosmeticSlot.Finish:
+                _selectedFinishId = cosmeticId;
+                break;
+            case CosmeticSlot.TrailStyle:
+                _selectedTrailStyleId = cosmeticId;
+                break;
+            case CosmeticSlot.Crown:
+                _selectedCrownId = cosmeticId;
+                break;
         }
 
         ApplyCustomizationSelectionsToProfile();
@@ -2000,6 +2281,9 @@ public partial class AppRoot : Node
             (_secondaryColorButtons, CosmeticSlot.SecondaryColor),
             (_patternButtons, CosmeticSlot.Pattern),
             (_trailButtons, CosmeticSlot.Trail),
+            (_finishButtons, CosmeticSlot.Finish),
+            (_trailStyleButtons, CosmeticSlot.TrailStyle),
+            (_crownButtons, CosmeticSlot.Crown),
         })
         {
             string selectedId = SelectedCosmeticId(slot);
@@ -2039,11 +2323,17 @@ public partial class AppRoot : Node
         _profile.SecondaryColorId = _selectedSecondaryColorId;
         _profile.PatternId = _selectedPatternId;
         _profile.TrailId = _selectedTrailId;
+        _profile.FinishId = _selectedFinishId;
+        _profile.TrailStyleId = _selectedTrailStyleId;
+        _profile.CrownId = _selectedCrownId;
         ProfileStore.Normalize(_profile);
         _selectedPrimaryColorId = _profile.PrimaryColorId;
         _selectedSecondaryColorId = _profile.SecondaryColorId;
         _selectedPatternId = _profile.PatternId;
         _selectedTrailId = _profile.TrailId;
+        _selectedFinishId = _profile.FinishId;
+        _selectedTrailStyleId = _profile.TrailStyleId;
+        _selectedCrownId = _profile.CrownId;
     }
 
     private string SelectedCosmeticId(CosmeticSlot slot)
@@ -2054,6 +2344,9 @@ public partial class AppRoot : Node
             CosmeticSlot.SecondaryColor => _selectedSecondaryColorId,
             CosmeticSlot.Pattern => _selectedPatternId,
             CosmeticSlot.Trail => _selectedTrailId,
+            CosmeticSlot.Finish => _selectedFinishId,
+            CosmeticSlot.TrailStyle => _selectedTrailStyleId,
+            CosmeticSlot.Crown => _selectedCrownId,
             _ => string.Empty,
         };
     }
@@ -2066,15 +2359,23 @@ public partial class AppRoot : Node
             CosmeticSlot.SecondaryColor => _secondaryColorButtons,
             CosmeticSlot.Pattern => _patternButtons,
             CosmeticSlot.Trail => _trailButtons,
+            CosmeticSlot.Finish => _finishButtons,
+            CosmeticSlot.TrailStyle => _trailStyleButtons,
+            CosmeticSlot.Crown => _crownButtons,
             _ => throw new ArgumentOutOfRangeException(nameof(slot)),
         };
     }
 
-    private static string UnlockRequirementFor(string cosmeticId)
+    private static string UnlockRequirementFor(CosmeticDefinition definition)
     {
         return AdvancementCatalog.All.FirstOrDefault(advancement =>
-            string.Equals(advancement.RewardCosmeticId, cosmeticId, StringComparison.Ordinal))?.Description
-            ?? "This reward is not available yet.";
+            string.Equals(advancement.RewardCosmeticId, definition.Id, StringComparison.Ordinal))?.Description
+            ?? definition.Kind switch
+            {
+                CosmeticKind.Finish => "Complete Hard Mode to unlock this Finish.",
+                CosmeticKind.TrailStyle => "Complete Extreme Mode to unlock this Trail Style.",
+                _ => "This reward is not available yet.",
+            };
     }
 
     private static Color ResolveCosmeticColor(string cosmeticId)
@@ -2129,7 +2430,7 @@ public partial class AppRoot : Node
         UnlockAndNotify(candidates);
     }
 
-    private void EvaluateRoomCompletionAdvancements()
+    private void EvaluateRoomCompletionAdvancements(bool deferUntilMainMenu = false)
     {
         if (_currentRoom is null || _currentPlayer is null || IsAutomatedSmokeRun())
         {
@@ -2149,10 +2450,13 @@ public partial class AppRoot : Node
             });
         }
 
-        UnlockAndNotify(candidates);
+        UnlockAndNotify(candidates, deferUntilMainMenu: deferUntilMainMenu);
     }
 
-    private void UnlockAndNotify(IEnumerable<string> advancementIds, bool profileAlreadyChanged = false)
+    private void UnlockAndNotify(
+        IEnumerable<string> advancementIds,
+        bool profileAlreadyChanged = false,
+        bool deferUntilMainMenu = false)
     {
         List<AdvancementDefinition> unlocked = new();
         foreach (string id in advancementIds.Distinct(StringComparer.Ordinal))
@@ -2178,7 +2482,11 @@ public partial class AppRoot : Node
         _advancementNotifications.ReducedMotion = _settings.ReducedMotion;
         foreach (AdvancementDefinition advancement in unlocked)
         {
-            if (_currentRoom is not null && _roomCompletionHandled)
+            if (deferUntilMainMenu)
+            {
+                _deferredMainMenuNotifications.Add(advancement);
+            }
+            else if (_currentRoom is not null && _roomCompletionHandled)
             {
                 _deferredRoomStartNotifications.Add(advancement);
             }
@@ -2203,6 +2511,21 @@ public partial class AppRoot : Node
         }
 
         _deferredRoomStartNotifications.Clear();
+    }
+
+    private void FlushDeferredMainMenuNotifications()
+    {
+        if (_deferredMainMenuNotifications.Count == 0 || !_mainMenu.Visible || _loadingOverlay.Visible)
+        {
+            return;
+        }
+
+        _advancementNotifications.ReducedMotion = _settings.ReducedMotion;
+        foreach (AdvancementDefinition advancement in _deferredMainMenuNotifications)
+        {
+            _advancementNotifications.Enqueue(advancement);
+        }
+        _deferredMainMenuNotifications.Clear();
     }
 
     private bool IsAutomatedSmokeRun() => _runUiSmoke || _runSaveSmoke || _runCampaignFlowSmoke;
@@ -2252,17 +2575,52 @@ public partial class AppRoot : Node
             _profile.UnlockedAdvancementIds.Contains(definition.Id));
         _advancementsProgress.Text = $"{completedCount} / {AdvancementCatalog.All.Count} COMPLETE";
 
-        foreach (AdvancementDefinition definition in AdvancementCatalog.All)
+        foreach (AdvancementDefinition definition in OrderedAdvancementsForMenu())
         {
             AddAdvancementRow(definition, _profile.UnlockedAdvancementIds.Contains(definition.Id));
         }
     }
 
+    private IReadOnlyList<AdvancementDefinition> OrderedAdvancementsForMenu()
+    {
+        return AdvancementCatalog.All
+            .Select((definition, catalogIndex) => new { definition, catalogIndex })
+            .OrderBy(item => _profile.UnlockedAdvancementIds.Contains(item.definition.Id) ? 1 : 0)
+            .ThenBy(item => AdvancementRoomNumber(item.definition.Id) ?? int.MaxValue)
+            .ThenBy(item => item.catalogIndex)
+            .Select(item => item.definition)
+            .ToArray();
+    }
+
+    private static int? AdvancementRoomNumber(string id) => id switch
+    {
+        "fresh-from-the-globe" => 1,
+        "five-star-batch" => 5,
+        "straight-as-glass" => 6,
+        "perfect-stop" => 7,
+        "blue-streak" => 8,
+        "feather-touch" => 11,
+        "against-the-wind" => 13,
+        "perfect-switch" => 14,
+        "bullseye" => 16,
+        "untouchable" => 17,
+        "moving-with-it" => 18,
+        "piston-perfect" => 19,
+        "clean-assembly" => 20,
+        "full-account" => 23,
+        "sugar-breaker" => 24,
+        "vacuum-packed" => 26,
+        "smooth-operator" => 29,
+        "final-inspection" => 30,
+        _ => null,
+    };
+
     private void AddAdvancementRow(AdvancementDefinition definition, bool completed)
     {
-        CosmeticDefinition? reward = CosmeticCatalog.FindById(definition.RewardCosmeticId);
+        CosmeticDefinition? reward = definition.RewardCosmeticId is null ? null : CosmeticCatalog.FindById(definition.RewardCosmeticId);
         PanelContainer row = new()
         {
+            Name = $"Advancement_{definition.Id}",
             CustomMinimumSize = new Vector2(0.0f, 96.0f),
         };
         StyleBoxFlat rowStyle = new()
@@ -2288,6 +2646,16 @@ public partial class AppRoot : Node
         };
         status.AddThemeColorOverride("font_color", completed ? new Color("78d4bd") : new Color("7f8b93"));
         status.AddThemeFontSizeOverride("font_size", 15);
+        TextureRect achievementIcon = new()
+        {
+            Name = "AchievementIcon",
+            Texture = GD.Load<Texture2D>($"res://assets/ui/advancements/{definition.Id}.svg"),
+            CustomMinimumSize = new Vector2(64.0f, 64.0f),
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+            Modulate = completed ? Colors.White : new Color(0.48f, 0.52f, 0.55f, 0.58f),
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+        };
 
         VBoxContainer details = new()
         {
@@ -2311,7 +2679,7 @@ public partial class AppRoot : Node
         rewardLine.AddThemeConstantOverride("separation", 10);
         Label rewardLabel = new()
         {
-            Text = "REWARD  /",
+            Text = reward is null ? "BADGE  /  NO COSMETIC REWARD" : "REWARD  /",
             VerticalAlignment = VerticalAlignment.Center,
         };
         rewardLabel.AddThemeColorOverride("font_color", new Color("b88956"));
@@ -2339,6 +2707,7 @@ public partial class AppRoot : Node
         details.AddChild(description);
         details.AddChild(rewardLine);
         layout.AddChild(status);
+        layout.AddChild(achievementIcon);
         layout.AddChild(details);
         row.AddChild(layout);
         _advancementsList.AddChild(row);
@@ -2349,6 +2718,51 @@ public partial class AppRoot : Node
         _unavailableDialog.Title = title;
         _unavailableDialog.DialogText = message;
         _unavailableDialog.PopupCentered(new Vector2I(520, 180));
+    }
+
+    private async void CheckForUpdatesAsync()
+    {
+        if (_updateCheckInProgress) return;
+        _updateCheckInProgress = true;
+        _updateCheckButton.Disabled = true;
+        _updateStatusLabel.Text = "Checking GitHub for updates...";
+        UpdateCheckResult result = await ReleaseUpdateService.CheckForUpdateAsync();
+        _updateCheckInProgress = false;
+        _updateCheckButton.Disabled = false;
+        _updateStatusLabel.Text = result.Message;
+        if (result.Status != UpdateCheckStatus.UpdateAvailable || result.Update is null) return;
+        _availableUpdate = result.Update;
+        _updateConfirmation.DialogText = $"Velocitex v{result.Update.Version} is available. Download it and restart the game now?";
+        _updateConfirmation.PopupCentered(new Vector2I(560, 220));
+    }
+
+    private async void DownloadAndRestartAsync()
+    {
+        if (_availableUpdate is null) return;
+        _updateCheckButton.Disabled = true;
+        _updateStatusLabel.Text = $"Downloading Velocitex v{_availableUpdate.Version}...";
+        _updateDownloadProgress.Value = 0;
+        _updateDownloadProgress.Indeterminate = true;
+        _updateDownloadProgress.Show();
+        string? error = await ReleaseUpdateService.DownloadAndStartUpdaterAsync(_availableUpdate,
+            (downloaded, total) => CallDeferred(nameof(UpdateDownloadProgress), downloaded, total ?? -1L));
+        _updateDownloadProgress.Hide();
+        if (error is not null)
+        {
+            _updateCheckButton.Disabled = false;
+            _updateStatusLabel.Text = error;
+            return;
+        }
+        _updateStatusLabel.Text = "Update ready. Restarting...";
+        GetTree().Quit();
+    }
+
+    private void UpdateDownloadProgress(long downloaded, long total)
+    {
+        if (total <= 0 || _availableUpdate is null) return;
+        _updateDownloadProgress.Indeterminate = false;
+        _updateDownloadProgress.Value = downloaded * 100.0 / total;
+        _updateStatusLabel.Text = $"Downloading Velocitex v{_availableUpdate.Version}... {Mathf.FloorToInt((float)_updateDownloadProgress.Value)}%";
     }
 
     private void ResetSettingsControls()
@@ -2637,6 +3051,7 @@ public partial class AppRoot : Node
             return;
         }
 
+        if (CampaignModeRules.SavesRoomStart(_campaignMode, room.RoomNumber)) SaveCurrentSnapshot(SnapshotKind.RoomStart);
     }
 
     private CampaignSnapshot? SaveCurrentSnapshot(SnapshotKind kind)
@@ -2667,6 +3082,19 @@ public partial class AppRoot : Node
         return snapshot;
     }
 
+    private void PersistCurrentRoomElapsed()
+    {
+        if (_currentRoom is null)
+        {
+            return;
+        }
+
+        if (!CampaignSaveService.UpdateRoomStartElapsed(_currentRoom.RoomNumber, _campaignElapsedSeconds, out string? error, _campaignRoot))
+        {
+            GD.PushError($"Campaign elapsed-time update failed: {error}");
+        }
+    }
+
     private void OnRoomCompleted()
     {
         if (_currentRoom is null || _roomCompletionHandled)
@@ -2680,7 +3108,27 @@ public partial class AppRoot : Node
         {
             MuteSfxForRoomTransfer();
         }
-        EvaluateRoomCompletionAdvancements();
+        bool finalRoom = _currentRoom.RoomNumber == CampaignSaveService.MaximumRoomCount;
+        EvaluateRoomCompletionAdvancements(deferUntilMainMenu: finalRoom);
+        if (finalRoom && !IsAutomatedSmokeRun())
+        {
+            if (_campaignMode == CampaignMode.Hard)
+            {
+                foreach (string id in new[] { "glossy", "metal", "frosted", "candy-glaze" }) _profile.UnlockedCosmeticIds.Add(id);
+                List<string> achievements = new() { "hard-mode-complete" };
+                if (!CampaignSaveService.HasRunFailure(_campaignRoot)) achievements.Add("jawbreaker");
+                UnlockAndNotify(achievements, profileAlreadyChanged: true, deferUntilMainMenu: true);
+            }
+            else if (_campaignMode == CampaignMode.Extreme)
+            {
+                foreach (string id in new[] { "solid-line", "dotted", "dashed", "pulse" }) _profile.UnlockedCosmeticIds.Add(id);
+                UnlockAndNotify(new[] { "extreme-mode-complete" }, profileAlreadyChanged: true, deferUntilMainMenu: true);
+            }
+            else
+            {
+                UnlockAndNotify(new[] { "flawless-campaign" }, deferUntilMainMenu: true);
+            }
+        }
         _pendingCompletionSnapshot = new CampaignSnapshot { RoomId = _currentRoom.RoomId, RoomName = _currentRoom.RoomDisplayName, RoomNumber = _currentRoom.RoomNumber, Kind = SnapshotKind.RoomComplete, CampaignElapsedSeconds = _campaignElapsedSeconds };
         GetTree().Paused = true;
         ApplyCameraSettings(inputEnabled: false, applyDefaultMode: false);
@@ -2880,7 +3328,7 @@ public partial class AppRoot : Node
         TimeSpan elapsed = TimeSpan.FromSeconds(snapshot.CampaignElapsedSeconds);
         Label metadata = new()
         {
-            Text = $"{snapshot.SavedAtUtc.ToLocalTime():yyyy-MM-dd HH:mm}\nPLAY TIME {elapsed:hh\\:mm\\:ss}",
+            Text = $"{snapshot.SavedAtUtc.ToLocalTime():yyyy-MM-dd HH:mm}\nTOTAL PLAY TIME {elapsed:hh\\:mm\\:ss}",
         };
         metadata.AddThemeColorOverride("font_color", new Color("8f9ba3"));
         Button load = new()
@@ -2905,8 +3353,11 @@ public partial class AppRoot : Node
     {
         Button button = new()
         {
-            Text = $"ROOM {room.Number:00}   {room.DisplayName.ToUpperInvariant()}\n{room.MechanicLabel}",
-            CustomMinimumSize = new Vector2(0.0f, 74.0f),
+            Text = $"Room {room.Number} - {room.DisplayName}",
+            Icon = GD.Load<Texture2D>($"res://assets/panoramas/thumbnails/room{room.Number:00}.png"),
+            ExpandIcon = true,
+            IconAlignment = HorizontalAlignment.Left,
+            CustomMinimumSize = new Vector2(0.0f, 116.0f),
             Alignment = HorizontalAlignment.Left,
         };
         int roomNumber = room.Number;
@@ -2972,10 +3423,17 @@ public partial class AppRoot : Node
             }
         }
 
-        IReadOnlyList<CampaignSnapshot> all = CampaignSaveService.LoadAll(out IReadOnlyList<string> loadErrors, testRoot);
-        if (all.Count != CampaignSaveService.MaximumSnapshotCount || loadErrors.Count != 0)
+        if (!CampaignSaveService.UpdateRoomStartElapsed(3, 199.0, out string? elapsedError, testRoot))
         {
-            FailSaveSmoke($"Expected five valid room-start snapshots, found {all.Count} with {loadErrors.Count} errors.");
+            FailSaveSmoke($"Could not update total play time: {elapsedError}");
+            return;
+        }
+
+        IReadOnlyList<CampaignSnapshot> all = CampaignSaveService.LoadAll(out IReadOnlyList<string> loadErrors, testRoot);
+        if (all.Count != CampaignSaveService.MaximumSnapshotCount || loadErrors.Count != 0 ||
+            all.SingleOrDefault(snapshot => snapshot.RoomNumber == 3)?.CampaignElapsedSeconds != 199.0)
+        {
+            FailSaveSmoke($"Expected five valid room-start snapshots with persistent total play time, found {all.Count} with {loadErrors.Count} errors.");
             return;
         }
 
@@ -2986,6 +3444,9 @@ public partial class AppRoot : Node
             return;
         }
 
+        CampaignSaveService.MarkRoomCompleted(1, testRoot);
+        CampaignSaveService.MarkRoomCompleted(3, testRoot);
+        CampaignSaveService.MarkRoomCompleted(5, testRoot);
         if (!CampaignSaveService.DeleteSnapshotsAfter(selected, out string? discardError, testRoot))
         {
             FailSaveSmoke($"Could not discard saves after Room 03: {discardError}");
@@ -2995,13 +3456,12 @@ public partial class AppRoot : Node
         all = CampaignSaveService.LoadAll(out loadErrors, testRoot);
         if (all.Count != 3 || loadErrors.Count != 0 ||
             all.Any(snapshot => snapshot.RoomNumber > selected.RoomNumber) ||
-            CampaignSaveService.LoadLatest(testRoot)?.RoomNumber != selected.RoomNumber)
+            CampaignSaveService.LoadLatest(testRoot)?.RoomNumber != selected.RoomNumber ||
+            !CampaignSaveService.GetCompletedRoomNumbers(testRoot).SetEquals(new[] { 1, 3 }))
         {
-            FailSaveSmoke("Loading Room 03 did not discard every later campaign save.");
+            FailSaveSmoke("Loading Room 03 did not discard every later campaign save and room-select unlock.");
             return;
         }
-
-        CampaignSaveService.MarkRoomCompleted(1, testRoot);
 
         if (!CampaignSaveService.DeleteAll(out deleteError, testRoot) ||
             CampaignSaveService.LoadAll(out _, testRoot).Count != 0 ||
@@ -3011,7 +3471,7 @@ public partial class AppRoot : Node
             return;
         }
 
-        GD.Print("SAVE_SMOKE_PASS: loading a save discards later saves and New Game clears all campaign saves.");
+        GD.Print("SAVE_SMOKE_PASS: loading a save discards later saves and room-select unlocks, and New Game clears all campaign saves.");
         GetTree().Quit(0);
     }
 
@@ -3048,12 +3508,11 @@ public partial class AppRoot : Node
                 return;
             case 2:
                 IReadOnlyList<CampaignSnapshot> completedSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (completedSnapshots.Count != 2 ||
+                if (completedSnapshots.Count != 1 ||
                     !completedSnapshots.Any(snapshot => snapshot.Kind == SnapshotKind.RoomStart) ||
-                    !completedSnapshots.Any(snapshot => snapshot.Kind == SnapshotKind.RoomComplete) ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(1))
                 {
-                    FailCampaignFlowSmoke("Room completion did not produce the paired snapshot or room-select unlock.");
+                    FailCampaignFlowSmoke("Room completion did not preserve its room-start save or room-select unlock.");
                     return;
                 }
 
@@ -3077,7 +3536,7 @@ public partial class AppRoot : Node
                 IReadOnlyList<CampaignSnapshot> roomTwoSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
                 if (_currentRoom?.RoomNumber != 2 ||
                     _currentRoom.RoomId != "room-02" ||
-                    roomTwoSnapshots.Count != 3 ||
+                    roomTwoSnapshots.Count != 2 ||
                     !roomTwoSnapshots.Any(snapshot => snapshot.RoomNumber == 2 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 01 did not load Room 02 and create its Room Start snapshot.");
@@ -3089,8 +3548,7 @@ public partial class AppRoot : Node
                 return;
             case 4:
                 IReadOnlyList<CampaignSnapshot> roomTwoCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomTwoCompleteSnapshots.Count != 4 ||
-                    !roomTwoCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 2 && snapshot.Kind == SnapshotKind.RoomComplete) ||
+                if (roomTwoCompleteSnapshots.Count != 2 ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(2))
                 {
                     FailCampaignFlowSmoke("Completing Room 02 did not create its Room Complete snapshot or unlock.");
@@ -3117,7 +3575,7 @@ public partial class AppRoot : Node
                 IReadOnlyList<CampaignSnapshot> roomThreeSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
                 if (_currentRoom?.RoomNumber != 3 ||
                     _currentRoom.RoomId != "room-03" ||
-                    roomThreeSnapshots.Count != 5 ||
+                    roomThreeSnapshots.Count != 3 ||
                     !roomThreeSnapshots.Any(snapshot => snapshot.RoomNumber == 3 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 02 did not load Room 03 and create its Room Start snapshot.");
@@ -3129,8 +3587,7 @@ public partial class AppRoot : Node
                 return;
             case 6:
                 IReadOnlyList<CampaignSnapshot> roomThreeCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomThreeCompleteSnapshots.Count != 6 ||
-                    !roomThreeCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 3 && snapshot.Kind == SnapshotKind.RoomComplete) ||
+                if (roomThreeCompleteSnapshots.Count != 3 ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(3))
                 {
                     FailCampaignFlowSmoke("Completing Room 03 did not create its Room Complete snapshot or unlock.");
@@ -3157,7 +3614,7 @@ public partial class AppRoot : Node
                 IReadOnlyList<CampaignSnapshot> roomFourSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
                 if (_currentRoom?.RoomNumber != 4 ||
                     _currentRoom.RoomId != "room-04" ||
-                    roomFourSnapshots.Count != 7 ||
+                    roomFourSnapshots.Count != 4 ||
                     !roomFourSnapshots.Any(snapshot => snapshot.RoomNumber == 4 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 03 did not load Room 04 and create its Room Start snapshot.");
@@ -3169,8 +3626,7 @@ public partial class AppRoot : Node
                 return;
             case 8:
                 IReadOnlyList<CampaignSnapshot> roomFourCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomFourCompleteSnapshots.Count != 8 ||
-                    !roomFourCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 4 && snapshot.Kind == SnapshotKind.RoomComplete) ||
+                if (roomFourCompleteSnapshots.Count != 4 ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(4))
                 {
                     FailCampaignFlowSmoke("Completing Room 04 did not create its Room Complete snapshot or unlock.");
@@ -3197,7 +3653,7 @@ public partial class AppRoot : Node
                 IReadOnlyList<CampaignSnapshot> roomFiveSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
                 if (_currentRoom?.RoomNumber != 5 ||
                     _currentRoom.RoomId != "room-05" ||
-                    roomFiveSnapshots.Count != 9 ||
+                    roomFiveSnapshots.Count != 5 ||
                     !roomFiveSnapshots.Any(snapshot => snapshot.RoomNumber == 5 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 04 did not load Room 05 and create its Room Start snapshot.");
@@ -3209,8 +3665,7 @@ public partial class AppRoot : Node
                 return;
             case 10:
                 IReadOnlyList<CampaignSnapshot> roomFiveCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomFiveCompleteSnapshots.Count != 10 ||
-                    !roomFiveCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 5 && snapshot.Kind == SnapshotKind.RoomComplete) ||
+                if (roomFiveCompleteSnapshots.Count != 5 ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(5))
                 {
                     FailCampaignFlowSmoke("Completing Room 05 did not create its Room Complete snapshot or unlock.");
@@ -3237,7 +3692,7 @@ public partial class AppRoot : Node
                 IReadOnlyList<CampaignSnapshot> roomSixSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
                 if (_currentRoom?.RoomNumber != 6 ||
                     _currentRoom.RoomId != "room-06" ||
-                    roomSixSnapshots.Count != 11 ||
+                    roomSixSnapshots.Count != 5 ||
                     !roomSixSnapshots.Any(snapshot => snapshot.RoomNumber == 6 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 05 did not load Room 06 and create its Room Start snapshot.");
@@ -3249,8 +3704,7 @@ public partial class AppRoot : Node
                 return;
             case 12:
                 IReadOnlyList<CampaignSnapshot> roomSixCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomSixCompleteSnapshots.Count != 12 ||
-                    !roomSixCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 6 && snapshot.Kind == SnapshotKind.RoomComplete) ||
+                if (roomSixCompleteSnapshots.Count != 5 ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(6))
                 {
                     FailCampaignFlowSmoke("Completing Room 06 did not create its Room Complete snapshot or unlock.");
@@ -3277,7 +3731,7 @@ public partial class AppRoot : Node
                 IReadOnlyList<CampaignSnapshot> roomSevenSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
                 if (_currentRoom?.RoomNumber != 7 ||
                     _currentRoom.RoomId != "room-07" ||
-                    roomSevenSnapshots.Count != 13 ||
+                    roomSevenSnapshots.Count != 5 ||
                     !roomSevenSnapshots.Any(snapshot => snapshot.RoomNumber == 7 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 06 did not load Room 07 and create its Room Start snapshot.");
@@ -3289,8 +3743,7 @@ public partial class AppRoot : Node
                 return;
             case 14:
                 IReadOnlyList<CampaignSnapshot> roomSevenCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomSevenCompleteSnapshots.Count != 14 ||
-                    !roomSevenCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 7 && snapshot.Kind == SnapshotKind.RoomComplete) ||
+                if (roomSevenCompleteSnapshots.Count != 5 ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(7))
                 {
                     FailCampaignFlowSmoke("Completing Room 07 did not create its Room Complete snapshot or unlock.");
@@ -3317,7 +3770,7 @@ public partial class AppRoot : Node
                 IReadOnlyList<CampaignSnapshot> roomEightSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
                 if (_currentRoom?.RoomNumber != 8 ||
                     _currentRoom.RoomId != "room-08" ||
-                    roomEightSnapshots.Count != 15 ||
+                    roomEightSnapshots.Count != 5 ||
                     !roomEightSnapshots.Any(snapshot => snapshot.RoomNumber == 8 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 07 did not load Room 08 and create its Room Start snapshot.");
@@ -3329,8 +3782,7 @@ public partial class AppRoot : Node
                 return;
             case 16:
                 IReadOnlyList<CampaignSnapshot> roomEightCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomEightCompleteSnapshots.Count != 16 ||
-                    !roomEightCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 8 && snapshot.Kind == SnapshotKind.RoomComplete) ||
+                if (roomEightCompleteSnapshots.Count != 5 ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(8))
                 {
                     FailCampaignFlowSmoke("Completing Room 08 did not create its Room Complete snapshot or unlock.");
@@ -3357,7 +3809,7 @@ public partial class AppRoot : Node
                 IReadOnlyList<CampaignSnapshot> roomNineSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
                 if (_currentRoom?.RoomNumber != 9 ||
                     _currentRoom.RoomId != "room-09" ||
-                    roomNineSnapshots.Count != 17 ||
+                    roomNineSnapshots.Count != 5 ||
                     !roomNineSnapshots.Any(snapshot => snapshot.RoomNumber == 9 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 08 did not load Room 09 and create its Room Start snapshot.");
@@ -3369,8 +3821,7 @@ public partial class AppRoot : Node
                 return;
             case 18:
                 IReadOnlyList<CampaignSnapshot> roomNineCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomNineCompleteSnapshots.Count != 18 ||
-                    !roomNineCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 9 && snapshot.Kind == SnapshotKind.RoomComplete) ||
+                if (roomNineCompleteSnapshots.Count != 5 ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(9))
                 {
                     FailCampaignFlowSmoke("Completing Room 09 did not create its Room Complete snapshot or unlock.");
@@ -3397,7 +3848,7 @@ public partial class AppRoot : Node
                 IReadOnlyList<CampaignSnapshot> roomTenSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
                 if (_currentRoom?.RoomNumber != 10 ||
                     _currentRoom.RoomId != "room-10" ||
-                    roomTenSnapshots.Count != 19 ||
+                    roomTenSnapshots.Count != 5 ||
                     !roomTenSnapshots.Any(snapshot => snapshot.RoomNumber == 10 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 09 did not load Room 10 and create its Room Start snapshot.");
@@ -3409,8 +3860,7 @@ public partial class AppRoot : Node
                 return;
             case 20:
                 IReadOnlyList<CampaignSnapshot> roomTenCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomTenCompleteSnapshots.Count != 20 ||
-                    !roomTenCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 10 && snapshot.Kind == SnapshotKind.RoomComplete) ||
+                if (roomTenCompleteSnapshots.Count != 5 ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(10))
                 {
                     FailCampaignFlowSmoke("Completing Room 10 did not create its Room Complete snapshot or unlock.");
@@ -3437,7 +3887,7 @@ public partial class AppRoot : Node
                 IReadOnlyList<CampaignSnapshot> roomElevenSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
                 if (_currentRoom?.RoomNumber != 11 ||
                     _currentRoom.RoomId != "room-11" ||
-                    roomElevenSnapshots.Count != 21 ||
+                    roomElevenSnapshots.Count != 5 ||
                     !roomElevenSnapshots.Any(snapshot => snapshot.RoomNumber == 11 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 10 did not load Room 11 and create its Room Start snapshot.");
@@ -3449,8 +3899,7 @@ public partial class AppRoot : Node
                 return;
             case 22:
                 IReadOnlyList<CampaignSnapshot> roomElevenCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomElevenCompleteSnapshots.Count != 22 ||
-                    !roomElevenCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 11 && snapshot.Kind == SnapshotKind.RoomComplete) ||
+                if (roomElevenCompleteSnapshots.Count != 5 ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(11))
                 {
                     FailCampaignFlowSmoke("Completing Room 11 did not create its Room Complete snapshot or unlock.");
@@ -3477,7 +3926,7 @@ public partial class AppRoot : Node
                 IReadOnlyList<CampaignSnapshot> roomTwelveSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
                 if (_currentRoom?.RoomNumber != 12 ||
                     _currentRoom.RoomId != "room-12" ||
-                    roomTwelveSnapshots.Count != 23 ||
+                    roomTwelveSnapshots.Count != 5 ||
                     !roomTwelveSnapshots.Any(snapshot => snapshot.RoomNumber == 12 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 11 did not load Room 12 and create its Room Start snapshot.");
@@ -3489,8 +3938,7 @@ public partial class AppRoot : Node
                 return;
             case 24:
                 IReadOnlyList<CampaignSnapshot> roomTwelveCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomTwelveCompleteSnapshots.Count != 24 ||
-                    !roomTwelveCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 12 && snapshot.Kind == SnapshotKind.RoomComplete) ||
+                if (roomTwelveCompleteSnapshots.Count != 5 ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(12))
                 {
                     FailCampaignFlowSmoke("Completing Room 12 did not create its Room Complete snapshot or unlock.");
@@ -3517,7 +3965,7 @@ public partial class AppRoot : Node
                 IReadOnlyList<CampaignSnapshot> roomThirteenSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
                 if (_currentRoom?.RoomNumber != 13 ||
                     _currentRoom.RoomId != "room-13" ||
-                    roomThirteenSnapshots.Count != 25 ||
+                    roomThirteenSnapshots.Count != 5 ||
                     !roomThirteenSnapshots.Any(snapshot => snapshot.RoomNumber == 13 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 12 did not load Room 13 and create its Room Start snapshot.");
@@ -3529,8 +3977,7 @@ public partial class AppRoot : Node
                 return;
             case 26:
                 IReadOnlyList<CampaignSnapshot> roomThirteenCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomThirteenCompleteSnapshots.Count != 26 ||
-                    !roomThirteenCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 13 && snapshot.Kind == SnapshotKind.RoomComplete) ||
+                if (roomThirteenCompleteSnapshots.Count != 5 ||
                     !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(13))
                 {
                     FailCampaignFlowSmoke("Completing Room 13 did not create its Room Complete snapshot or unlock.");
@@ -3551,7 +3998,7 @@ public partial class AppRoot : Node
             case 27:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomFourteenSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 14 || _currentRoom.RoomId != "room-14" || roomFourteenSnapshots.Count != 27 ||
+                if (_currentRoom?.RoomNumber != 14 || _currentRoom.RoomId != "room-14" || roomFourteenSnapshots.Count != 5 ||
                     !roomFourteenSnapshots.Any(snapshot => snapshot.RoomNumber == 14 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 13 did not load Room 14 and create its Room Start snapshot.");
@@ -3562,7 +4009,7 @@ public partial class AppRoot : Node
                 return;
             case 28:
                 IReadOnlyList<CampaignSnapshot> roomFourteenCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomFourteenCompleteSnapshots.Count != 28 || !roomFourteenCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 14 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(14))
+                if (roomFourteenCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(14))
                 {
                     FailCampaignFlowSmoke("Completing Room 14 did not create its Room Complete snapshot or unlock."); return;
                 }
@@ -3574,7 +4021,7 @@ public partial class AppRoot : Node
             case 29:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomFifteenSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 15 || _currentRoom.RoomId != "room-15" || roomFifteenSnapshots.Count != 29 || !roomFifteenSnapshots.Any(snapshot => snapshot.RoomNumber == 15 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 15 || _currentRoom.RoomId != "room-15" || roomFifteenSnapshots.Count != 5 || !roomFifteenSnapshots.Any(snapshot => snapshot.RoomNumber == 15 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 14 did not load Room 15 and create its Room Start snapshot."); return;
                 }
@@ -3583,7 +4030,7 @@ public partial class AppRoot : Node
                 return;
             case 30:
                 IReadOnlyList<CampaignSnapshot> roomFifteenCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomFifteenCompleteSnapshots.Count != 30 || !roomFifteenCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 15 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(15))
+                if (roomFifteenCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(15))
                 {
                     FailCampaignFlowSmoke("Completing Room 15 did not create its Room Complete snapshot or unlock."); return;
                 }
@@ -3595,7 +4042,7 @@ public partial class AppRoot : Node
             case 31:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomSixteenSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 16 || _currentRoom.RoomId != "room-16" || roomSixteenSnapshots.Count != 31 || !roomSixteenSnapshots.Any(snapshot => snapshot.RoomNumber == 16 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 16 || _currentRoom.RoomId != "room-16" || roomSixteenSnapshots.Count != 5 || !roomSixteenSnapshots.Any(snapshot => snapshot.RoomNumber == 16 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 15 did not load Room 16 and create its Room Start snapshot."); return;
                 }
@@ -3604,7 +4051,7 @@ public partial class AppRoot : Node
                 return;
             case 32:
                 IReadOnlyList<CampaignSnapshot> roomSixteenCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomSixteenCompleteSnapshots.Count != 32 || !roomSixteenCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 16 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(16))
+                if (roomSixteenCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(16))
                 {
                     FailCampaignFlowSmoke("Completing Room 16 did not create its Room Complete snapshot or unlock."); return;
                 }
@@ -3616,7 +4063,7 @@ public partial class AppRoot : Node
             case 33:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomSeventeenSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 17 || _currentRoom.RoomId != "room-17" || roomSeventeenSnapshots.Count != 33 || !roomSeventeenSnapshots.Any(snapshot => snapshot.RoomNumber == 17 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 17 || _currentRoom.RoomId != "room-17" || roomSeventeenSnapshots.Count != 5 || !roomSeventeenSnapshots.Any(snapshot => snapshot.RoomNumber == 17 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 16 did not load Room 17 and create its Room Start snapshot."); return;
                 }
@@ -3625,7 +4072,7 @@ public partial class AppRoot : Node
                 return;
             case 34:
                 IReadOnlyList<CampaignSnapshot> roomSeventeenCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomSeventeenCompleteSnapshots.Count != 34 || !roomSeventeenCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 17 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(17))
+                if (roomSeventeenCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(17))
                 {
                     FailCampaignFlowSmoke("Completing Room 17 did not create its Room Complete snapshot or unlock."); return;
                 }
@@ -3637,7 +4084,7 @@ public partial class AppRoot : Node
             case 35:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomEighteenSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 18 || _currentRoom.RoomId != "room-18" || roomEighteenSnapshots.Count != 35 || !roomEighteenSnapshots.Any(snapshot => snapshot.RoomNumber == 18 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 18 || _currentRoom.RoomId != "room-18" || roomEighteenSnapshots.Count != 5 || !roomEighteenSnapshots.Any(snapshot => snapshot.RoomNumber == 18 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 17 did not load Room 18 and create its Room Start snapshot."); return;
                 }
@@ -3646,7 +4093,7 @@ public partial class AppRoot : Node
                 return;
             case 36:
                 IReadOnlyList<CampaignSnapshot> roomEighteenCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomEighteenCompleteSnapshots.Count != 36 || !roomEighteenCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 18 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(18))
+                if (roomEighteenCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(18))
                 {
                     FailCampaignFlowSmoke("Completing Room 18 did not create its Room Complete snapshot or unlock."); return;
                 }
@@ -3658,7 +4105,7 @@ public partial class AppRoot : Node
             case 37:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomNineteenSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 19 || _currentRoom.RoomId != "room-19" || roomNineteenSnapshots.Count != 37 || !roomNineteenSnapshots.Any(snapshot => snapshot.RoomNumber == 19 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 19 || _currentRoom.RoomId != "room-19" || roomNineteenSnapshots.Count != 5 || !roomNineteenSnapshots.Any(snapshot => snapshot.RoomNumber == 19 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 18 did not load Room 19 and create its Room Start snapshot."); return;
                 }
@@ -3667,7 +4114,7 @@ public partial class AppRoot : Node
                 return;
             case 38:
                 IReadOnlyList<CampaignSnapshot> roomNineteenCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomNineteenCompleteSnapshots.Count != 38 || !roomNineteenCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 19 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(19))
+                if (roomNineteenCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(19))
                 {
                     FailCampaignFlowSmoke("Completing Room 19 did not create its Room Complete snapshot or unlock."); return;
                 }
@@ -3679,7 +4126,7 @@ public partial class AppRoot : Node
             case 39:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomTwentySnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 20 || _currentRoom.RoomId != "room-20" || roomTwentySnapshots.Count != 39 || !roomTwentySnapshots.Any(snapshot => snapshot.RoomNumber == 20 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 20 || _currentRoom.RoomId != "room-20" || roomTwentySnapshots.Count != 5 || !roomTwentySnapshots.Any(snapshot => snapshot.RoomNumber == 20 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 19 did not load Room 20 and create its Room Start snapshot."); return;
                 }
@@ -3688,7 +4135,7 @@ public partial class AppRoot : Node
                 return;
             case 40:
                 IReadOnlyList<CampaignSnapshot> roomTwentyCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomTwentyCompleteSnapshots.Count != 40 || !roomTwentyCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 20 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(20))
+                if (roomTwentyCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(20))
                 {
                     FailCampaignFlowSmoke("Completing Room 20 did not create its Room Complete snapshot or unlock."); return;
                 }
@@ -3700,7 +4147,7 @@ public partial class AppRoot : Node
             case 41:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomTwentyOneSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 21 || _currentRoom.RoomId != "room-21" || roomTwentyOneSnapshots.Count != 41 || !roomTwentyOneSnapshots.Any(snapshot => snapshot.RoomNumber == 21 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 21 || _currentRoom.RoomId != "room-21" || roomTwentyOneSnapshots.Count != 5 || !roomTwentyOneSnapshots.Any(snapshot => snapshot.RoomNumber == 21 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 20 did not load Room 21 and create its Room Start snapshot."); return;
                 }
@@ -3709,7 +4156,7 @@ public partial class AppRoot : Node
                 return;
             case 42:
                 IReadOnlyList<CampaignSnapshot> roomTwentyOneCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomTwentyOneCompleteSnapshots.Count != 42 || !roomTwentyOneCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 21 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(21))
+                if (roomTwentyOneCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(21))
                 {
                     FailCampaignFlowSmoke("Completing Room 21 did not create its Room Complete snapshot or unlock."); return;
                 }
@@ -3721,14 +4168,14 @@ public partial class AppRoot : Node
             case 43:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomTwentyTwoSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 22 || _currentRoom.RoomId != "room-22" || roomTwentyTwoSnapshots.Count != 43 || !roomTwentyTwoSnapshots.Any(snapshot => snapshot.RoomNumber == 22 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 22 || _currentRoom.RoomId != "room-22" || roomTwentyTwoSnapshots.Count != 5 || !roomTwentyTwoSnapshots.Any(snapshot => snapshot.RoomNumber == 22 && snapshot.Kind == SnapshotKind.RoomStart))
                 {
                     FailCampaignFlowSmoke("Continuing from Room 21 did not load Room 22 and create its Room Start snapshot."); return;
                 }
                 OnRoomCompleted(); _campaignFlowSmokeStep = 44; return;
             case 44:
                 IReadOnlyList<CampaignSnapshot> roomTwentyTwoCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomTwentyTwoCompleteSnapshots.Count != 44 || !roomTwentyTwoCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 22 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(22))
+                if (roomTwentyTwoCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(22))
                 {
                     FailCampaignFlowSmoke("Completing Room 22 did not create its Room Complete snapshot or unlock."); return;
                 }
@@ -3740,12 +4187,12 @@ public partial class AppRoot : Node
             case 45:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomTwentyThreeSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 23 || _currentRoom.RoomId != "room-23" || roomTwentyThreeSnapshots.Count != 45 || !roomTwentyThreeSnapshots.Any(snapshot => snapshot.RoomNumber == 23 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 23 || _currentRoom.RoomId != "room-23" || roomTwentyThreeSnapshots.Count != 5 || !roomTwentyThreeSnapshots.Any(snapshot => snapshot.RoomNumber == 23 && snapshot.Kind == SnapshotKind.RoomStart))
                 { FailCampaignFlowSmoke("Continuing from Room 22 did not load Room 23 and create its Room Start snapshot."); return; }
                 OnRoomCompleted(); _campaignFlowSmokeStep = 46; return;
             case 46:
                 IReadOnlyList<CampaignSnapshot> roomTwentyThreeCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomTwentyThreeCompleteSnapshots.Count != 46 || !roomTwentyThreeCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 23 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(23))
+                if (roomTwentyThreeCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(23))
                 { FailCampaignFlowSmoke("Completing Room 23 did not create its Room Complete snapshot or unlock."); return; }
                 if (!_roomCompleteDialog.Title.Contains("CHILD", StringComparison.Ordinal) || !_roomCompleteDialog.DialogText.Contains("Something in there just wound up!", StringComparison.Ordinal))
                 { FailCampaignFlowSmoke("Room 23 completion did not show its assigned story dialogue."); return; }
@@ -3753,12 +4200,12 @@ public partial class AppRoot : Node
             case 47:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomTwentyFourSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 24 || _currentRoom.RoomId != "room-24" || roomTwentyFourSnapshots.Count != 47 || !roomTwentyFourSnapshots.Any(snapshot => snapshot.RoomNumber == 24 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 24 || _currentRoom.RoomId != "room-24" || roomTwentyFourSnapshots.Count != 5 || !roomTwentyFourSnapshots.Any(snapshot => snapshot.RoomNumber == 24 && snapshot.Kind == SnapshotKind.RoomStart))
                 { FailCampaignFlowSmoke("Continuing from Room 23 did not load Room 24 and create its Room Start snapshot."); return; }
                 OnRoomCompleted(); _campaignFlowSmokeStep = 48; return;
             case 48:
                 IReadOnlyList<CampaignSnapshot> roomTwentyFourCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomTwentyFourCompleteSnapshots.Count != 48 || !roomTwentyFourCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 24 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(24))
+                if (roomTwentyFourCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(24))
                 { FailCampaignFlowSmoke("Completing Room 24 did not create its Room Complete snapshot or unlock."); return; }
                 if (!_roomCompleteDialog.Title.Contains("MOTHER", StringComparison.Ordinal) || !_roomCompleteDialog.DialogText.Contains("I hope that cracking sound was normal.", StringComparison.Ordinal))
                 { FailCampaignFlowSmoke("Room 24 completion did not show its assigned story dialogue."); return; }
@@ -3766,12 +4213,12 @@ public partial class AppRoot : Node
             case 49:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomTwentyFiveSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 25 || _currentRoom.RoomId != "room-25" || roomTwentyFiveSnapshots.Count != 49 || !roomTwentyFiveSnapshots.Any(snapshot => snapshot.RoomNumber == 25 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 25 || _currentRoom.RoomId != "room-25" || roomTwentyFiveSnapshots.Count != 5 || !roomTwentyFiveSnapshots.Any(snapshot => snapshot.RoomNumber == 25 && snapshot.Kind == SnapshotKind.RoomStart))
                 { FailCampaignFlowSmoke("Continuing from Room 24 did not load Room 25 and create its Room Start snapshot."); return; }
                 OnRoomCompleted(); _campaignFlowSmokeStep = 50; return;
             case 50:
                 IReadOnlyList<CampaignSnapshot> roomTwentyFiveCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomTwentyFiveCompleteSnapshots.Count != 50 || !roomTwentyFiveCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 25 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(25))
+                if (roomTwentyFiveCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(25))
                 { FailCampaignFlowSmoke("Completing Room 25 did not create its Room Complete snapshot or unlock."); return; }
                 if (!_roomCompleteDialog.Title.Contains("CHILD", StringComparison.Ordinal) || !_roomCompleteDialog.DialogText.Contains("Why does it keep changing how it rolls?", StringComparison.Ordinal))
                 { FailCampaignFlowSmoke("Room 25 completion did not show its assigned story dialogue."); return; }
@@ -3779,12 +4226,12 @@ public partial class AppRoot : Node
             case 51:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomTwentySixSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 26 || _currentRoom.RoomId != "room-26" || roomTwentySixSnapshots.Count != 51 || !roomTwentySixSnapshots.Any(snapshot => snapshot.RoomNumber == 26 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 26 || _currentRoom.RoomId != "room-26" || roomTwentySixSnapshots.Count != 5 || !roomTwentySixSnapshots.Any(snapshot => snapshot.RoomNumber == 26 && snapshot.Kind == SnapshotKind.RoomStart))
                 { FailCampaignFlowSmoke("Continuing from Room 25 did not load Room 26 and create its Room Start snapshot."); return; }
                 OnRoomCompleted(); _campaignFlowSmokeStep = 52; return;
             case 52:
                 IReadOnlyList<CampaignSnapshot> roomTwentySixCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomTwentySixCompleteSnapshots.Count != 52 || !roomTwentySixCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 26 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(26))
+                if (roomTwentySixCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(26))
                 { FailCampaignFlowSmoke("Completing Room 26 did not create its Room Complete snapshot or unlock."); return; }
                 if (!_roomCompleteDialog.Title.Contains("CHILD", StringComparison.Ordinal) || !_roomCompleteDialog.DialogText.Contains("Those cannons are tracking it through the air!", StringComparison.Ordinal))
                 { FailCampaignFlowSmoke("Room 26 completion did not show its assigned story dialogue."); return; }
@@ -3792,12 +4239,12 @@ public partial class AppRoot : Node
             case 53:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomTwentySevenSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 27 || _currentRoom.RoomId != "room-27" || roomTwentySevenSnapshots.Count != 53 || !roomTwentySevenSnapshots.Any(snapshot => snapshot.RoomNumber == 27 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 27 || _currentRoom.RoomId != "room-27" || roomTwentySevenSnapshots.Count != 5 || !roomTwentySevenSnapshots.Any(snapshot => snapshot.RoomNumber == 27 && snapshot.Kind == SnapshotKind.RoomStart))
                 { FailCampaignFlowSmoke("Continuing from Room 26 did not load Room 27 and create its Room Start snapshot."); return; }
                 OnRoomCompleted(); _campaignFlowSmokeStep = 54; return;
             case 54:
                 IReadOnlyList<CampaignSnapshot> roomTwentySevenCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomTwentySevenCompleteSnapshots.Count != 54 || !roomTwentySevenCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 27 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(27))
+                if (roomTwentySevenCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(27))
                 { FailCampaignFlowSmoke("Completing Room 27 did not create its Room Complete snapshot or unlock."); return; }
                 if (!_roomCompleteDialog.Title.Contains("CHILD", StringComparison.Ordinal) || !_roomCompleteDialog.DialogText.Contains("Did the candy just change direction?", StringComparison.Ordinal))
                 { FailCampaignFlowSmoke("Room 27 completion did not show its assigned story dialogue."); return; }
@@ -3805,17 +4252,31 @@ public partial class AppRoot : Node
             case 55:
                 if (_campaignFlowWaitFrames-- > 0) { return; }
                 IReadOnlyList<CampaignSnapshot> roomTwentyEightSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (_currentRoom?.RoomNumber != 28 || _currentRoom.RoomId != "room-28" || roomTwentyEightSnapshots.Count != 55 || !roomTwentyEightSnapshots.Any(snapshot => snapshot.RoomNumber == 28 && snapshot.Kind == SnapshotKind.RoomStart))
+                if (_currentRoom?.RoomNumber != 28 || _currentRoom.RoomId != "room-28" || roomTwentyEightSnapshots.Count != 5 || !roomTwentyEightSnapshots.Any(snapshot => snapshot.RoomNumber == 28 && snapshot.Kind == SnapshotKind.RoomStart))
                 { FailCampaignFlowSmoke("Continuing from Room 27 did not load Room 28 and create its Room Start snapshot."); return; }
                 OnRoomCompleted(); _campaignFlowSmokeStep = 56; return;
             case 56:
                 IReadOnlyList<CampaignSnapshot> roomTwentyEightCompleteSnapshots = CampaignSaveService.LoadAll(out _, _campaignRoot);
-                if (roomTwentyEightCompleteSnapshots.Count != 56 || !roomTwentyEightCompleteSnapshots.Any(snapshot => snapshot.RoomNumber == 28 && snapshot.Kind == SnapshotKind.RoomComplete) || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(28))
+                if (roomTwentyEightCompleteSnapshots.Count != 5 || !CampaignSaveService.GetCompletedRoomNumbers(_campaignRoot).Contains(28))
                 { FailCampaignFlowSmoke("Completing Room 28 did not create its Room Complete snapshot or unlock."); return; }
-                if (!_roomCompleteDialog.Title.Contains("CHILD", StringComparison.Ordinal) || !_roomCompleteDialog.DialogText.Contains("It must be close now!", StringComparison.Ordinal))
+                if (!_roomCompleteDialog.Title.Contains("CHILD", StringComparison.Ordinal) || !_roomCompleteDialog.DialogText.Contains("It sounds like something really heavy is moving.", StringComparison.Ordinal))
                 { FailCampaignFlowSmoke("Room 28 completion did not show its assigned story dialogue."); return; }
+                ContinueAfterRoomCompletion(); _campaignFlowWaitFrames = 5; _campaignFlowSmokeStep = 57; return;
+            case 57:
+                if (_campaignFlowWaitFrames-- > 0) return;
+                if (_currentRoom?.RoomNumber != 29) { FailCampaignFlowSmoke("Continuing from Room 28 did not load Room 29."); return; }
+                OnRoomCompleted(); _campaignFlowSmokeStep = 58; return;
+            case 58:
+                if (!_roomCompleteDialog.DialogText.Contains("I think it is almost through.", StringComparison.Ordinal)) { FailCampaignFlowSmoke("Room 29 dialogue is incorrect."); return; }
+                ContinueAfterRoomCompletion(); _campaignFlowWaitFrames = 5; _campaignFlowSmokeStep = 59; return;
+            case 59:
+                if (_campaignFlowWaitFrames-- > 0) return;
+                if (_currentRoom?.RoomNumber != 30) { FailCampaignFlowSmoke("Continuing from Room 29 did not load Room 30."); return; }
+                OnRoomCompleted(); _campaignFlowSmokeStep = 60; return;
+            case 60:
+                if (!_roomCompleteDialog.DialogText.Contains("It must be close now!", StringComparison.Ordinal)) { FailCampaignFlowSmoke("Room 30 dialogue is incorrect."); return; }
                 _roomCompleteDialog.Hide(); GetTree().Paused = false; CampaignSaveService.DeleteAll(out _, _campaignRoot); _campaignFlowSmokePending = false;
-                GD.Print("CAMPAIGN_FLOW_SMOKE_PASS: Rooms 01-28 transitions, dialogue and all 56 paired campaign snapshots are integrated."); GetTree().Quit(0); return;
+                GD.Print("CAMPAIGN_FLOW_SMOKE_PASS: Rooms 01-30 transitions, dialogue, room-start saves and room-select unlocks are integrated."); GetTree().Quit(0); return;
         }
     }
 
@@ -3938,7 +4399,11 @@ public partial class AppRoot : Node
         TabContainer tabs = GetNode<TabContainer>("Ui/SettingsMenu/Center/Panel/Layout/Tabs");
         Control settingsPanel = GetNode<Control>("Ui/SettingsMenu/Center/Panel");
         Vector2 viewportSize = GetViewport().GetVisibleRect().Size;
-        if (!_settingsMenu.Visible || tabs.GetTabCount() != 5 ||
+        if (!_settingsMenu.Visible || tabs.GetTabCount() != 6 ||
+            _updateVersionLabel.Text != $"Current version: v{ReleaseUpdateService.CurrentVersion}" ||
+            !ReleaseUpdateService.TryParseVersion("v1.3.1", out Version? laterVersion) || laterVersion is null || laterVersion <= ReleaseUpdateService.CurrentVersion ||
+            !ReleaseUpdateService.TryParseVersion("1.3.0", out Version? sameVersion) || sameVersion is null || sameVersion != ReleaseUpdateService.CurrentVersion ||
+            ReleaseUpdateService.TryParseVersion("invalid", out _) ||
             _subtitlesCheck.ButtonPressed ||
             settingsPanel.Size.X > viewportSize.X || settingsPanel.Size.Y > viewportSize.Y)
         {
@@ -3961,21 +4426,39 @@ public partial class AppRoot : Node
 
         CloseSettings();
         PlayerProfile smokeProfile = ProfileStore.CreateDefault();
+        smokeProfile.UnlockedCosmeticIds.Add("bronze-crown");
+        smokeProfile.CrownId = "bronze-crown";
         string? profileSaveError = null;
         if (!ProfileStore.Save(smokeProfile, out profileSaveError, _profilePath))
         {
             FailUiSmoke($"Customization profile setup failed: {profileSaveError}");
             return;
         }
+        _profile = smokeProfile;
 
         OpenCustomize(MenuOrigin.Main);
+        Vector3 expectedPreviewCrownPosition = _candyPreview.BallLocalPosition + Vector3.Up * 0.91f;
+        if (_candyPreview.AppliedCrownId != "bronze-crown" || !_candyPreview.IsCrownVisible ||
+            _candyPreview.CrownLocalPosition.DistanceTo(expectedPreviewCrownPosition) > 0.005f)
+        {
+            FailUiSmoke($"Customize crown is not centered and seated on the candy. actual={_candyPreview.CrownLocalPosition}, expected={expectedPreviewCrownPosition}.");
+            return;
+        }
         Control customizePanel = GetNode<Control>("Ui/CustomizeMenu/Center/Panel");
         int colorCount = CosmeticCatalog.OfKind(CosmeticKind.Color).Count();
         int patternCount = CosmeticCatalog.OfKind(CosmeticKind.Pattern).Count();
         int trailCount = CosmeticCatalog.OfKind(CosmeticKind.Trail).Count();
+        int finishCount = CosmeticCatalog.OfKind(CosmeticKind.Finish).Count();
+        int trailStyleCount = CosmeticCatalog.OfKind(CosmeticKind.TrailStyle).Count();
+        int crownCount = CosmeticCatalog.OfKind(CosmeticKind.Crown).Count();
         if (!_customizeMenu.Visible || _primaryColorButtons.Count != colorCount ||
             _secondaryColorButtons.Count != colorCount || _patternButtons.Count != patternCount ||
-            _trailButtons.Count != trailCount || !_primaryColorButtons.Any(button => button.IsLocked) ||
+            _trailButtons.Count != trailCount || _finishButtons.Count != finishCount || _trailStyleButtons.Count != trailStyleCount || _crownButtons.Count != crownCount ||
+            _patternButtons.Any(button => !button.UsesExactPatternShader || button.AppliedPatternMode != CandyVisualStyle.ResolvePatternMode(button.Definition.Id)) ||
+            _finishButtons.Any(button => button.Text != button.Definition.DisplayName.ToUpperInvariant()) ||
+            _trailStyleButtons.Any(button => button.Text != button.Definition.DisplayName.ToUpperInvariant()) ||
+            _crownButtons.Any(button => !string.IsNullOrEmpty(button.Text) || button.CustomMinimumSize != new Vector2(50.0f, 50.0f)) ||
+            !_primaryColorButtons.Any(button => button.IsLocked) ||
             !_patternButtons.Any(button => button.IsLocked) || !_trailButtons.Any(button => button.IsLocked) ||
             customizePanel.Size.X > viewportSize.X ||
             customizePanel.Size.Y > viewportSize.Y)
@@ -3984,6 +4467,17 @@ public partial class AppRoot : Node
                 $"Customize swatch catalog/layout mismatch: colors={_primaryColorButtons.Count}/{_secondaryColorButtons.Count}, " +
                 $"patterns={_patternButtons.Count}, trails={_trailButtons.Count}, panel={customizePanel.Size}, viewport={viewportSize}.");
             return;
+        }
+
+        OnCosmeticSwatchPressed(CosmeticSlot.Finish, "glossy");
+        if (!_customizeStatus.Text.Contains("Complete Hard Mode", StringComparison.Ordinal))
+        {
+            FailUiSmoke("A locked Finish did not identify Hard Mode as its unlock requirement."); return;
+        }
+        OnCosmeticSwatchPressed(CosmeticSlot.TrailStyle, "dashed");
+        if (!_customizeStatus.Text.Contains("Complete Extreme Mode", StringComparison.Ordinal))
+        {
+            FailUiSmoke("A locked Trail Style did not identify Extreme Mode as its unlock requirement."); return;
         }
 
         string primaryBeforeLockedClick = _selectedPrimaryColorId;
@@ -4016,12 +4510,22 @@ public partial class AppRoot : Node
             return;
         }
 
+        ulong stableCustomizeButtonId = _patternButtons[0].GetInstanceId();
         CloseCustomize();
         if (!_mainMenu.Visible)
         {
             FailUiSmoke("Customize did not return to its main-menu origin.");
             return;
         }
+
+        ulong customizeReopenStarted = Time.GetTicksUsec();
+        OpenCustomize(MenuOrigin.Main);
+        double customizeReopenMilliseconds = (Time.GetTicksUsec() - customizeReopenStarted) / 1000.0;
+        if (_patternButtons[0].GetInstanceId() != stableCustomizeButtonId || customizeReopenMilliseconds > 100.0)
+        {
+            FailUiSmoke($"Reopening Customize rebuilt its tree or took too long ({customizeReopenMilliseconds:F1} ms)."); return;
+        }
+        CloseCustomize();
 
         OpenAdvancements(MenuOrigin.Main);
         Control advancementsPanel = GetNode<Control>("Ui/AdvancementsMenu/Center/Panel");
@@ -4033,21 +4537,41 @@ public partial class AppRoot : Node
             return;
         }
 
-        for (int index = 0; index < AdvancementCatalog.All.Count; index++)
+        IReadOnlyList<AdvancementDefinition> orderedAdvancements = OrderedAdvancementsForMenu();
+        for (int index = 0; index < orderedAdvancements.Count; index++)
         {
+            AdvancementDefinition definition = orderedAdvancements[index];
             Node row = _advancementsList.GetChild(index);
+            if (row.Name != $"Advancement_{definition.Id}")
+            {
+                FailUiSmoke($"Advancement menu order is incorrect at row {index + 1}.");
+                return;
+            }
+            TextureRect? achievementIcon = row.FindChild("AchievementIcon", recursive: true, owned: false) as TextureRect;
+            if (achievementIcon?.Texture is null)
+            {
+                FailUiSmoke($"Advancement {index + 1} has no achievement icon in the Advancements menu.");
+                return;
+            }
+            if (definition.RewardCosmeticId is null)
+            {
+                continue;
+            }
             CosmeticSwatchButton? rewardIcon = row.FindChild("RewardIcon", recursive: true, owned: false) as CosmeticSwatchButton;
             CosmeticSwatchButton? customizeIcon = _primaryColorButtons
                 .Concat(_secondaryColorButtons)
                 .Concat(_patternButtons)
                 .Concat(_trailButtons)
+                .Concat(_finishButtons)
+                .Concat(_trailStyleButtons)
+                .Concat(_crownButtons)
                 .FirstOrDefault(button => string.Equals(
                     button.Definition.Id,
-                    AdvancementCatalog.All[index].RewardCosmeticId,
+                    definition.RewardCosmeticId,
                     StringComparison.Ordinal));
             if (rewardIcon is null ||
                 customizeIcon is null ||
-                !string.Equals(rewardIcon.Definition.Id, AdvancementCatalog.All[index].RewardCosmeticId, StringComparison.Ordinal) ||
+                !string.Equals(rewardIcon.Definition.Id, definition.RewardCosmeticId, StringComparison.Ordinal) ||
                 rewardIcon.CustomMinimumSize != customizeIcon.CustomMinimumSize ||
                 rewardIcon.PreviewPrimaryColor != customizeIcon.PreviewPrimaryColor ||
                 rewardIcon.PreviewSecondaryColor != customizeIcon.PreviewSecondaryColor)
@@ -4068,6 +4592,54 @@ public partial class AppRoot : Node
         if (!_playMenu.Visible || !_continueButton.Disabled || !_loadButton.Disabled)
         {
             FailUiSmoke("Play submenu did not expose the empty-campaign state correctly.");
+            return;
+        }
+
+        VBoxContainer playLayout = GetNode<VBoxContainer>("Ui/PlayMenu/Center/Panel/Layout");
+        if (playLayout.GetChildren().OfType<Button>().Count(button => button.Name == "ExtrasButton") != 1 ||
+            !_extrasButton.Visible || _hardModeButton.Visible || _extremeModeButton.Visible)
+        {
+            FailUiSmoke("Play submenu does not contain exactly one collapsed Extras entry.");
+            return;
+        }
+
+        _extrasButton.EmitSignal(BaseButton.SignalName.Pressed);
+        Button playBackButton = GetNode<Button>("Ui/PlayMenu/Center/Panel/Layout/BackButton");
+        Button playNewGameButton = GetNode<Button>("Ui/PlayMenu/Center/Panel/Layout/NewGameButton");
+        if (_extrasButton.Visible || !_hardModeButton.Visible || !_extremeModeButton.Visible ||
+            _continueButton.Visible || _loadButton.Visible || _roomSelectButton.Visible || playNewGameButton.Visible ||
+            _campaignModeDescription.Visible || _playMenuPanel.CustomMinimumSize.Y != 300)
+        {
+            FailUiSmoke("Extras did not isolate the Hard Mode and Extreme Mode choices.");
+            return;
+        }
+
+        _hardModeButton.EmitSignal(BaseButton.SignalName.Pressed);
+        if (!_continueButton.Visible || !_loadButton.Visible || !_roomSelectButton.Visible ||
+            _roomSelectButton.Text != "SELECT CHECKPOINT" || !playNewGameButton.Visible || _extrasButton.Visible ||
+            _campaignModeDescription.Text != "Complete all 30 rooms with a checkpoint only every 5 rooms")
+        {
+            FailUiSmoke("Hard Mode menu does not expose Continue, Load Game, Select Checkpoint and New Game.");
+            return;
+        }
+
+        playBackButton.EmitSignal(BaseButton.SignalName.Pressed);
+        _extremeModeButton.EmitSignal(BaseButton.SignalName.Pressed);
+        if (!_continueButton.Visible || _loadButton.Visible || _roomSelectButton.Visible ||
+            !playNewGameButton.Visible || _extrasButton.Visible ||
+            _campaignModeDescription.Text != "Complete all 30 rooms without checkpoints" || _playMenuPanel.CustomMinimumSize.Y != 350)
+        {
+            FailUiSmoke("Extreme Mode menu does not expose only Continue and New Game.");
+            return;
+        }
+
+        ShowMainMenu();
+        ShowPlayMenu();
+        if (!_extrasButton.Visible || _hardModeButton.Visible || _extremeModeButton.Visible ||
+            !_loadButton.Visible || !_roomSelectButton.Visible || _roomSelectButton.Text != "SELECT ROOM" ||
+            _campaignRoot != "user://campaign-ui-smoke")
+        {
+            FailUiSmoke("Opening Play did not reset its menu state while retaining the isolated UI-smoke save root.");
             return;
         }
 
@@ -4094,7 +4666,7 @@ public partial class AppRoot : Node
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         if (_gameplayInstance is null || _mainMenu.Visible || _loadingOverlay.Visible || _menuBackground.Visible || _menuMusic.Playing ||
-            _roomIntroNumber.Text != "ROOM 01 / 28" || _roomIntroName.Text != "THE DROP")
+            _roomIntroNumber.Text != "ROOM 01 / 30" || _roomIntroName.Text != "THE DROP")
         {
             FailUiSmoke("Play did not leave the loading screen and enter gameplay cleanly.");
             return;
@@ -4184,11 +4756,54 @@ public partial class AppRoot : Node
             return;
         }
 
+        Button restartButton = GetNode<Button>("Ui/PauseMenu/Center/Panel/Layout/RestartButton");
+        _campaignMode = CampaignMode.Hard;
+        PauseGame();
+        if (restartButton.Text != "RESTART CHECKPOINT")
+        {
+            FailUiSmoke("Hard Mode pause menu did not label restart as RESTART CHECKPOINT.");
+            return;
+        }
+        ResumeGame();
+        _campaignMode = CampaignMode.Extreme;
+        PauseGame();
+        if (restartButton.Text != "RESTART")
+        {
+            FailUiSmoke("Extreme Mode pause menu did not label restart as RESTART.");
+            return;
+        }
+        ResumeGame();
+        _campaignMode = CampaignMode.Normal;
+
+        AdvancementDefinition? finalAchievement = AdvancementCatalog.Find("hard-mode-complete");
+        if (finalAchievement is null)
+        {
+            FailUiSmoke("Hard Mode completion achievement is missing.");
+            return;
+        }
+        _deferredMainMenuNotifications.Add(finalAchievement);
+        FlushDeferredMainMenuNotifications();
+        if (_deferredMainMenuNotifications.Count != 1)
+        {
+            FailUiSmoke("A final-room achievement was shown before reaching the main menu.");
+            return;
+        }
+        int notificationsBeforeMainMenu = _advancementNotifications.PendingCount;
+        _mainMenu.Show();
+        FlushDeferredMainMenuNotifications();
+        _mainMenu.Hide();
+        if (_deferredMainMenuNotifications.Count != 0 ||
+            _advancementNotifications.PendingCount <= notificationsBeforeMainMenu)
+        {
+            FailUiSmoke("A final-room achievement was not released as a main-menu popup.");
+            return;
+        }
+
         _settings = new GameSettingsData();
         ApplySettings(save: false, applyDefaultCamera: false);
         CampaignSaveService.DeleteAll(out _, _campaignRoot);
         ProfileStore.DeleteTestFiles(_profilePath);
-            GD.Print("UI_SMOKE_PASS: visual menu, loading, main-menu-only load/customization, deferred room-completion notifications, silent room transfer, pause boundary, complete settings, rebinding and 120 FPS work.");
+            GD.Print("UI_SMOKE_PASS: visual menu, loading, main-menu-only load/customization, room-start and final-main-menu achievement notifications, mode-specific restart labels, silent room transfer, pause boundary, complete settings, rebinding and 120 FPS work.");
         GetTree().Quit(0);
     }
 

@@ -15,7 +15,7 @@ public partial class Room21Runtime : RoomRuntime
     private const string SurfacePath = "res://resources/surfaces/absorbing.tres";
     private const int RequiredSolutionRuns = 10;
     private const int MaximumSolutionTicksPerRun = 2600;
-    private const int RequiredButtons = 3;
+    private const int RequiredButtons = 5;
     private const int RequiredNeutralAbsorptionTicks = 24;
     private const float MinimumAbsorberEntrySpeed = 6.0f;
     private const float MaximumRetainedSpeedRatio = 0.22f;
@@ -23,8 +23,6 @@ public partial class Room21Runtime : RoomRuntime
     private const float StopTargetRadius = 1.65f;
 
     private readonly List<RouteCheckpoint3D> _sequenceButtons = new();
-    private readonly Dictionary<RouteCheckpoint3D, Material> _buttonIdleMaterials = new();
-    private readonly Dictionary<RouteCheckpoint3D, Tween> _wrongOrderTweens = new();
     private readonly List<MeshInstance3D> _targetChargeSegments = new();
 
     private PlayerBall _player = null!;
@@ -36,7 +34,6 @@ public partial class Room21Runtime : RoomRuntime
     private Material _targetActiveMaterial = null!;
     private Material _chargeEmptyMaterial = null!;
     private Material _chargeActiveMaterial = null!;
-    private Material _wrongOrderMaterial = null!;
     private Transform3D _spawnTransform;
     private SolutionTrace? _solutionTrace;
     private bool _runSolutionSmoke;
@@ -199,7 +196,7 @@ public partial class Room21Runtime : RoomRuntime
             _solutionRun++;
             if (_solutionRun >= RequiredSolutionRuns)
             {
-                GD.Print($"ROOM21_SOLUTION_PASS: SolutionTrace crossed three ordered foam buttons and stopped inside the precision target from {_verifiedEntrySpeed:F2} to {_verifiedMinimumSpeed:F2} m/s for {_solutionRun} consecutive completions.");
+                GD.Print($"ROOM21_SOLUTION_PASS: SolutionTrace crossed five ordered foam buttons and stopped inside the precision target from {_verifiedEntrySpeed:F2} to {_verifiedMinimumSpeed:F2} m/s for {_solutionRun} consecutive completions.");
                 FinishSolutionSmoke(0);
                 return;
             }
@@ -296,14 +293,7 @@ public partial class Room21Runtime : RoomRuntime
         foreach (RouteCheckpoint3D button in _sequenceButtons)
         {
             button.ResetCheckpoint();
-            if (_buttonIdleMaterials.TryGetValue(button, out Material? idleMaterial) &&
-                button.GetNodeOrNull<MeshInstance3D>("InsetPlate") is MeshInstance3D inset)
-            {
-                SetButtonVisual(inset, idleMaterial, true);
-            }
         }
-        foreach (Tween tween in _wrongOrderTweens.Values) { tween.Kill(); }
-        _wrongOrderTweens.Clear();
     }
 
     private void BuildRoom()
@@ -316,16 +306,8 @@ public partial class Room21Runtime : RoomRuntime
         SurfaceProfile profile = GD.Load<SurfaceProfile>(SurfacePath) ?? new SurfaceProfile { Kind = SurfaceKind.Absorbing, Friction = 0.22f, LinearDrag = 3.4f };
         ShaderMaterial caramelMaterial = (ShaderMaterial)GD.Load<ShaderMaterial>("res://resources/materials/sticky_caramel.tres").Duplicate();
 
-        _wrongOrderMaterial = new StandardMaterial3D
-        {
-            AlbedoColor = new Color("d62f2f"),
-            Roughness = 0.54f,
-            EmissionEnabled = true,
-            Emission = new Color("721010"),
-            EmissionEnergyMultiplier = 1.15f,
-        };
-        _targetIdleMaterial = RoomGeometry.CreateMaterial("res://assets/textures/copper_rivets.svg", new Color("d0a365"), 0.38f, 0.56f);
-        _targetActiveMaterial = RoomGeometry.CreateMaterial("res://assets/textures/sugar_glaze.svg", new Color("84d1aa"), 0.08f, 0.48f, emissionEnabled: true, emission: new Color("1e614b"));
+        _targetIdleMaterial = RoomGeometry.CreateMaterial(string.Empty, Colors.White, 0.08f, 0.52f);
+        _targetActiveMaterial = RoomGeometry.CreateMaterial(string.Empty, Colors.White, 0.03f, 0.42f, emissionEnabled: true, emission: new Color("bfe8d8"));
         _chargeEmptyMaterial = RoomGeometry.CreateMaterial(metal, new Color("283432"), 0.32f, 0.72f);
         _chargeActiveMaterial = RoomGeometry.CreateMaterial("res://assets/textures/sugar_glaze.svg", new Color("8ed7b5"), 0.06f, 0.44f, emissionEnabled: true, emission: new Color("2b795c"));
 
@@ -342,22 +324,26 @@ public partial class Room21Runtime : RoomRuntime
 
         foreach (float side in new[] { -1.0f, 1.0f })
         {
-            RoomGeometry.AddBox(this, $"StartRail{side}", new Vector3(0.32f, 1.45f, 16.0f), new Vector3(side * 9.59f, 16.8f, 44.0f), Vector3.Zero, metal, frame, 0.4f, 0.66f);
+            RoomGeometry.AddWall(this, $"StartRail{side}", new Vector3(0.32f, 1.45f, 16.0f), new Vector3(side * 9.59f, 16.8f, 44.0f), Vector3.Zero, metal, frame, 0.4f, 0.66f);
             AddSlopeRail($"SlopeRail{side}", side * 9.59f, 36.0f, 16.275f, 10.0f, 5.0f, metal, frame);
-            RoomGeometry.AddBox(this, $"FoamKerb{side}", new Vector3(0.32f, 1.1f, 36.0f), new Vector3(side * 9.59f, 5.25f, -8.0f), Vector3.Zero, foam, new Color("68756c"), 0.02f, 0.98f);
-            RoomGeometry.AddBox(this, $"ExitRail{side}", new Vector3(0.32f, 1.35f, 26.0f), new Vector3(side * 9.59f, 5.45f, -39.0f), Vector3.Zero, metal, frame, 0.4f, 0.66f);
+            RoomGeometry.AddWall(this, $"FoamKerb{side}", new Vector3(0.32f, 1.1f, 36.0f), new Vector3(side * 9.59f, 5.25f, -8.0f), Vector3.Zero, foam, new Color("68756c"), 0.02f, 0.98f);
+            RoomGeometry.AddWall(this, $"ExitRail{side}", new Vector3(0.32f, 1.35f, 26.0f), new Vector3(side * 9.59f, 5.45f, -39.0f), Vector3.Zero, metal, frame, 0.4f, 0.66f);
         }
 
         AddSequenceButton("FoamButtonOne", 0, new Vector3(-5.2f, 5.06f, 3.5f));
         AddSequenceButton("FoamButtonTwo", 1, new Vector3(5.2f, 5.06f, -5.0f));
         AddSequenceButton("FoamButtonThree", 2, new Vector3(-4.2f, 5.06f, -13.5f));
+        AddSequenceButton("FoamButtonFour", 3, new Vector3(4.8f, 5.06f, -17.0f));
+        AddSequenceButton("FoamButtonFive", 4, new Vector3(-4.8f, 5.06f, -19.5f));
         BuildStopTarget(new Vector3(0.0f, 5.02f, StopTargetZ));
 
         StandardMaterial3D routeMaterial = RoomGeometry.CreateMaterial(metal, new Color("dceadf"), 0.18f, 0.62f, emissionEnabled: true, emission: new Color("315742"));
         AddRouteRibbon(new Vector3(0.0f, 5.02f, 8.0f), new Vector3(-5.2f, 5.02f, 3.5f), routeMaterial);
         AddRouteRibbon(new Vector3(-5.2f, 5.02f, 3.5f), new Vector3(5.2f, 5.02f, -5.0f), routeMaterial);
         AddRouteRibbon(new Vector3(5.2f, 5.02f, -5.0f), new Vector3(-4.2f, 5.02f, -13.5f), routeMaterial);
-        AddRouteRibbon(new Vector3(-4.2f, 5.02f, -13.5f), new Vector3(0.0f, 5.02f, StopTargetZ), routeMaterial);
+        AddRouteRibbon(new Vector3(-4.2f, 5.02f, -13.5f), new Vector3(4.8f, 5.02f, -17.0f), routeMaterial);
+        AddRouteRibbon(new Vector3(4.8f, 5.02f, -17.0f), new Vector3(-4.8f, 5.02f, -19.5f), routeMaterial);
+        AddRouteRibbon(new Vector3(-4.8f, 5.02f, -19.5f), new Vector3(0.0f, 5.02f, StopTargetZ), routeMaterial);
     }
 
     private void AddSlopeBetween(string name, float width, float thickness, float highZ, float highY, float lowZ, float lowY, string texture, Color tint)
@@ -381,7 +367,7 @@ public partial class Room21Runtime : RoomRuntime
         Vector3 normal = new(0.0f, Mathf.Cos(angle), Mathf.Sin(angle));
         Vector3 topCenter = new(x, ((highY + lowY) * 0.5f) + 0.72f, (highZ + lowZ) * 0.5f);
         Vector3 bodyCenter = topCenter - (normal * 0.16f);
-        RoomGeometry.AddBox(this, name, new Vector3(0.32f, 1.45f, length), bodyCenter, new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.38f, 0.6f);
+        RoomGeometry.AddWall(this, name, new Vector3(0.32f, 1.45f, length), bodyCenter, new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.38f, 0.6f);
     }
 
     private void AddSequenceButton(string name, int index, Vector3 position)
@@ -407,30 +393,11 @@ public partial class Room21Runtime : RoomRuntime
                     GD.Print($"ROOM21_BUTTON_TRACE: button={_nextSequenceButton}/{RequiredButtons}, tick={_solutionTick}, position={player.GlobalPosition}, speed={player.LinearVelocity.Length():F2}.");
                 }
             }
-            else
-            {
-                FlashWrongOrder(entered);
-            }
         };
         AddChild(button);
         MeshInstance3D inset = button.GetNode<MeshInstance3D>("InsetPlate");
-        if (inset.MaterialOverride is Material idleMaterial) { _buttonIdleMaterials[button] = idleMaterial; }
         RoomGeometry.AddSequencePips(inset, index + 1);
         _sequenceButtons.Add(button);
-    }
-
-    private void FlashWrongOrder(RouteCheckpoint3D button)
-    {
-        button.FlashDenied();
-    }
-
-    private static void SetButtonVisual(MeshInstance3D inset, Material material, bool showPips)
-    {
-        inset.MaterialOverride = material;
-        foreach (MeshInstance3D pip in inset.GetChildren().OfType<MeshInstance3D>())
-        {
-            if (pip.Name.ToString().StartsWith("SequencePip", StringComparison.Ordinal)) { pip.Visible = showPips; }
-        }
     }
 
     private void AddRouteRibbon(Vector3 start, Vector3 end, Material material)
