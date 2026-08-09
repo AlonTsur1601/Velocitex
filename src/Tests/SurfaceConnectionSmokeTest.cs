@@ -1,4 +1,5 @@
 using Godot;
+using System.Text.Json;
 using Velocitex.Gameplay.Player;
 using Velocitex.Gameplay.Rooms;
 
@@ -10,11 +11,15 @@ public partial class SurfaceConnectionSmokeTest : Node
     private const float DetectionHeight = 2.0f;
     private const float MaximumSeamGap = 0.01f;
     private const float MaximumSeamStep = 0.01f;
-    private const float MinimumGeneratedWallVisualHeight = 0.86f;
-    private const float MaximumGeneratedWallVisualHeight = 0.88f;
-    private const float MaximumGeneratedWallTotalOverhang = 1.91f;
+    private const float MinimumGeneratedWallVisualHeight = 1.21f;
+    private const float MaximumGeneratedWallVisualHeight = 1.23f;
+    private const float MaximumGeneratedWallTotalOverhang = 0.09f;
 
-    private readonly record struct Surface(StaticBody3D Body, BoxShape3D Shape, bool IsSloped);
+    private readonly record struct Surface(
+        StaticBody3D Body,
+        CollisionShape3D Collision,
+        BoxShape3D Shape,
+        bool IsSloped);
     private readonly record struct Barrier(
         StaticBody3D Body,
         Vector3 SupportSize,
@@ -32,6 +37,14 @@ public partial class SurfaceConnectionSmokeTest : Node
     public override async void _Ready()
     {
         int[] rooms = ResolveRequestedRooms();
+        string? geometryExportPath = OS.GetCmdlineUserArgs()
+            .FirstOrDefault(argument => argument.StartsWith("--surface-geometry-export=", StringComparison.Ordinal))?
+            ["--surface-geometry-export=".Length..];
+        if (!string.IsNullOrWhiteSpace(geometryExportPath))
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(geometryExportPath)!);
+            File.Delete(geometryExportPath);
+        }
         int issueCount = 0;
         foreach (int room in rooms)
         {
@@ -50,6 +63,10 @@ public partial class SurfaceConnectionSmokeTest : Node
             AddChild(roomRoot);
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             roomRoot.ProcessMode = ProcessModeEnum.Disabled;
+            if (!string.IsNullOrWhiteSpace(geometryExportPath))
+            {
+                ExportRoomGeometry(room, roomRoot, geometryExportPath);
+            }
             AuditResult result = AuditRoom(room, roomRoot);
             issueCount += result.IssueCount;
             if (result.IssueCount == 0)
@@ -75,6 +92,46 @@ public partial class SurfaceConnectionSmokeTest : Node
 
         GD.Print($"SURFACE_CONNECTION_PASS: all adjoining platform and slope edges in {rooms.Length} requested room(s) are flush and connected.");
         await FinishAsync(0);
+    }
+
+    private static void ExportRoomGeometry(int room, Node root, string path)
+    {
+        using StreamWriter writer = new(path, append: true);
+        foreach (StaticBody3D body in EnumerateDescendants(root).OfType<StaticBody3D>())
+        foreach (CollisionShape3D collision in body.GetChildren().OfType<CollisionShape3D>())
+        {
+            if (collision.Disabled || collision.Shape is not BoxShape3D box)
+            {
+                continue;
+            }
+
+            Transform3D transform = collision.GlobalTransform;
+            bool generatedWall = body.HasMeta(RoomGeometry.GeneratedPlatformWallMetadata);
+            bool barrier = IsBarrierBox(body.Name.ToString(), box);
+            bool rollingSurface = !barrier && IsRollingSurface(body, box);
+            if (!generatedWall && !rollingSurface)
+            {
+                continue;
+            }
+
+            writer.WriteLine(JsonSerializer.Serialize(new
+            {
+                room,
+                name = body.Name.ToString(),
+                kind = generatedWall ? "wall" : "platform",
+                support = body.HasMeta(RoomGeometry.GeneratedPlatformWallSurfaceMetadata)
+                    ? body.GetMeta(RoomGeometry.GeneratedPlatformWallSurfaceMetadata).AsString()
+                    : string.Empty,
+                origin = new[] { transform.Origin.X, transform.Origin.Y, transform.Origin.Z },
+                basis = new[]
+                {
+                    transform.Basis.X.X, transform.Basis.X.Y, transform.Basis.X.Z,
+                    transform.Basis.Y.X, transform.Basis.Y.Y, transform.Basis.Y.Z,
+                    transform.Basis.Z.X, transform.Basis.Z.Y, transform.Basis.Z.Z,
+                },
+                size = new[] { box.Size.X, box.Size.Y, box.Size.Z },
+            }));
+        }
     }
 
     private static int[] ResolveRequestedRooms()
@@ -210,6 +267,13 @@ public partial class SurfaceConnectionSmokeTest : Node
                         $"SURFACE_BARRIER_OVERHANG: Room {room:00} {barrier.Body.Name} extends " +
                         $"{totalOverhang:F3} m beyond its authored wall guide.");
                 }
+                if (!IsBarrierClearOfPlatformInteriors(barrier, surfaces, out string intrusionDetails))
+                {
+                    issues++;
+                    GD.PushError(
+                        $"SURFACE_BARRIER_INTRUSION: Room {room:00} {barrier.Body.Name} leaves the platform edge; " +
+                        intrusionDetails);
+                }
             }
 
             if (IsBarrierSupported(barrier, surfaces, structuralWalls, out string supportDetails))
@@ -234,6 +298,52 @@ public partial class SurfaceConnectionSmokeTest : Node
         issues += AuditSharedWindFans(room, root);
 
         return new AuditResult(issues, surfaces.Count, seams.Count, barriers.Count, worstGap, worstStep, startWallGap);
+    }
+
+    private static bool IsBarrierClearOfPlatformInteriors(
+        Barrier barrier,
+        List<Surface> surfaces,
+        out string details)
+    {
+        details = string.Empty;
+        bool runsAlongX = barrier.VisualSize.X >= barrier.VisualSize.Z;
+        float halfLength = (runsAlongX ? barrier.VisualSize.X : barrier.VisualSize.Z) * 0.5f;
+        Vector3 localAxis = runsAlongX ? Vector3.Right : Vector3.Back;
+        Vector3 localBase = barrier.VisualOffset - (Vector3.Up * (barrier.VisualSize.Y * 0.5f));
+        string supportName = barrier.Body.HasMeta(RoomGeometry.GeneratedPlatformWallSurfaceMetadata)
+            ? barrier.Body.GetMeta(RoomGeometry.GeneratedPlatformWallSurfaceMetadata).AsString()
+            : string.Empty;
+
+        for (int sample = 0; sample <= 12; sample++)
+        {
+            float offset = Mathf.Lerp(-halfLength, halfLength, sample / 12.0f);
+            Vector3 worldPoint = barrier.Body.ToGlobal(localBase + (localAxis * offset));
+            foreach (Surface surface in surfaces)
+            {
+                if (surface.Body.Name.ToString() == supportName)
+                {
+                    continue;
+                }
+
+                Vector3 local = surface.Collision.ToLocal(worldPoint);
+                Vector3 half = surface.Shape.Size * 0.5f;
+                const float interiorMargin = 0.04f;
+                bool insideFootprint = Mathf.Abs(local.X) < half.X - interiorMargin &&
+                    Mathf.Abs(local.Z) < half.Z - interiorMargin;
+                bool nearTop = local.Y >= half.Y - 0.08f &&
+                    local.Y <= half.Y + barrier.VisualSize.Y + 0.08f;
+                if (!insideFootprint || !nearTop)
+                {
+                    continue;
+                }
+
+                details = $"base sample {sample}/12 is inside platform {surface.Body.Name} " +
+                    $"at local ({local.X:F3}, {local.Y:F3}, {local.Z:F3}).";
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static int AuditSharedWindFans(int room, Node root)
@@ -687,7 +797,7 @@ public partial class SurfaceConnectionSmokeTest : Node
                 }
 
                 float up = Mathf.Abs((body.GlobalTransform.Basis * Vector3.Up).Normalized().Dot(Vector3.Up));
-                surfaces.Add(new Surface(body, box, up < 0.9995f));
+                surfaces.Add(new Surface(body, collision, box, up < 0.9995f));
                 break;
             }
         }
