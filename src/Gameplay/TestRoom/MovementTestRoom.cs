@@ -241,18 +241,18 @@ public partial class MovementTestRoom : RoomRuntime
         if (_smokeTick == 1)
         {
             _player.LinearVelocity = new Vector3(0.0f, 0.0f, -40.0f);
-            _player.ApplyProfile(new PlayerProfile { TrailId = "trail-gold" }, trailAllowed: true);
-            if (!_player.IsTrailEnabled || !_player.IsTrailEmitting || !_player.IsTrailVisible)
+            _player.ApplyProfile(new PlayerProfile { TrailId = "trail-gold", CrownId = "gold-crown" }, trailAllowed: true);
+            if (!_player.IsTrailEnabled || !_player.IsTrailEmitting || !_player.IsTrailVisible || !_player.IsCrownVisible)
             {
-                FailMovementSmoke("A configured high-speed trail was not visible in third person.");
+                FailMovementSmoke("Configured trail and crown were not visible in third person.");
                 return;
             }
 
             _cameraRig.SetFirstPerson(true);
             if (!_cameraRig.IsFirstPerson || _player.IsVisualVisible ||
-                !_player.IsTrailEmitting || _player.IsTrailVisible || !_cameraRig.IsTrailLayerVisible)
+                !_player.IsTrailEmitting || _player.IsTrailVisible || _player.IsCrownVisible || !_cameraRig.IsTrailLayerVisible)
             {
-                FailMovementSmoke("First-person camera did not hide the trail at extreme speed.");
+                FailMovementSmoke("First-person camera did not hide the crown and high-speed trail.");
                 return;
             }
 
@@ -266,9 +266,9 @@ public partial class MovementTestRoom : RoomRuntime
 
             _cameraRig.SetFirstPerson(false);
             if (_cameraRig.IsFirstPerson || !_player.IsVisualVisible ||
-                !_player.IsTrailEmitting || !_player.IsTrailVisible || !_cameraRig.IsTrailLayerVisible)
+                !_player.IsTrailEmitting || !_player.IsTrailVisible || !_player.IsCrownVisible || !_cameraRig.IsTrailLayerVisible)
             {
-                FailMovementSmoke("Third-person camera did not restore both the player visual and its configured trail.");
+                FailMovementSmoke("Third-person camera did not restore the player visual, crown and configured trail.");
                 return;
             }
 

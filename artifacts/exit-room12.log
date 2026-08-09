@@ -1,0 +1,20 @@
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+ERROR: EXIT_PRESENTATION: Room 12 corridor fade was not gradual or fully black before transition (mid=0.79, end=1.00).
+   at: void Velocitex.Tests.ExitPresentationSmokeTest.Report(int, string) (res://src/Tests/ExitPresentationSmokeTest.cs:772)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Velocitex.Tests.ExitPresentationSmokeTest.Report(int, string) (C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\ExitPresentationSmokeTest.cs:772)
+       [2] int Velocitex.Tests.ExitPresentationSmokeTest.AuditRoom(int, Godot.Node) (C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\ExitPresentationSmokeTest.cs:415)
+       [3] void Velocitex.Tests.ExitPresentationSmokeTest+<_Ready>d__2.MoveNext() (C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\ExitPresentationSmokeTest.cs:44)
+       [4] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, object)
+       [5] void System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [6] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: EXIT_PRESENTATION_FAIL: found 1 missing, duplicated or inactive room exits.
+   at: void Velocitex.Tests.ExitPresentationSmokeTest+<_Ready>d__2.MoveNext() (res://src/Tests/ExitPresentationSmokeTest.cs:59)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Velocitex.Tests.ExitPresentationSmokeTest+<_Ready>d__2.MoveNext() (C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\ExitPresentationSmokeTest.cs:59)
+       [2] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, object)
+       [3] void System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [4] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)

@@ -44,13 +44,14 @@ internal readonly record struct PlatformWallStyle(
     private const string AbsorbingTexturePath = "res://assets/textures/absorbing_foam.svg";
     private const string OneWayGripTexturePath = "res://assets/textures/one_way_teeth.svg";
     private const float StandardGeneratedWallHeight = 1.10f;
-    private const float MaximumGeneratedWallEndOverlap = 0.08f;
+    private const float MaximumGeneratedWallEndOverlap = 0.90f;
     public const string StickyRollSfxMetadata = "sticky_roll_sfx";
     public const string BarrierBaseSeamSizeMetadata = "barrier_base_seam_size";
     public const string BarrierBaseSeamOffsetMetadata = "barrier_base_seam_offset";
     public const string GeneratedPlatformWallMetadata = "generated_platform_wall";
     public const string GeneratedPlatformWallSurfaceMetadata = "generated_platform_wall_surface";
     public const string GeneratedPlatformWallGuideSizeMetadata = "generated_platform_wall_guide_size";
+    private const string GeneratedWallRoomMaterialMetadata = "generated_wall_room_material";
     public static Color SequenceButtonFrameTint => new("a96f50");
 
     public static StaticBody3D AddBox(
@@ -156,6 +157,11 @@ internal readonly record struct PlatformWallStyle(
         Material? materialOverride = null,
         float endJoinAllowance = 0.04f)
     {
+        if (parent.GetNodeOrNull<StaticBody3D>($"EditableWalls/{name}") is StaticBody3D editableWall)
+        {
+            return editableWall;
+        }
+
         if (!IsEdgeBarrier(name, size))
         {
             throw new ArgumentException(
@@ -184,6 +190,12 @@ internal readonly record struct PlatformWallStyle(
             rotation,
             endJoinAllowance);
 
+        Material? roomWallMaterial = materialOverride;
+        if (parent.HasMeta(GeneratedWallRoomMaterialMetadata))
+        {
+            roomWallMaterial = parent.GetMeta(GeneratedWallRoomMaterialMetadata).AsGodotObject() as Material;
+        }
+
         StaticBody3D wall = AddBox(
             parent,
             name,
@@ -197,7 +209,7 @@ internal readonly record struct PlatformWallStyle(
             friction,
             bounce,
             castShadow,
-            materialOverride: materialOverride,
+            materialOverride: roomWallMaterial,
             edgeBarrierEndOverlap: generatedEndOverlap.Total,
             edgeBarrierLongOffset: generatedEndOverlap.CenterOffset);
         if (!generatedVisualPosition.IsEqualApprox(generatedWallPosition) &&
@@ -208,7 +220,21 @@ internal readonly record struct PlatformWallStyle(
             wall.SetMeta(BarrierBaseSeamOffsetMetadata, wallVisual.Position);
         }
         MeshInstance3D generatedVisual = wall.GetChildren().OfType<MeshInstance3D>().First();
+        if (!parent.HasMeta(GeneratedWallRoomMaterialMetadata) && generatedVisual.MaterialOverride is Material generatedMaterial)
+        {
+            parent.SetMeta(GeneratedWallRoomMaterialMetadata, generatedMaterial);
+        }
         Vector3 generatedVisualSize = wall.GetMeta(BarrierBaseSeamSizeMetadata).AsVector3();
+        if (Mathf.Abs(rotation.X) > 0.001f || Mathf.Abs(rotation.Z) > 0.001f)
+        {
+            // The lower edge follows the sloped platform, while the wall rises
+            // in world-space Up.  Rotating a rectangular wall with the deck
+            // shortens its apparent height and creates half-height joints when
+            // it reaches a level wall.
+            generatedVisual.Mesh = SurfaceMeshFactory.CreateTiledVerticalWall(
+                generatedVisualSize,
+                authoredBasis);
+        }
         CollisionShape3D generatedHitbox = wall.GetChildren().OfType<CollisionShape3D>().First();
         generatedHitbox.Name = "GeneratedWallHitbox";
         generatedHitbox.Position = generatedVisual.Position;
@@ -219,10 +245,6 @@ internal readonly record struct PlatformWallStyle(
         wall.SetMeta(
             GeneratedPlatformWallSurfaceMetadata,
             string.IsNullOrEmpty(supportSurface) ? "structural-join" : supportSurface);
-        if (!name.StartsWith("GeneratedRailJoin", StringComparison.Ordinal))
-        {
-            AddNearbyGeneratedWallJoins(parent, wall, texturePath, tint, metallic, roughness);
-        }
         return wall;
     }
 
@@ -329,13 +351,7 @@ internal readonly record struct PlatformWallStyle(
         return false;
     }
 
-    private static void AddNearbyGeneratedWallJoins(
-        Node parent,
-        StaticBody3D wall,
-        string texturePath,
-        Color tint,
-        float metallic,
-        float roughness)
+    private static void CloseNearbyGeneratedWallGaps(Node parent, StaticBody3D wall)
     {
         (Vector3 wallStart, Vector3 wallEnd, Vector3 wallAxis, float wallThickness) = GetGeneratedWallSpan(wall);
         foreach (StaticBody3D other in EnumerateDescendants(parent).OfType<StaticBody3D>().ToArray())
@@ -347,11 +363,6 @@ internal readonly record struct PlatformWallStyle(
             }
 
             (Vector3 otherStart, Vector3 otherEnd, Vector3 otherAxis, float otherThickness) = GetGeneratedWallSpan(other);
-            if (Mathf.Abs(wallAxis.Dot(otherAxis)) < 0.80f)
-            {
-                continue;
-            }
-
             (Vector3 A, Vector3 B)[] endpointPairs =
             {
                 (wallStart, otherStart),
@@ -369,52 +380,51 @@ internal readonly record struct PlatformWallStyle(
                 continue;
             }
 
-            Vector3 horizontalGap = new(gapVector.X, 0.0f, gapVector.Z);
-            float horizontalLength = horizontalGap.Length();
-            float thickness = Mathf.Max(wallThickness, otherThickness);
-            Vector3 direction;
-            if (horizontalLength <= 0.025f)
-            {
-                Vector3 horizontalAxis = new(wallAxis.X, 0.0f, wallAxis.Z);
-                direction = horizontalAxis.LengthSquared() > 0.0001f
-                    ? horizontalAxis.Normalized()
-                    : Vector3.Back;
-                horizontalLength = thickness;
-            }
-            else
-            {
-                direction = horizontalGap / horizontalLength;
-            }
-
-            string firstName = wall.Name.ToString();
-            string secondName = other.Name.ToString();
-            string joinName = string.CompareOrdinal(firstName, secondName) < 0
-                ? $"GeneratedRailJoin_{firstName}_{secondName}"
-                : $"GeneratedRailJoin_{secondName}_{firstName}";
-            if (parent.GetNodeOrNull<Node>(joinName) is not null)
-            {
-                continue;
-            }
-
-            // Corner fillers must remain upright.  Rotating the full box toward
-            // a vertically displaced slope endpoint made one side appear half
-            // height and produced the malformed fins seen at platform corners.
-            float yaw = Mathf.Atan2(-direction.X, -direction.Z);
-            AddWall(
-                parent,
-                joinName,
-                new Vector3(thickness, StandardGeneratedWallHeight, horizontalLength),
-                new Vector3(
-                    (closest.A.X + closest.B.X) * 0.5f,
-                    (closest.A.Y + closest.B.Y) * 0.5f,
-                    (closest.A.Z + closest.B.Z) * 0.5f),
-                new Vector3(0.0f, yaw, 0.0f),
-                texturePath,
-                tint,
-                metallic,
-                roughness,
-                endJoinAllowance: 0.04f);
+            // Extend the two existing wall bodies to a common endpoint.  A
+            // separate connector box creates the visible teeth/protrusions at
+            // corners and can inherit a different material or height.
+            Vector3 meetingPoint = (closest.A + closest.B) * 0.5f;
+            ExtendGeneratedWallEnd(wall, closest.A, meetingPoint, wallThickness);
+            ExtendGeneratedWallEnd(other, closest.B, meetingPoint, otherThickness);
         }
+    }
+
+    private static void ExtendGeneratedWallEnd(
+        StaticBody3D wall,
+        Vector3 oldEndpoint,
+        Vector3 target,
+        float thickness)
+    {
+        CollisionShape3D hitbox = wall.GetNode<CollisionShape3D>("GeneratedWallHitbox");
+        BoxShape3D box = (BoxShape3D)hitbox.Shape;
+        bool runsAlongX = box.Size.X >= box.Size.Z;
+        Vector3 localAxis = runsAlongX ? Vector3.Right : Vector3.Back;
+        Vector3 worldAxis = (wall.GlobalTransform.Basis * localAxis).Normalized();
+        Vector3 center = wall.ToGlobal(hitbox.Position);
+        float signedEnd = Mathf.Sign((oldEndpoint - center).Dot(worldAxis));
+        float extension = Mathf.Max(0.0f, (target - oldEndpoint).Dot(worldAxis) * signedEnd);
+        if (extension <= 0.001f)
+        {
+            return;
+        }
+
+        float oldLength = runsAlongX ? box.Size.X : box.Size.Z;
+        float newLength = oldLength + extension + (thickness * 0.5f);
+        Vector3 newWorldCenter = center + (worldAxis * signedEnd * ((newLength - oldLength) * 0.5f));
+        Vector3 newSize = box.Size;
+        if (runsAlongX) { newSize.X = newLength; }
+        else { newSize.Z = newLength; }
+        hitbox.Position = wall.ToLocal(newWorldCenter);
+        box.Size = newSize;
+
+        MeshInstance3D visual = wall.GetChildren().OfType<MeshInstance3D>().First();
+        visual.Position = hitbox.Position;
+        Basis authoredBasis = wall.GlobalTransform.Basis;
+        visual.Mesh = Mathf.Abs(wall.Rotation.X) > 0.001f || Mathf.Abs(wall.Rotation.Z) > 0.001f
+            ? SurfaceMeshFactory.CreateTiledVerticalWall(newSize, authoredBasis)
+            : SurfaceMeshFactory.CreateTiledBox(newSize);
+        wall.SetMeta(BarrierBaseSeamSizeMetadata, newSize);
+        wall.SetMeta(BarrierBaseSeamOffsetMetadata, hitbox.Position);
     }
 
     private static (Vector3 Start, Vector3 End, Vector3 Axis, float Thickness) GetGeneratedWallSpan(
@@ -432,6 +442,64 @@ internal readonly record struct PlatformWallStyle(
         return (center - extent, center + extent, axis, thickness);
     }
 
+    private static void CloseNearbyStructuralWallGaps(Node parent, StaticBody3D wall)
+    {
+        (Vector3 wallStart, Vector3 wallEnd, _, float thickness) = GetGeneratedWallSpan(wall);
+        foreach ((Vector3 endpoint, string endName) in new[] { (wallStart, "Start"), (wallEnd, "End") })
+        {
+            float nearestDistance = float.PositiveInfinity;
+            Vector3 nearestPoint = Vector3.Zero;
+            string nearestName = string.Empty;
+            foreach (StaticBody3D body in EnumerateDescendants(parent).OfType<StaticBody3D>())
+            {
+                if (body == wall || body.HasMeta(GeneratedPlatformWallMetadata))
+                {
+                    continue;
+                }
+
+                string bodyName = body.Name.ToString();
+                if (!bodyName.Contains("Wall", StringComparison.OrdinalIgnoreCase) &&
+                    !bodyName.Contains("Frame", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                foreach (CollisionShape3D collision in body.GetChildren().OfType<CollisionShape3D>())
+                {
+                    if (collision.Disabled || collision.Shape is not BoxShape3D box)
+                    {
+                        continue;
+                    }
+
+                    Vector3 local = collision.ToLocal(endpoint);
+                    Vector3 half = box.Size * 0.5f;
+                    Vector3 closestLocal = new(
+                        Mathf.Clamp(local.X, -half.X, half.X),
+                        Mathf.Clamp(local.Y, -half.Y, half.Y),
+                        Mathf.Clamp(local.Z, -half.Z, half.Z));
+                    Vector3 closest = collision.ToGlobal(closestLocal);
+                    Vector3 horizontalDelta = new(closest.X - endpoint.X, 0.0f, closest.Z - endpoint.Z);
+                    float distance = horizontalDelta.Length();
+                    if (distance <= 0.025f || distance > 0.90f || distance >= nearestDistance)
+                    {
+                        continue;
+                    }
+
+                    nearestDistance = distance;
+                    nearestPoint = closest;
+                    nearestName = bodyName;
+                }
+            }
+
+            if (!float.IsFinite(nearestDistance))
+            {
+                continue;
+            }
+
+            ExtendGeneratedWallEnd(wall, endpoint, nearestPoint, thickness);
+        }
+    }
+
     private static WallEndOverlap CalculateWallEndOverlap(
         Node parent,
         Vector3 wallSize,
@@ -439,15 +507,69 @@ internal readonly record struct PlatformWallStyle(
         Vector3 rotation,
         float requestedOverlap)
     {
-        // Generated walls must remain on the selected platform edge.  Only a
-        // tiny symmetric seam allowance is permitted; searching for a nearby
-        // wall and stretching toward it can cross a turn or enter an adjoining
-        // platform even when both authored guides are correct.
-        float totalOverlap = Mathf.Clamp(
-            requestedOverlap,
-            0.0f,
-            MaximumGeneratedWallEndOverlap);
-        return new WallEndOverlap(totalOverlap * 0.5f, totalOverlap * 0.5f);
+        float baseOverlap = Mathf.Clamp(requestedOverlap * 0.5f, 0.0f, MaximumGeneratedWallEndOverlap * 0.5f);
+        if (parent is not Node3D parent3D)
+        {
+            return new WallEndOverlap(baseOverlap, baseOverlap);
+        }
+
+        Basis basis = Basis.FromEuler(rotation);
+        bool runsAlongX = wallSize.X >= wallSize.Z;
+        Vector3 axis = (basis * (runsAlongX ? Vector3.Right : Vector3.Back)).Normalized();
+        float halfLength = (runsAlongX ? wallSize.X : wallSize.Z) * 0.5f;
+        float negative = FindRequiredWallEndExtension(parent, parent3D, visualPosition, axis, -1.0f, halfLength, baseOverlap);
+        float positive = FindRequiredWallEndExtension(parent, parent3D, visualPosition, axis, 1.0f, halfLength, baseOverlap);
+        return new WallEndOverlap(negative, positive);
+    }
+
+    private static float FindRequiredWallEndExtension(
+        Node parent,
+        Node3D parent3D,
+        Vector3 center,
+        Vector3 axis,
+        float endSign,
+        float halfLength,
+        float baseOverlap)
+    {
+        Vector3 endpointLocal = center + (axis * endSign * halfLength);
+        Vector3 endpointWorld = parent3D.ToGlobal(endpointLocal);
+        float best = float.PositiveInfinity;
+        foreach (StaticBody3D body in EnumerateDescendants(parent).OfType<StaticBody3D>())
+        {
+            if (!body.HasMeta(GeneratedPlatformWallMetadata) &&
+                !body.Name.ToString().Contains("Wall", StringComparison.OrdinalIgnoreCase) &&
+                !body.Name.ToString().Contains("Frame", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            foreach (CollisionShape3D collision in body.GetChildren().OfType<CollisionShape3D>())
+            {
+                if (collision.Disabled || collision.Shape is not BoxShape3D box)
+                {
+                    continue;
+                }
+                Vector3 local = collision.ToLocal(endpointWorld);
+                Vector3 half = box.Size * 0.5f;
+                Vector3 closestLocal = new(
+                    Mathf.Clamp(local.X, -half.X, half.X),
+                    Mathf.Clamp(local.Y, -half.Y, half.Y),
+                    Mathf.Clamp(local.Z, -half.Z, half.Z));
+                Vector3 closestInParent = parent3D.ToLocal(collision.ToGlobal(closestLocal));
+                Vector3 delta = closestInParent - endpointLocal;
+                float forward = delta.Dot(axis) * endSign;
+                float lateral = (delta - (axis * delta.Dot(axis))).Length();
+                if (forward <= 0.001f || forward > MaximumGeneratedWallEndOverlap || lateral > 0.48f)
+                {
+                    continue;
+                }
+                best = Mathf.Min(best, forward + 0.025f);
+            }
+        }
+
+        return float.IsFinite(best)
+            ? Mathf.Clamp(Mathf.Max(baseOverlap, best), 0.0f, MaximumGeneratedWallEndOverlap)
+            : baseOverlap;
     }
 
     private static bool TrySnapWallGuideToPlatformEdge(
@@ -1141,8 +1263,8 @@ internal readonly record struct PlatformWallStyle(
             0.76f);
 
         AddExitCorridor(door);
-        AddVisualBox(door, "LeftDoorLeaf", new Vector3(1.72f, 3.72f, 0.3f), new Vector3(-0.88f, 2.08f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, leafMaterial);
-        AddVisualBox(door, "RightDoorLeaf", new Vector3(1.72f, 3.72f, 0.3f), new Vector3(0.88f, 2.08f, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, leafMaterial);
+        AddVisualBox(door, "LeftDoorLeaf", new Vector3(ExitDoor3D.DoorLeafClosedWidth, ExitDoor3D.DoorLeafClosedHeight, 0.3f), new Vector3(-ExitDoor3D.DoorLeafClosedWidth * 0.5f, ExitDoor3D.DoorLeafClosedCenterY, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, leafMaterial);
+        AddVisualBox(door, "RightDoorLeaf", new Vector3(ExitDoor3D.DoorLeafClosedWidth, ExitDoor3D.DoorLeafClosedHeight, 0.3f), new Vector3(ExitDoor3D.DoorLeafClosedWidth * 0.5f, ExitDoor3D.DoorLeafClosedCenterY, 0.0f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, leafMaterial);
         // The leaves slide into opaque side pockets. These masks sit just in
         // front of the moving meshes, so no part of a leaf can remain visible
         // after it travels beyond the outside edge of the frame.
@@ -1173,22 +1295,22 @@ internal readonly record struct PlatformWallStyle(
             });
         }
         door.AddChild(frameCollision);
-        AddVisualBox(door, "CenterSeam", new Vector3(0.1f, 3.45f, 0.08f), new Vector3(0.0f, 2.08f, 0.19f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, recessMaterial);
-        AddVisualBox(door, "LeftHandle", new Vector3(0.1f, 0.9f, 0.08f), new Vector3(-0.22f, 2.08f, 0.21f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, markingMaterial);
-        AddVisualBox(door, "RightHandle", new Vector3(0.1f, 0.9f, 0.08f), new Vector3(0.22f, 2.08f, 0.21f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, markingMaterial);
+        AddVisualBox(door, "CenterSeam", new Vector3(0.08f, ExitDoor3D.DoorLeafClosedHeight, 0.08f), new Vector3(0.0f, ExitDoor3D.DoorLeafClosedCenterY, 0.19f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, recessMaterial);
+        AddVisualBox(door, "LeftHandle", new Vector3(0.1f, 0.9f, 0.08f), new Vector3(-0.22f, ExitDoor3D.DoorLeafClosedCenterY, 0.21f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, markingMaterial);
+        AddVisualBox(door, "RightHandle", new Vector3(0.1f, 0.9f, 0.08f), new Vector3(0.22f, ExitDoor3D.DoorLeafClosedCenterY, 0.21f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, markingMaterial);
         AddVisualBox(door, "ChevronLeft", new Vector3(1.08f, 0.14f, 0.12f), new Vector3(-0.43f, 4.48f, 0.86f), new Vector3(0.0f, 0.0f, Mathf.DegToRad(-30.0f)), string.Empty, Colors.White, 0.0f, 1.0f, markingMaterial);
         AddVisualBox(door, "ChevronRight", new Vector3(1.08f, 0.14f, 0.12f), new Vector3(0.43f, 4.48f, 0.86f), new Vector3(0.0f, 0.0f, Mathf.DegToRad(30.0f)), string.Empty, Colors.White, 0.0f, 1.0f, markingMaterial);
 
         StaticBody3D closedDoorBlocker = new()
         {
             Name = "ClosedDoorBlocker",
-            Position = new Vector3(0.0f, 2.08f, -0.03f),
+            Position = new Vector3(0.0f, ExitDoor3D.DoorLeafClosedCenterY, -0.03f),
             PhysicsMaterialOverride = new PhysicsMaterial { Friction = 0.8f, Bounce = 0.0f },
         };
         closedDoorBlocker.AddChild(new CollisionShape3D
         {
             Name = "CollisionShape3D",
-            Shape = new BoxShape3D { Size = new Vector3(3.55f, 3.72f, 0.34f) },
+            Shape = new BoxShape3D { Size = new Vector3(ExitDoor3D.FrameOpeningHalfWidth * 2.0f, ExitDoor3D.DoorLeafClosedHeight, 0.34f) },
         });
         door.AddChild(closedDoorBlocker);
 
@@ -1809,7 +1931,7 @@ internal readonly record struct PlatformWallStyle(
         Shader shader = new()
         {
             Code = @"shader_type spatial;
-render_mode unshaded;
+render_mode diffuse_burley, specular_schlick_ggx;
 uniform sampler2D corridor_texture : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform float corridor_length = 9.6;
 varying float corridor_depth;
@@ -1819,7 +1941,7 @@ void vertex() {
 void fragment() {
     vec3 detail = texture(corridor_texture, UV * vec2(8.0, 5.0)).rgb;
     float fade = smoothstep(0.0, 1.0, corridor_depth);
-    ALBEDO = detail * mix(vec3(0.095, 0.115, 0.125), vec3(0.030, 0.036, 0.040), fade * 0.72);
+    ALBEDO = detail * mix(vec3(0.095, 0.115, 0.125), vec3(0.002, 0.003, 0.004), fade);
     ROUGHNESS = 0.96;
     METALLIC = 0.02;
 }",

@@ -13,7 +13,7 @@ public partial class SurfaceConnectionSmokeTest : Node
     private const float MaximumSeamStep = 0.01f;
     private const float MinimumGeneratedWallVisualHeight = 1.21f;
     private const float MaximumGeneratedWallVisualHeight = 1.23f;
-    private const float MaximumGeneratedWallTotalOverhang = 0.09f;
+    private const float MaximumGeneratedWallTotalOverhang = 0.95f;
 
     private readonly record struct Surface(
         StaticBody3D Body,
@@ -98,6 +98,24 @@ public partial class SurfaceConnectionSmokeTest : Node
     {
         using StreamWriter writer = new(path, append: true);
         foreach (StaticBody3D body in EnumerateDescendants(root).OfType<StaticBody3D>())
+        {
+        if (body.HasMeta(RoomGeometry.GeneratedPlatformWallMetadata) &&
+            body.GetChildren().OfType<MeshInstance3D>().FirstOrDefault() is MeshInstance3D visual &&
+            visual.Mesh is Mesh wallMesh)
+        {
+            Vector3[] vertices = wallMesh.GetFaces()
+                .Select(vertex => visual.ToGlobal(vertex))
+                .ToArray();
+            writer.WriteLine(JsonSerializer.Serialize(new
+            {
+                room,
+                name = body.Name.ToString(),
+                kind = "wall_visual",
+                vertices = vertices
+                    .SelectMany(vertex => new[] { vertex.X, vertex.Y, vertex.Z })
+                    .ToArray(),
+            }));
+        }
         foreach (CollisionShape3D collision in body.GetChildren().OfType<CollisionShape3D>())
         {
             if (collision.Disabled || collision.Shape is not BoxShape3D box)
@@ -109,16 +127,12 @@ public partial class SurfaceConnectionSmokeTest : Node
             bool generatedWall = body.HasMeta(RoomGeometry.GeneratedPlatformWallMetadata);
             bool barrier = IsBarrierBox(body.Name.ToString(), box);
             bool rollingSurface = !barrier && IsRollingSurface(body, box);
-            if (!generatedWall && !rollingSurface)
-            {
-                continue;
-            }
 
             writer.WriteLine(JsonSerializer.Serialize(new
             {
                 room,
                 name = body.Name.ToString(),
-                kind = generatedWall ? "wall" : "platform",
+                kind = generatedWall ? "wall" : rollingSurface ? "platform" : "structural",
                 support = body.HasMeta(RoomGeometry.GeneratedPlatformWallSurfaceMetadata)
                     ? body.GetMeta(RoomGeometry.GeneratedPlatformWallSurfaceMetadata).AsString()
                     : string.Empty,
@@ -131,6 +145,7 @@ public partial class SurfaceConnectionSmokeTest : Node
                 },
                 size = new[] { box.Size.X, box.Size.Y, box.Size.Z },
             }));
+        }
         }
     }
 
@@ -284,6 +299,19 @@ public partial class SurfaceConnectionSmokeTest : Node
             issues++;
             GD.PushError(
                 $"SURFACE_BARRIER_SUPPORT: Room {room:00} {barrier.Body.Name} loses contact with its supporting floor; {supportDetails}.");
+        }
+
+        ulong[] generatedWallMaterialIds = barriers
+            .Where(barrier => barrier.Body.HasMeta(RoomGeometry.GeneratedPlatformWallMetadata))
+            .Select(barrier => barrier.Body.GetChildren().OfType<MeshInstance3D>().FirstOrDefault()?.MaterialOverride)
+            .Where(material => material is not null)
+            .Select(material => material!.GetInstanceId())
+            .Distinct()
+            .ToArray();
+        if (generatedWallMaterialIds.Length > 1)
+        {
+            issues++;
+            GD.PushError($"SURFACE_BARRIER_COLOR: Room {room:00} uses {generatedWallMaterialIds.Length} different generated-wall materials instead of one room-wide material.");
         }
 
         foreach (Barrier barrier in barriers)

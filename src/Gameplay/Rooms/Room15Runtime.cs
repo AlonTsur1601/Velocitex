@@ -467,7 +467,7 @@ public partial class Room15Runtime : RoomRuntime
             AddSlopeWall($"ApproachSideWall{side}", side * 7.18f, 38.7f, 12.25f, 23.7f, 8.25f, metal, frame);
             AddSlopeWall($"LowLaunchSideWall{side}", side * 7.18f, 23.7f, 8.25f, 18.0f, 11.25f, metal, frame);
             RoomGeometry.AddWall(this, $"LowLandingSideWall{side}", new Vector3(0.36f, 1.45f, 20.0f), new Vector3(side * 9.18f, 5.725f, -91.0f), Vector3.Zero, copper, frame, 0.42f, 0.6f, endJoinAllowance: 0.80f);
-            RoomGeometry.AddWall(this, $"WindPrepSideWall{side}", new Vector3(0.36f, 1.45f, 16.0f), new Vector3(side * 9.18f, 5.725f, -109.0f), Vector3.Zero, metal, frame, 0.42f, 0.62f, endJoinAllowance: 0.80f);
+            RoomGeometry.AddWall(this, $"WindPrepSideWall{side}", new Vector3(0.36f, 1.45f, 16.0f), new Vector3(side * 9.18f, 5.725f, -109.0f), Vector3.Zero, metal, frame, 0.42f, 0.62f, endJoinAllowance: 0.90f);
             AddSlopeWall($"WindSlopeSideWall{side}", side * 9.18f, -117.0f, 5.25f, -125.0f, 10.25f, copper, frame);
             RoomGeometry.AddWall(this, $"ChoiceSideWall{side}", new Vector3(0.36f, 1.45f, 18.0f), new Vector3(side * 11.18f, 4.725f, -151.0f), Vector3.Zero, metal, frame, 0.42f, 0.62f, endJoinAllowance: 0.80f);
             RoomGeometry.AddWall(this, $"FinalSideWall{side}", new Vector3(0.36f, 1.45f, 32.7f), new Vector3(side * 8.18f, 19.225f, -218.35f), Vector3.Zero, copper, frame, 0.42f, 0.6f, endJoinAllowance: 0.80f);
@@ -496,7 +496,7 @@ public partial class Room15Runtime : RoomRuntime
         float length = Mathf.Sqrt(run * run + rise * rise) - (1.45f * Mathf.Abs(Mathf.Sin(angle)));
         Vector3 up = new Basis(Vector3.Right, angle) * Vector3.Up;
         Vector3 topCenter = new(x, (backTopY + frontTopY) * 0.5f + 0.725f, (backZ + frontZ) * 0.5f);
-        RoomGeometry.AddWall(this, name, new Vector3(0.36f, 1.45f, length), topCenter - up * 0.725f, new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.42f, 0.6f, endJoinAllowance: 0.80f);
+        RoomGeometry.AddWall(this, name, new Vector3(0.36f, 1.45f, length), topCenter - up * 0.725f, new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.42f, 0.6f, endJoinAllowance: 0.90f);
     }
 
     private ForceVolume3D AddForceVolume(string name, Vector3 position, Vector3 size, string profilePath)

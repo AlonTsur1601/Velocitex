@@ -249,8 +249,6 @@ public static class CampaignSaveService
                 DeleteSnapshotFiles(path);
             }
 
-            DeleteCompletedRoomsAfter(absoluteRoot, snapshot.RoomNumber);
-
             return true;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
@@ -416,29 +414,6 @@ public static class CampaignSaveService
                 File.Delete(path);
             }
         }
-    }
-
-    private static void DeleteCompletedRoomsAfter(string absoluteRoot, int roomNumber)
-    {
-        string path = Path.Combine(absoluteRoot, "completed_rooms.txt");
-        if (!File.Exists(path))
-        {
-            return;
-        }
-
-        int[] retainedRooms = File.ReadLines(path)
-            .Select(value => int.TryParse(value, out int completedRoom) ? completedRoom : 0)
-            .Where(completedRoom => completedRoom >= 1 && completedRoom <= roomNumber)
-            .Distinct()
-            .OrderBy(completedRoom => completedRoom)
-            .ToArray();
-        if (retainedRooms.Length == 0)
-        {
-            File.Delete(path);
-            return;
-        }
-
-        File.WriteAllLines(path, retainedRooms.Select(completedRoom => completedRoom.ToString()));
     }
 
     private static string GetStem(CampaignSnapshot snapshot)

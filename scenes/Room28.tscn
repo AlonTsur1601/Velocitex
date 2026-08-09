@@ -1,31 +1,57 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3]
+
 [ext_resource type="Script" path="res://src/Gameplay/Rooms/CoreRoomsRuntime.cs" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3"]
+[ext_resource type="Script" path="res://src/Gameplay/Player/PlayerBall.cs" id="3_npf2j"]
+[ext_resource type="Script" path="res://src/Gameplay/Camera/PlayerCameraRig.cs" id="5_i11dx"]
+[ext_resource type="PackedScene" path="res://scenes/EditableWalls/Room28Walls.tscn" id="6_iyclq"]
+
 [sub_resource type="Environment" id="e"]
-background_mode=1
-background_color=Color(0.11,0.14,0.12,1)
-ambient_light_source=3
-ambient_light_color=Color(0.72,0.92,0.76,1)
-ambient_light_energy=3.4
-tonemap_exposure=1.5
-[node name="Room28" type="Node3D"]
-script=ExtResource("1")
-RoomNumber=28
-RoomId="room-28"
-RoomDisplayName="Counterweight"
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment=SubResource("e")
-[node name="Light" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
-rotation_degrees=Vector3(-58,-20,0)
-light_energy=1.8
-shadow_enabled=true
-[node name="Fill" type="OmniLight3D" parent="."]
-position=Vector3(0,22,0)
-light_color=Color(0.58,0.92,0.68,1)
-light_energy=13
-omni_range=75
-[node name="Player" parent="." instance=ExtResource("2")]
-position=Vector3(0,5.1,42)
-[node name="CameraRig" parent="." instance=ExtResource("3")]
-position=Vector3(0,5.4,42)
+background_mode = 1
+background_color = Color(0.11, 0.14, 0.12, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.72, 0.92, 0.76, 1)
+ambient_light_energy = 3.4
+tonemap_exposure = 1.5
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_player"]
+bounce = 0.12
+
+[node name="Room28" type="Node3D" unique_id=936354766]
+script = ExtResource("1")
+RoomNumber = 28
+RoomId = "room-28"
+RoomDisplayName = "Counterweight"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1854165791]
+environment = SubResource("e")
+
+[node name="Light" type="DirectionalLight3D" parent="." unique_id=1889166497 groups=["quality_shadow_light"]]
+transform = Transform3D(0.9396926, 0.29004952, -0.18124305, 0, 0.52991927, 0.8480481, 0.34202012, -0.7969045, 0.49796122, 0, 0, 0)
+light_energy = 1.8
+shadow_enabled = true
+
+[node name="Fill" type="OmniLight3D" parent="." unique_id=1869446186]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22, 0)
+light_color = Color(0.58, 0.92, 0.68, 1)
+light_energy = 13.0
+omni_range = 75.0
+
+[node name="Player" type="RigidBody3D" parent="." unique_id=1738369994 groups=["player_ball"] instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 42)
+physics_material_override = SubResource("PhysicsMaterial_player")
+can_sleep = false
+continuous_cd = true
+contact_monitor = true
+max_contacts_reported = 8
+linear_damp_mode = 1
+script = ExtResource("3_npf2j")
+
+[node name="CameraRig" type="Node3D" parent="." unique_id=1426447821 instance=ExtResource("3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.4, 42)
+script = ExtResource("5_i11dx")
+
+[node name="EditableWalls" type="Node3D" parent="." unique_id=1900834749 instance=ExtResource("6_iyclq")]
+
+[editable path="EditableWalls"]

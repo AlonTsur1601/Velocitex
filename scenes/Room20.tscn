@@ -1,8 +1,11 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://src/Gameplay/Rooms/Room20Runtime.cs" id="1_room"]
 [ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2_player"]
+[ext_resource type="Script" path="res://src/Gameplay/Player/PlayerBall.cs" id="3_b87ac"]
 [ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3_camera"]
+[ext_resource type="Script" path="res://src/Gameplay/Camera/PlayerCameraRig.cs" id="5_8vbin"]
+[ext_resource type="PackedScene" path="res://scenes/EditableWalls/Room20Walls.tscn" id="6_72dml"]
 
 [sub_resource type="Environment" id="Environment_room20"]
 background_mode = 1
@@ -13,51 +16,62 @@ ambient_light_energy = 3.2
 reflected_light_source = 2
 tonemap_exposure = 1.58
 
-[node name="Room20" type="Node3D"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_player"]
+bounce = 0.12
+
+[node name="Room20" type="Node3D" unique_id=578636771]
 script = ExtResource("1_room")
 RoomNumber = 20
 RoomId = "room-20"
 RoomDisplayName = "Ballistic Assembly"
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=738308345]
 environment = SubResource("Environment_room20")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
-rotation_degrees = Vector3(-58, -24, 0)
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1211187023 groups=["quality_shadow_light"]]
+transform = Transform3D(0.9135454, 0.34493223, -0.21553758, 0, 0.52991927, 0.8480481, 0.40673664, -0.77473044, 0.48410532, 0, 0, 0)
 light_color = Color(0.92, 0.86, 1, 1)
 light_energy = 1.85
 shadow_enabled = true
 
-[node name="RoomFill" type="OmniLight3D" parent="."]
-position = Vector3(0, 24, -23)
+[node name="RoomFill" type="OmniLight3D" parent="." unique_id=31662148]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, -23)
 light_color = Color(0.69, 0.74, 1, 1)
 light_energy = 14.0
 omni_range = 82.0
-shadow_enabled = false
 
-[node name="StartFill" type="OmniLight3D" parent="."]
-position = Vector3(0, 11, 47)
+[node name="StartFill" type="OmniLight3D" parent="." unique_id=685615259]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11, 47)
 light_color = Color(0.98, 0.96, 1, 1)
 light_energy = 5.0
 omni_range = 18.0
-shadow_enabled = false
 
-[node name="TransitFill" type="OmniLight3D" parent="."]
-position = Vector3(0, 19, -30)
+[node name="TransitFill" type="OmniLight3D" parent="." unique_id=1686599404]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 19, -30)
 light_color = Color(0.65, 0.9, 0.94, 1)
 light_energy = 7.0
 omni_range = 31.0
-shadow_enabled = false
 
-[node name="ExitFill" type="OmniLight3D" parent="."]
-position = Vector3(0, 37, -102)
+[node name="ExitFill" type="OmniLight3D" parent="." unique_id=183270724]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 37, -102)
 light_color = Color(1, 0.9, 0.75, 1)
 light_energy = 7.5
 omni_range = 24.0
-shadow_enabled = false
 
-[node name="Player" parent="." instance=ExtResource("2_player")]
+[node name="Player" type="RigidBody3D" parent="." unique_id=1316976567 groups=["player_ball"] instance=ExtResource("2_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.85, 50.2)
+physics_material_override = SubResource("PhysicsMaterial_player")
+can_sleep = false
+continuous_cd = true
+contact_monitor = true
+max_contacts_reported = 8
+linear_damp_mode = 1
+script = ExtResource("3_b87ac")
 
-[node name="CameraRig" parent="." instance=ExtResource("3_camera")]
+[node name="CameraRig" type="Node3D" parent="." unique_id=1671155366 instance=ExtResource("3_camera")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.1, 50.2)
+script = ExtResource("5_8vbin")
+
+[node name="EditableWalls" type="Node3D" parent="." unique_id=22591939 instance=ExtResource("6_72dml")]
+
+[editable path="EditableWalls"]

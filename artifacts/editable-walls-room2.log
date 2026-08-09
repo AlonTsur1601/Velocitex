@@ -1,0 +1,13 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+SURFACE_SEAM_AUDIT: Room 02 SafeStart <-> MomentumBasin: gap=0.000 m, step=0.000 m, overlap=8.000 m.
+SURFACE_SEAM_AUDIT: Room 02 MomentumBasin <-> ExitRun: gap=-0.000 m, step=0.000 m, overlap=8.000 m.
+SURFACE_SEAM_AUDIT: Room 02 MomentumBasin <-> RightChargeSlope: gap=0.000 m, step=0.000 m, overlap=18.000 m.
+SURFACE_SEAM_AUDIT: Room 02 MomentumBasin <-> LeftReturnSlope: gap=-0.000 m, step=0.000 m, overlap=18.000 m.
+SURFACE_SEAM_AUDIT: Room 02 ExitRun <-> ExitCorridorFloor: gap=-0.000 m, step=0.000 m, overlap=3.650 m.
+SURFACE_SEAM_AUDIT: Room 02 RightChargeSlope <-> RightButtonDeck: gap=0.000 m, step=0.000 m, overlap=18.000 m.
+SURFACE_SEAM_AUDIT: Room 02 LeftReturnSlope <-> LeftButtonDeck: gap=-0.000 m, step=0.000 m, overlap=18.000 m.
+SURFACE_CONNECTION_ROOM_PASS: Room 02 audited 8 rolling surfaces and 7 adjoining seams plus 16 supported edge barriers; worst gap=0.000 m, worst step=0.000 m, start-wall gap=0.000 m.
+SURFACE_CONNECTION_PASS: all adjoining platform and slope edges in 1 requested room(s) are flush and connected.

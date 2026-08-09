@@ -1,34 +1,59 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3]
+
 [ext_resource type="Script" path="res://src/Gameplay/Rooms/Room26Runtime.cs" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/PlayerBall.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/PlayerCameraRig.tscn" id="3"]
+[ext_resource type="Script" path="res://src/Gameplay/Player/PlayerBall.cs" id="3_ko0fs"]
+[ext_resource type="Script" path="res://src/Gameplay/Camera/PlayerCameraRig.cs" id="5_45kiv"]
+[ext_resource type="PackedScene" path="res://scenes/EditableWalls/Room26Walls.tscn" id="6_h5qfc"]
+
 [sub_resource type="Environment" id="e"]
-background_mode=1
-background_color=Color(0.09,0.14,0.16,1)
-ambient_light_source=3
-ambient_light_color=Color(0.66,0.9,0.96,1)
-ambient_light_energy=3.4
-reflected_light_source=2
-tonemap_exposure=1.52
-[node name="Room26" type="Node3D"]
-script=ExtResource("1")
-RoomNumber=26
-RoomId="room-26"
-RoomDisplayName="Zero-G Crossfire"
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment=SubResource("e")
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." groups=["quality_shadow_light"]]
-rotation_degrees=Vector3(-60,-20,0)
-light_color=Color(0.8,0.95,1,1)
-light_energy=1.8
-shadow_enabled=true
-[node name="RoomFill" type="OmniLight3D" parent="."]
-position=Vector3(0,20,0)
-light_color=Color(0.45,0.85,1,1)
-light_energy=13
-omni_range=70
-shadow_enabled=false
-[node name="Player" parent="." instance=ExtResource("2")]
-transform=Transform3D(1,0,0,0,1,0,0,0,1,0,5.1,49)
-[node name="CameraRig" parent="." instance=ExtResource("3")]
-transform=Transform3D(1,0,0,0,1,0,0,0,1,0,5.4,49)
+background_mode = 1
+background_color = Color(0.09, 0.14, 0.16, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.66, 0.9, 0.96, 1)
+ambient_light_energy = 3.4
+reflected_light_source = 2
+tonemap_exposure = 1.52
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_player"]
+bounce = 0.12
+
+[node name="Room26" type="Node3D" unique_id=1900147263]
+script = ExtResource("1")
+RoomNumber = 26
+RoomId = "room-26"
+RoomDisplayName = "Zero-G Crossfire"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1585774217]
+environment = SubResource("e")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=138762391 groups=["quality_shadow_light"]]
+transform = Transform3D(0.9396926, 0.29619813, -0.17101005, 0, 0.49999997, 0.86602545, 0.34202012, -0.8137977, 0.46984628, 0, 0, 0)
+light_color = Color(0.8, 0.95, 1, 1)
+light_energy = 1.8
+shadow_enabled = true
+
+[node name="RoomFill" type="OmniLight3D" parent="." unique_id=1738304509]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 0)
+light_color = Color(0.45, 0.85, 1, 1)
+light_energy = 13.0
+omni_range = 70.0
+
+[node name="Player" type="RigidBody3D" parent="." unique_id=1470916964 groups=["player_ball"] instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.1, 49)
+physics_material_override = SubResource("PhysicsMaterial_player")
+can_sleep = false
+continuous_cd = true
+contact_monitor = true
+max_contacts_reported = 8
+linear_damp_mode = 1
+script = ExtResource("3_ko0fs")
+
+[node name="CameraRig" type="Node3D" parent="." unique_id=1910866405 instance=ExtResource("3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.4, 49)
+script = ExtResource("5_45kiv")
+
+[node name="EditableWalls" type="Node3D" parent="." unique_id=1249627673 instance=ExtResource("6_h5qfc")]
+
+[editable path="EditableWalls"]

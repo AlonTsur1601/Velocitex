@@ -623,7 +623,7 @@ public partial class Room13Runtime : RoomRuntime
         float length = Mathf.Sqrt((run * run) + (rise * rise)) - (wallHeight * Mathf.Abs(Mathf.Sin(angle)));
         Vector3 up = new Basis(Vector3.Right, angle) * Vector3.Up;
         Vector3 topCenter = new(x, ((backTopY + frontTopY) * 0.5f) + halfWallHeight, (backZ + frontZ) * 0.5f);
-        RoomGeometry.AddWall(this, name, new Vector3(0.38f, wallHeight, length), topCenter - (up * halfWallHeight), new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.42f, 0.62f);
+        RoomGeometry.AddWall(this, name, new Vector3(0.38f, wallHeight, length), topCenter - (up * halfWallHeight), new Vector3(angle, 0.0f, 0.0f), texture, tint, 0.42f, 0.62f, endJoinAllowance: 0.36f);
     }
 
     private void BuildLaunchGate(string metal, Color frame)

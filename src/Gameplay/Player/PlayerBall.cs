@@ -223,6 +223,7 @@ public partial class PlayerBall : RigidBody3D
     {
         _firstPersonView = firstPerson;
         _visual.Visible = !firstPerson;
+        UpdateCrownVisibility();
         UpdateTrailVisibility(LinearVelocity);
     }
 
@@ -230,6 +231,7 @@ public partial class PlayerBall : RigidBody3D
     {
         CandyVisualStyle.ApplyCandyMaterial(_candyMaterial, profile);
         _crown.Apply(profile.CrownId);
+        UpdateCrownVisibility();
         AppliedPatternId = profile.PatternId;
         bool showTrail = trailAllowed && !string.Equals(profile.TrailId, "off", StringComparison.Ordinal);
         _trailEnabled = showTrail;
@@ -290,6 +292,12 @@ public partial class PlayerBall : RigidBody3D
     private void UpdateTrailVisibility(Vector3 velocity)
     {
         _trail.Visible = !_firstPersonView || velocity.LengthSquared() < FirstPersonTrailHideSpeed * FirstPersonTrailHideSpeed;
+    }
+
+    private void UpdateCrownVisibility()
+    {
+        _crown.Visible = !_firstPersonView &&
+            !string.Equals(_crown.AppliedCrownId, "none-crown", StringComparison.Ordinal);
     }
 
     private void ApplyTrailColor(Color color)

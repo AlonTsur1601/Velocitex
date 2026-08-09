@@ -279,6 +279,19 @@ public partial class ExitPresentationSmokeTest : Node
             Node3D? leftFrame = door.GetNodeOrNull<Node3D>("LeftFrame");
             Node3D? rightFrame = door.GetNodeOrNull<Node3D>("RightFrame");
             Node3D? header = door.GetNodeOrNull<Node3D>("Header");
+            MeshInstance3D? leftLeaf = door.GetNodeOrNull<MeshInstance3D>("LeftDoorLeaf");
+            MeshInstance3D? rightLeaf = door.GetNodeOrNull<MeshInstance3D>("RightDoorLeaf");
+            if (leftLeaf?.Mesh is null || rightLeaf?.Mesh is null ||
+                leftLeaf.Mesh.GetAabb().Size.DistanceTo(new Vector3(ExitDoor3D.DoorLeafClosedWidth, ExitDoor3D.DoorLeafClosedHeight, 0.3f)) > 0.001f ||
+                rightLeaf.Mesh.GetAabb().Size.DistanceTo(new Vector3(ExitDoor3D.DoorLeafClosedWidth, ExitDoor3D.DoorLeafClosedHeight, 0.3f)) > 0.001f ||
+                Mathf.Abs(leftLeaf.Position.X + (ExitDoor3D.DoorLeafClosedWidth * 0.5f)) > 0.001f ||
+                Mathf.Abs(rightLeaf.Position.X - (ExitDoor3D.DoorLeafClosedWidth * 0.5f)) > 0.001f ||
+                Mathf.Abs(leftLeaf.Position.Y - ExitDoor3D.DoorLeafClosedCenterY) > 0.001f ||
+                Mathf.Abs(rightLeaf.Position.Y - ExitDoor3D.DoorLeafClosedCenterY) > 0.001f)
+            {
+                Report(room, "closed door leaves do not seal against each other and the inner frame");
+                issues++;
+            }
             if (door.GetNodeOrNull<Node3D>("Threshold") is not null ||
                 leftFrame is null || rightFrame is null || header is null ||
                 Mathf.Abs(leftFrame.Position.Z - ExitDoor3D.FrameRoomSideCenterZ) > 0.001f ||
@@ -408,11 +421,12 @@ public partial class ExitPresentationSmokeTest : Node
                         }
                     }
                     ColorRect darknessOverlay = door.GetNode<ColorRect>("ExitDarknessLayer/ExitDarknessOverlay");
-                    if (door.DarknessAmount < 0.999f ||
-                        midpointDarkness < 0.35f || midpointDarkness > 0.65f ||
+                    if (door.DarknessAmount < 0.999f || door.DarknessAmount > 1.001f ||
+                        midpointDarkness < 0.44f || midpointDarkness > 0.56f ||
+                        darknessOverlay.Size.DistanceTo(door.GetViewport().GetVisibleRect().Size) > 0.5f ||
                         !Mathf.IsEqualApprox(darknessOverlay.Color.A, door.DarknessAmount))
                     {
-                        Report(room, $"corridor fade was not gradual or fully black before transition (mid={midpointDarkness:F2}, end={door.DarknessAmount:F2})");
+                        Report(room, $"corridor fade does not match the shared 1.3.1 darkness curve (mid={midpointDarkness:F2}, end={door.DarknessAmount:F2})");
                         issues++;
                     }
 
@@ -686,7 +700,7 @@ public partial class ExitPresentationSmokeTest : Node
             .FirstOrDefault();
         return mesh?.MaterialOverride is ShaderMaterial material &&
             material.Shader?.Code.Contains("corridor_depth", StringComparison.Ordinal) == true &&
-            material.Shader.Code.Contains("render_mode unshaded", StringComparison.Ordinal);
+            material.Shader.Code.Contains("render_mode diffuse_burley, specular_schlick_ggx", StringComparison.Ordinal);
     }
 
     private static bool DoorwayPiecesClearVisibleFrame(Node3D shell, StaticBody3D carvedWall, ExitDoor3D door)

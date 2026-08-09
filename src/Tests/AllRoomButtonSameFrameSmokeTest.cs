@@ -47,6 +47,24 @@ public partial class AllRoomButtonSameFrameSmokeTest : Node
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 
             RouteCheckpoint3D[] buttons = EnumerateDescendants(room).OfType<RouteCheckpoint3D>().ToArray();
+            MeshInstance3D[] orphanSharedButtonVisuals = EnumerateDescendants(room)
+                .OfType<MeshInstance3D>()
+                .Where(mesh => mesh.Name.ToString() is "FramePlate" or "InsetPlate")
+                .Where(mesh => mesh.GetParent() is not RouteCheckpoint3D)
+                .ToArray();
+            if (orphanSharedButtonVisuals.Length > 0)
+            {
+                Fail($"{scenePath}: found button plate visuals outside the shared RouteCheckpoint3D implementation: {string.Join(", ", orphanSharedButtonVisuals.Select(mesh => mesh.GetPath()))}.");
+                return;
+            }
+            RouteCheckpoint3D[] physicalButtonsOutsideSharedAutomaticPath = buttons
+                .Where(button => button.IsPhysicalFloorButton && !button.AutomaticPressEnabled)
+                .ToArray();
+            if (physicalButtonsOutsideSharedAutomaticPath.Length > 0)
+            {
+                Fail($"{scenePath}: found physical buttons outside the shared automatic press path: {string.Join(", ", physicalButtonsOutsideSharedAutomaticPath.Select(button => button.Name))}.");
+                return;
+            }
             PlayerBall? player = room.GetNodeOrNull<PlayerBall>("Player");
             if (buttons.Length > 0 && player is null)
             {

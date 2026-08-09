@@ -1,0 +1,28 @@
+ERROR: Failed to read the root certificate store.
+   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2582)
+ERROR: SURFACE_BARRIER_CONNECTION: Room 15 WindSlopeSideWall-1 has a nearby disconnected end; end is 0.835 m from WindPrepSideWall-1.
+   at: Velocitex.Tests.SurfaceConnectionSmokeTest+AuditResult Velocitex.Tests.SurfaceConnectionSmokeTest.AuditRoom(int, Godot.Node) (res://src/Tests/SurfaceConnectionSmokeTest.cs:322)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] Velocitex.Tests.SurfaceConnectionSmokeTest+AuditResult Velocitex.Tests.SurfaceConnectionSmokeTest.AuditRoom(int, Godot.Node) (C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\SurfaceConnectionSmokeTest.cs:322)
+       [2] void Velocitex.Tests.SurfaceConnectionSmokeTest+<_Ready>d__12.MoveNext() (C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\SurfaceConnectionSmokeTest.cs:70)
+       [3] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, object)
+       [4] void System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [5] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: SURFACE_BARRIER_CONNECTION: Room 15 WindSlopeSideWall1 has a nearby disconnected end; end is 0.835 m from WindPrepSideWall1.
+   at: Velocitex.Tests.SurfaceConnectionSmokeTest+AuditResult Velocitex.Tests.SurfaceConnectionSmokeTest.AuditRoom(int, Godot.Node) (res://src/Tests/SurfaceConnectionSmokeTest.cs:322)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] Velocitex.Tests.SurfaceConnectionSmokeTest+AuditResult Velocitex.Tests.SurfaceConnectionSmokeTest.AuditRoom(int, Godot.Node) (C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\SurfaceConnectionSmokeTest.cs:322)
+       [2] void Velocitex.Tests.SurfaceConnectionSmokeTest+<_Ready>d__12.MoveNext() (C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\SurfaceConnectionSmokeTest.cs:70)
+       [3] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, object)
+       [4] void System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [5] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: SURFACE_CONNECTION_FAIL: found 2 raised, dropped or separated rolling-surface seams.
+   at: void Velocitex.Tests.SurfaceConnectionSmokeTest+<_Ready>d__12.MoveNext() (res://src/Tests/SurfaceConnectionSmokeTest.cs:88)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Velocitex.Tests.SurfaceConnectionSmokeTest+<_Ready>d__12.MoveNext() (C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\SurfaceConnectionSmokeTest.cs:88)
+       [2] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, object)
+       [3] void System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [4] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)

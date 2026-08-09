@@ -3457,9 +3457,9 @@ public partial class AppRoot : Node
         if (all.Count != 3 || loadErrors.Count != 0 ||
             all.Any(snapshot => snapshot.RoomNumber > selected.RoomNumber) ||
             CampaignSaveService.LoadLatest(testRoot)?.RoomNumber != selected.RoomNumber ||
-            !CampaignSaveService.GetCompletedRoomNumbers(testRoot).SetEquals(new[] { 1, 3 }))
+            !CampaignSaveService.GetCompletedRoomNumbers(testRoot).SetEquals(new[] { 1, 3, 5 }))
         {
-            FailSaveSmoke("Loading Room 03 did not discard every later campaign save and room-select unlock.");
+            FailSaveSmoke("Loading Room 03 did not discard later snapshots while preserving existing room-select unlocks.");
             return;
         }
 
@@ -3471,7 +3471,7 @@ public partial class AppRoot : Node
             return;
         }
 
-        GD.Print("SAVE_SMOKE_PASS: loading a save discards later saves and room-select unlocks, and New Game clears all campaign saves.");
+        GD.Print("SAVE_SMOKE_PASS: loading a save discards later snapshots, preserves room-select unlocks, and New Game clears all campaign saves.");
         GetTree().Quit(0);
     }
 

@@ -19,6 +19,9 @@ public partial class ExitDoor3D : Node3D
     public const float FrameBottomY = 0.12f;
     public const float FrameDepth = 0.58f;
     public const float FrameRoomSideCenterZ = 0.52f;
+    public const float DoorLeafClosedWidth = FrameOpeningHalfWidth;
+    public const float DoorLeafClosedHeight = 4.14f;
+    public const float DoorLeafClosedCenterY = 2.19f;
 
     private readonly List<(Node3D Part, Vector3 ClosedPosition, float Direction)> _slidingParts = new();
     private readonly List<(RouteCheckpoint3D Button, MeshInstance3D Indicator)> _buttonIndicators = new();
@@ -207,6 +210,9 @@ public partial class ExitDoor3D : Node3D
     {
         if (IsInstanceValid(_darknessOverlay))
         {
+            Rect2 visibleRect = GetViewport().GetVisibleRect();
+            _darknessOverlay!.Position = visibleRect.Position;
+            _darknessOverlay.Size = visibleRect.Size;
             _darknessOverlay!.Color = new Color(0.0f, 0.0f, 0.0f, _darknessAmount);
         }
     }
@@ -231,7 +237,7 @@ public partial class ExitDoor3D : Node3D
         {
             if (IsInstanceValid(part))
             {
-                part.Position = closedPosition + (Vector3.Right * direction * 1.72f * _openAmount);
+                part.Position = closedPosition + (Vector3.Right * direction * DoorLeafClosedWidth * _openAmount);
             }
         }
 

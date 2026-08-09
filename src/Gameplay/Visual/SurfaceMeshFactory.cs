@@ -41,6 +41,47 @@ public static class SurfaceMeshFactory
         return surface.Commit()!;
     }
 
+    public static ArrayMesh CreateTiledVerticalWall(
+        Vector3 size,
+        Basis authoredBasis,
+        float tileWorldSize = DefaultTileWorldSize)
+    {
+        float tile = Mathf.Max(0.25f, tileWorldSize);
+        Vector3 half = size * 0.5f;
+        Vector3 vertical = authoredBasis.Inverse() * (Vector3.Up * size.Y);
+        Vector3 b0 = new(-half.X, -half.Y, -half.Z);
+        Vector3 b1 = new(-half.X, -half.Y, half.Z);
+        Vector3 b2 = new(half.X, -half.Y, half.Z);
+        Vector3 b3 = new(half.X, -half.Y, -half.Z);
+        Vector3 t0 = b0 + vertical;
+        Vector3 t1 = b1 + vertical;
+        Vector3 t2 = b2 + vertical;
+        Vector3 t3 = b3 + vertical;
+
+        SurfaceTool surface = new();
+        surface.Begin(Mesh.PrimitiveType.Triangles);
+        AddAutoQuad(surface, b1, t1, t2, b2, size.X / tile, size.Y / tile);
+        AddAutoQuad(surface, b3, t3, t0, b0, size.X / tile, size.Y / tile);
+        AddAutoQuad(surface, b2, t2, t3, b3, size.Z / tile, size.Y / tile);
+        AddAutoQuad(surface, b0, t0, t1, b1, size.Z / tile, size.Y / tile);
+        AddAutoQuad(surface, t1, t0, t3, t2, size.X / tile, size.Z / tile);
+        AddAutoQuad(surface, b0, b1, b2, b3, size.X / tile, size.Z / tile);
+        return surface.Commit()!;
+    }
+
+    private static void AddAutoQuad(
+        SurfaceTool surface,
+        Vector3 a,
+        Vector3 b,
+        Vector3 c,
+        Vector3 d,
+        float uTiles,
+        float vTiles)
+    {
+        Vector3 normal = (b - a).Cross(c - a).Normalized();
+        AddQuad(surface, a, b, c, d, normal, uTiles, vTiles);
+    }
+
     private static void AddQuad(
         SurfaceTool surface,
         Vector3 a,
