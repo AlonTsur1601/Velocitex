@@ -18,8 +18,18 @@ public partial class RoomRuntime : Node3D
     public bool IsExitTraversalPending { get; private set; }
     public IReadOnlyCollection<string> CompletedAdvancementIds => _completedAdvancementIds;
 
+    public override void _EnterTree()
+    {
+        CallDeferred(nameof(ApplyBlenderRoomEdits));
+    }
+
     public virtual void RestartRoom()
     {
+    }
+
+    private void ApplyBlenderRoomEdits()
+    {
+        BlenderRoomEdits.Apply(this, RoomNumber);
     }
 
     protected void CompleteRoom()

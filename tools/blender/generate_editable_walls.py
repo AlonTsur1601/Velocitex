@@ -23,6 +23,8 @@ CONVERT = Matrix(((1.0, 0.0, 0.0, 0.0),
                   (0.0, 1.0, 0.0, 0.0),
                   (0.0, 0.0, 0.0, 1.0)))
 
+ROOM_SHELL_NAMES = {"HazardFloor", "Ceiling", "LeftWall", "RightWall", "BackWall", "ExitWall"}
+
 
 def correct_wall_slope_direction(world, size):
     basis = world.to_3x3()
@@ -82,8 +84,10 @@ def build_room(source, destination, reference_path):
     scene = bpy.data.scenes.new(source.stem)
     collection = bpy.data.collections.new("EditableWalls")
     scene.collection.children.link(collection)
-    reference_collection = bpy.data.collections.new("RoomReference_LOCKED")
+    reference_collection = bpy.data.collections.new("EditablePlatforms")
     scene.collection.children.link(reference_collection)
+    shell_collection = bpy.data.collections.new("ROOM SHELL — HIDE HERE")
+    scene.collection.children.link(shell_collection)
     material = bpy.data.materials.new("RoomWallMaterial")
     material.diffuse_color = (0.30, 0.39, 0.42, 1.0)
     reference_material = bpy.data.materials.new("RoomReferenceMaterial")
@@ -119,13 +123,16 @@ def build_room(source, destination, reference_path):
                        (entry["transform"][2], entry["transform"][5], entry["transform"][8], entry["transform"][11]),
                        (0.0, 0.0, 0.0, 1.0)))
         world = CONVERT @ body @ CONVERT.inverted()
-        obj, mesh = create_box(reference_collection, f"REF_{index:03}_{entry['name']}", entry["size"], world, reference_material, False)
+        obj, mesh = create_box(reference_collection, f"REF_{index:03}_{entry['name']}", entry["size"], world, reference_material, True)
         obj["godot_reference"] = True
+        if entry["name"] in ROOM_SHELL_NAMES:
+            reference_collection.objects.unlink(obj)
+            shell_collection.objects.link(obj)
         created_objects.append(obj)
         created_meshes.append(mesh)
 
     scene["velocitex_room"] = source.stem.replace("Walls", "")
-    scene["instructions"] = "Edit objects in EditableWalls. Keep object names unchanged."
+    scene["instructions"] = "Edit objects in EditableWalls/EditablePlatforms. Toggle ROOM SHELL — HIDE HERE to hide the outer room shell; the door stays visible. Keep object names unchanged."
     destination.parent.mkdir(parents=True, exist_ok=True)
     original_scene = bpy.context.window.scene
     try:
@@ -146,6 +153,7 @@ def build_room(source, destination, reference_path):
         bpy.data.meshes.remove(mesh)
     bpy.data.collections.remove(collection)
     bpy.data.collections.remove(reference_collection)
+    bpy.data.collections.remove(shell_collection)
     bpy.data.materials.remove(material)
     bpy.data.materials.remove(reference_material)
 
