@@ -1,5 +1,6 @@
 param(
-    [int]$StartRoom = 1
+    [int]$StartRoom = 1,
+    [int]$EndRoom = 30
 )
 
 $ErrorActionPreference = "Stop"
@@ -75,7 +76,8 @@ $captures = @(
 )
 
 $captures = $captures | Where-Object {
-    [int]($_.Id.Substring(4, 2)) -ge $StartRoom
+    $room = [int]($_.Id.Substring(4, 2))
+    $room -ge $StartRoom -and $room -le $EndRoom
 }
 
 foreach ($capture in $captures) {

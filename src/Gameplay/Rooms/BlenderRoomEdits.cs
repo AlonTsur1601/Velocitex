@@ -24,11 +24,11 @@ internal static class BlenderRoomEdits
         }
 
         Godot.Collections.Dictionary data = parsed.AsGodotDictionary();
-        ApplyWalls(room, ReadArray(data, "walls"));
+        ApplyWalls(room, roomNumber);
         ApplyPlatforms(room, ReadArray(data, "platforms"));
     }
 
-    private static void ApplyWalls(Node3D room, Godot.Collections.Array edits)
+    private static void ApplyWalls(Node3D room, int roomNumber)
     {
         Node? wallsRoot = room.GetNodeOrNull<Node>("EditableWalls");
         if (wallsRoot is null)
@@ -36,29 +36,58 @@ internal static class BlenderRoomEdits
             return;
         }
 
-        HashSet<string> exportedNames = new(StringComparer.Ordinal);
-        foreach (Variant value in edits)
+        string blendPath = $"res://assets/models/EditableWallsBlender/Room{roomNumber:00}Walls.blend";
+        PackedScene? importedScene = GD.Load<PackedScene>(blendPath);
+        if (importedScene?.Instantiate() is not Node3D importedRoot)
         {
-            Godot.Collections.Dictionary edit = value.AsGodotDictionary();
-            string name = edit["name"].AsString();
-            exportedNames.Add(name);
-            if (wallsRoot.GetNodeOrNull<StaticBody3D>(name) is not StaticBody3D wall)
+            GD.PushError($"BLENDER_ROOM_EDIT_FAIL: unable to load {blendPath}");
+            return;
+        }
+
+        MeshInstance3D[] importedWalls = importedRoot.GetChildren()
+            .OfType<MeshInstance3D>()
+            .Where(mesh => !mesh.Name.ToString().StartsWith("REF_", StringComparison.Ordinal))
+            .ToArray();
+        if (importedWalls.Length == 0)
+        {
+            importedRoot.Free();
+            GD.PushError($"BLENDER_ROOM_EDIT_FAIL: {blendPath} contains no editable walls");
+            return;
+        }
+
+        foreach (Node oldWall in wallsRoot.GetChildren())
+        {
+            wallsRoot.RemoveChild(oldWall);
+            oldWall.QueueFree();
+        }
+
+        foreach (MeshInstance3D importedWall in importedWalls)
+        {
+            Transform3D importedTransform = importedWall.Transform;
+            importedRoot.RemoveChild(importedWall);
+            importedWall.Owner = null;
+
+            StaticBody3D body = new()
             {
-                GD.PushError($"BLENDER_ROOM_EDIT_FAIL: missing wall {room.Name}/{name}");
-                continue;
-            }
+                Name = importedWall.Name,
+                CollisionLayer = 1,
+                CollisionMask = 1
+            };
+            wallsRoot.AddChild(body);
 
-            ApplyBoxEdit(room, wall, edit, resetBoxChildren: true);
+            importedWall.Transform = importedTransform;
+            body.AddChild(importedWall);
+
+            CollisionShape3D collision = new()
+            {
+                Name = "BlenderWallCollision",
+                Transform = importedTransform,
+                Shape = importedWall.Mesh?.CreateTrimeshShape()
+            };
+            body.AddChild(collision);
         }
 
-        foreach (StaticBody3D removedWall in wallsRoot.GetChildren()
-            .OfType<StaticBody3D>()
-            .Where(wall => !exportedNames.Contains(wall.Name.ToString()))
-            .ToArray())
-        {
-            wallsRoot.RemoveChild(removedWall);
-            removedWall.QueueFree();
-        }
+        importedRoot.Free();
     }
 
     private static void ApplyPlatforms(Node3D room, Godot.Collections.Array edits)
