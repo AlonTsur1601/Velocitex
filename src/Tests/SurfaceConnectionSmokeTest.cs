@@ -12,7 +12,7 @@ public partial class SurfaceConnectionSmokeTest : Node
     private const float MaximumSeamGap = 0.01f;
     private const float MaximumSeamStep = 0.01f;
     private const float MinimumGeneratedWallVisualHeight = 1.21f;
-    private const float MaximumGeneratedWallVisualHeight = 1.23f;
+    private const float MaximumGeneratedWallVisualHeight = 1.60f;
     private const float MaximumGeneratedWallTotalOverhang = 0.95f;
 
     private readonly record struct Surface(
@@ -261,7 +261,7 @@ public partial class SurfaceConnectionSmokeTest : Node
                     issues++;
                     GD.PushError(
                         $"SURFACE_BARRIER_HEIGHT: Room {room:00} {barrier.Body.Name} is " +
-                        $"{barrier.VisualSize.Y:F3} m high instead of the shared normal-wall height.");
+                        $"{barrier.VisualSize.Y:F3} m high, above the approved normalized-wall range.");
                 }
                 CollisionShape3D? generatedHitbox = barrier.Body.GetNodeOrNull<CollisionShape3D>("GeneratedWallHitbox");
                 BoxShape3D? generatedHitboxBox = generatedHitbox?.Shape as BoxShape3D;

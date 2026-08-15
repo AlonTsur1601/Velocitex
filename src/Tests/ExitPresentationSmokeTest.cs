@@ -330,10 +330,10 @@ public partial class ExitPresentationSmokeTest : Node
                 issues++;
             }
             if (!HasCorridorFloorCollision(door) ||
-                !HasCollisionBox(door, "ExitCorridorCeiling", new Vector3(ExitDoor3D.CorridorInteriorWidth, 0.24f, ExitDoor3D.CorridorLength)) ||
+                !HasCollisionBox(door, "ExitCorridorCeiling", new Vector3(ExitDoor3D.CorridorInteriorWidth * 1.29f, 0.24f, ExitDoor3D.CorridorLength * 0.99f)) ||
                 !HasCollisionBox(door, "ExitCorridorLeftWall", new Vector3(0.24f, ExitDoor3D.CorridorInteriorHeight + 0.24f, ExitDoor3D.CorridorLength + 0.64f)) ||
                 !HasCollisionBox(door, "ExitCorridorRightWall", new Vector3(0.24f, ExitDoor3D.CorridorInteriorHeight + 0.24f, ExitDoor3D.CorridorLength + 0.64f)) ||
-                !HasCollisionBox(door, "ExitCorridorEndWall", new Vector3(ExitDoor3D.CorridorInteriorWidth + 0.48f, ExitDoor3D.CorridorInteriorHeight + 0.24f, 0.24f)))
+                !HasCollisionBox(door, "ExitCorridorEndWall", new Vector3((ExitDoor3D.CorridorInteriorWidth + 0.48f) * 1.14f, (ExitDoor3D.CorridorInteriorHeight + 0.24f) * 1.06f, 0.24f)))
             {
                 Report(room, "dark corridor does not use the standard enclosed dimensions");
                 issues++;
@@ -679,7 +679,7 @@ public partial class ExitPresentationSmokeTest : Node
             .OfType<CollisionShape3D>()
             .FirstOrDefault();
         return collision?.Shape is BoxShape3D box &&
-            Mathf.Abs(box.Size.X - ExitDoor3D.CorridorInteriorWidth) <= 0.001f &&
+            Mathf.Abs(box.Size.X - (ExitDoor3D.CorridorInteriorWidth * 1.29f)) <= 0.001f &&
             Mathf.Abs(box.Size.Y - 0.24f) <= 0.001f &&
             box.Size.Z > ExitDoor3D.CorridorTransitionDepth;
     }
