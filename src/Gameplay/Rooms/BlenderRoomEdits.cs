@@ -55,6 +55,12 @@ internal static class BlenderRoomEdits
             return;
         }
 
+        Material? wallMaterial = wallsRoot.GetChildren()
+            .OfType<StaticBody3D>()
+            .SelectMany(body => body.GetChildren().OfType<MeshInstance3D>())
+            .Select(mesh => mesh.MaterialOverride ?? mesh.Mesh?.SurfaceGetMaterial(0))
+            .FirstOrDefault(material => material is not null);
+
         foreach (Node oldWall in wallsRoot.GetChildren())
         {
             wallsRoot.RemoveChild(oldWall);
@@ -76,6 +82,10 @@ internal static class BlenderRoomEdits
             wallsRoot.AddChild(body);
 
             importedWall.Transform = importedTransform;
+            if (wallMaterial is not null)
+            {
+                importedWall.MaterialOverride = wallMaterial;
+            }
             body.AddChild(importedWall);
 
             CollisionShape3D collision = new()
