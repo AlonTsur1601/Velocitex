@@ -84,12 +84,38 @@ public partial class Room02RouteFeedbackSmokeTest : Node
             return;
         }
 
+        // Respawn/reset can happen before the physics overlap cache has moved
+        // the player away from the old button. The stale contact must not
+        // immediately recreate denied feedback after the visual was reset.
+        checkpoints[2].ResetCheckpoint();
+        for (int frame = 0; frame < 6; frame++)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        }
+        if (checkpoints[2].IsDeniedFeedbackActive ||
+            wrongPlate.MaterialOverride != idleMaterial ||
+            checkpoints[2].IsShowingDeniedRed)
+        {
+            Fail("Respawn/reset retriggered the stale wrong-button contact and restored red feedback.");
+            return;
+        }
+
+        await MovePlayerAway(player);
+        await MovePlayerTo(player, checkpoints[2], Vector3.Zero);
+        if (!checkpoints[2].IsDeniedFeedbackActive)
+        {
+            Fail("The wrong button did not re-arm after the player left it following respawn/reset.");
+            return;
+        }
+
         float pipHeightBeforeActivation = GetPipHeightAbovePlate(checkpoints[0]);
 
-        for (int frame = 0; frame < 30; frame++)
+        for (int frame = 0; frame < 60 && checkpoints[2].IsDeniedFeedbackActive; frame++)
         {
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         }
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         if (wrongPlate.MaterialOverride != idleMaterial)
         {
             Fail("The out-of-order red flash did not restore the button's normal material.");
@@ -132,6 +158,39 @@ public partial class Room02RouteFeedbackSmokeTest : Node
         if (door.ProcessMode == ProcessModeEnum.Disabled || !routeLock.Disabled)
         {
             Fail("Completing the four-button sequence did not unlock the exit.");
+            return;
+        }
+
+        ColorRect? darknessOverlay = door.GetNodeOrNull<ColorRect>("ExitDarknessLayer/ExitDarknessOverlay");
+        if (darknessOverlay is null ||
+            darknessOverlay.Size.DistanceTo(door.GetViewport().GetVisibleRect().Size) > 0.5f)
+        {
+            Fail("Room 02's exit darkness overlay does not fill the viewport.");
+            return;
+        }
+
+        float midpointDepth = (ExitDoor3D.CorridorFadeStartDepth + ExitDoor3D.CorridorFadeEndDepth) * 0.5f;
+        player.GlobalPosition = door.ToGlobal(new Vector3(0.0f, 0.72f, -midpointDepth));
+        door._Process(0.0);
+        if (door.DarknessAmount < 0.44f || door.DarknessAmount > 0.56f ||
+            !Mathf.IsEqualApprox(darknessOverlay.Color.A, door.DarknessAmount))
+        {
+            Fail($"Room 02's exit midpoint dimming is incorrect: amount={door.DarknessAmount:F3}, alpha={darknessOverlay.Color.A:F3}.");
+            return;
+        }
+
+        player.GlobalPosition = door.ToGlobal(new Vector3(0.0f, 0.72f, -ExitDoor3D.CorridorFadeEndDepth));
+        door._Process(0.0);
+        if (door.DarknessAmount < 0.999f || darknessOverlay.Color.A < 0.999f)
+        {
+            Fail("Room 02's exit did not reach full darkness at the end of the fade.");
+            return;
+        }
+
+        door.ResetClosed();
+        if (door.DarknessAmount != 0.0f || darknessOverlay.Color.A != 0.0f)
+        {
+            Fail("Room 02's exit darkness survived a door reset.");
             return;
         }
 
@@ -233,6 +292,7 @@ public partial class Room02RouteFeedbackSmokeTest : Node
         }
 
         intendedButton.ResetCheckpoint();
+        await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
         wrongButton.Press(player);
         float expectedWrongIdleY = (-wrongButton.TriggerSize.Y * 0.42f) + 0.08f;
         if (!Mathf.IsEqualApprox(wrongInsetPlate.Position.Y, expectedWrongIdleY))

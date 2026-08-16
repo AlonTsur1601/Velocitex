@@ -275,18 +275,28 @@ public partial class Room05Runtime : RoomRuntime
             return;
         }
 
-        if (_sequenceSmokeTick == 32)
+        if (_sequenceSmokeTick == 42)
         {
             AssertIdleButtonVisual(_sequenceButtons[1]);
             _player.ResetTo(new Transform3D(Basis.Identity, _lever.GlobalPosition + new Vector3(1.4f, 0.73f, 0.0f)));
             _lever.Interact(_player);
             _sequenceButtons[0].Press(_player);
+            return;
+        }
+
+        if (_sequenceSmokeTick == 43)
+        {
             _sequenceButtons[1].Press(_player);
+            return;
+        }
+
+        if (_sequenceSmokeTick == 44)
+        {
             _sequenceButtons[2].Press(_player);
             return;
         }
 
-        if (_sequenceSmokeTick < 33)
+        if (_sequenceSmokeTick < 45)
         {
             return;
         }

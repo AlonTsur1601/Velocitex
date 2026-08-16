@@ -47,6 +47,7 @@ public partial class RouteCheckpoint3D : Area3D
     private float _activationAmount;
     private float _deniedFlashTime;
     private float _deniedFlashElapsed;
+    private ulong _suppressAutomaticPressUntilPhysicsFrame;
 
     public override void _Ready()
     {
@@ -287,6 +288,8 @@ public partial class RouteCheckpoint3D : Area3D
         _innerPlate.MaterialOverride = _idleMaterial;
         SetSequencePipsVisible(true);
         _handledFloorContacts.Clear();
+        _suppressAutomaticPressUntilPhysicsFrame = Engine.GetPhysicsFrames() + 2;
+        CaptureOverlappingPlayersAsHandled();
     }
 
     public override void _ExitTree()
@@ -312,6 +315,12 @@ public partial class RouteCheckpoint3D : Area3D
 
     private void ProcessFloorContacts()
     {
+        if (Engine.GetPhysicsFrames() <= _suppressAutomaticPressUntilPhysicsFrame)
+        {
+            CaptureOverlappingPlayersAsHandled();
+            return;
+        }
+
         PlayerBall[] overlappingPlayers = GetOverlappingBodies().OfType<PlayerBall>().ToArray();
         HashSet<ulong> touchingIds = new();
         foreach (PlayerBall player in overlappingPlayers)
@@ -416,6 +425,12 @@ public partial class RouteCheckpoint3D : Area3D
         }
 
         ulong id = player.GetInstanceId();
+        if (Engine.GetPhysicsFrames() <= _suppressAutomaticPressUntilPhysicsFrame)
+        {
+            _handledFloorContacts.Add(id);
+            return;
+        }
+
         if (_handledFloorContacts.Contains(id) || !IsClosestTouchedFloorButton(player))
         {
             return;
@@ -423,6 +438,14 @@ public partial class RouteCheckpoint3D : Area3D
 
         _handledFloorContacts.Add(id);
         Press(player);
+    }
+
+    private void CaptureOverlappingPlayersAsHandled()
+    {
+        foreach (PlayerBall player in GetOverlappingBodies().OfType<PlayerBall>())
+        {
+            _handledFloorContacts.Add(player.GetInstanceId());
+        }
     }
 
     private void ApplyAcceptedPressVisualImmediately()

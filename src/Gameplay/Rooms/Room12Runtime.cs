@@ -28,6 +28,7 @@ public partial class Room12Runtime : RoomRuntime
     private Area3D _goal = null!;
     private StaticBody3D _dropBarrier = null!;
     private CollisionShape3D _dropBarrierCollision = null!;
+    private Tween? _dropBarrierTween;
     private AudioStreamPlayer3D? _gravityAudio;
     private Transform3D _spawnTransform;
     private SolutionTrace? _solutionTrace;
@@ -255,13 +256,36 @@ public partial class Room12Runtime : RoomRuntime
         }
 
         _sequencePads[0].Press(_player);
-        _sequencePads[1].Press(_player);
         await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
-        if (_nextSequencePad != 2 || !_dropBarrierCollision.Disabled)
+        _sequencePads[1].Press(_player);
+        for (int frame = 0; frame < 40; frame++)
         {
-            FailMechanicsSmoke("correct pad order did not open the physical drop barrier.");
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        }
+        await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+        if (_nextSequencePad != 2 ||
+            !_dropBarrierCollision.Disabled ||
+            _dropBarrier.CollisionLayer != 0 ||
+            _dropBarrier.Position.DistanceTo(new Vector3(0.0f, 19.0f, 8.75f)) > 0.01f)
+        {
+            FailMechanicsSmoke($"correct pad order did not fully open the visual and physical drop barrier; pads={_nextSequencePad}, disabled={_dropBarrierCollision.Disabled}, layer={_dropBarrier.CollisionLayer}, position={_dropBarrier.Position}.");
             return;
         }
+
+        ResetPuzzleState();
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+        if (_dropBarrierCollision.Disabled ||
+            _dropBarrier.CollisionLayer == 0 ||
+            _dropBarrier.Position.DistanceTo(new Vector3(0.0f, 23.75f, 8.75f)) > 0.01f)
+        {
+            FailMechanicsSmoke("respawn/reset did not restore the closed visual and physical drop barrier.");
+            return;
+        }
+
+        _sequencePads[0].Press(_player);
+        await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+        _sequencePads[1].Press(_player);
 
         _touchedStrongGravity = true;
         _verifiedStrongGravity = true;
@@ -562,6 +586,13 @@ public partial class Room12Runtime : RoomRuntime
         {
             return;
         }
+        _dropBarrierTween?.Kill();
+        _dropBarrierTween = null;
+
+        // The layer change is immediate, so the barrier cannot retain a stale
+        // physical wall while CollisionShape3D applies its deferred update.
+        _dropBarrier.CollisionLayer = open ? 0u : 1u;
+        _dropBarrier.CollisionMask = open ? 0u : 1u;
         _dropBarrierCollision.SetDeferred(CollisionShape3D.PropertyName.Disabled, open);
         Vector3 target = new(0.0f, open ? 19.0f : 23.75f, 8.75f);
         if (!open)
@@ -569,8 +600,10 @@ public partial class Room12Runtime : RoomRuntime
             _dropBarrier.Position = target;
             return;
         }
-        CreateTween().SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.InOut)
-            .TweenProperty(_dropBarrier, "position", target, 0.55f);
+        _dropBarrierTween = CreateTween()
+            .SetTrans(Tween.TransitionType.Cubic)
+            .SetEase(Tween.EaseType.InOut);
+        _dropBarrierTween.TweenProperty(_dropBarrier, "position", target, 0.55f);
     }
 
     private void AddGravityParticles()
