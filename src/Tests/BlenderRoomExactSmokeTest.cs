@@ -22,6 +22,7 @@ public partial class BlenderRoomExactSmokeTest : Node
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 
             failures += AuditRoom(room, roomNumber);
+            failures += await AuditReferenceMotion(room, roomNumber);
             room.QueueFree();
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         }
@@ -96,9 +97,27 @@ public partial class BlenderRoomExactSmokeTest : Node
             if (IsVisible(actualMesh) &&
                 actualMesh.MaterialOverride is BaseMaterial3D texturedMaterial &&
                 texturedMaterial.AlbedoTexture is not null &&
+                !BlenderRoomEdits.HasUvLayer(actualMesh.Mesh) &&
                 (!texturedMaterial.Uv1Triplanar || !texturedMaterial.Uv1WorldTriplanar))
             {
                 GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} textured Blender mesh {name} has no UV-independent mapping.");
+                failures++;
+            }
+
+            if (IsVisible(actualMesh) &&
+                actualMesh.MaterialOverride is ShaderMaterial &&
+                !BlenderRoomEdits.HasUvLayer(actualMesh.Mesh))
+            {
+                GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} special Blender surface {name} has no generated UV layer.");
+                failures++;
+            }
+
+            if (IsVisible(actualMesh) &&
+                actualMesh.MaterialOverride is ShaderMaterial specialMaterial &&
+                (specialMaterial.Shader is null ||
+                    !specialMaterial.Shader.Code.Contains("cull_disabled", StringComparison.Ordinal)))
+            {
+                GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} special Blender surface {name} still culls reversed faces.");
                 failures++;
             }
 
@@ -112,6 +131,7 @@ public partial class BlenderRoomExactSmokeTest : Node
         }
 
         failures += AuditLegacyVisuals(room, blenderGeometry, actual, roomNumber);
+        failures += AuditLighting(room, roomNumber);
 
         if (failures == 0)
         {
@@ -120,6 +140,57 @@ public partial class BlenderRoomExactSmokeTest : Node
 
         importedRoot.Free();
         return failures;
+    }
+
+    private async Task<int> AuditReferenceMotion(Node3D room, int roomNumber)
+    {
+        MeshInstance3D? importedMesh = room.GetNodeOrNull<Node>("BlenderGeometry")?.GetChildren()
+            .OfType<MeshInstance3D>()
+            .FirstOrDefault(mesh =>
+                mesh.Name.ToString().StartsWith("REF_", StringComparison.Ordinal) &&
+                mesh.HasMeta(BlenderRoomEdits.ReferenceTargetPathMetadata));
+        if (importedMesh is null)
+        {
+            return 0;
+        }
+
+        NodePath targetPath = importedMesh.GetMeta(BlenderRoomEdits.ReferenceTargetPathMetadata).AsNodePath();
+        Node3D? target = room.GetNodeOrNull<Node3D>(targetPath);
+        if (target is null)
+        {
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} reference binding target {targetPath} is missing.");
+            return 1;
+        }
+
+        Vector3 offset = new(0.017f, 0.013f, -0.011f);
+        Vector3 targetStart = target.GlobalPosition;
+        Vector3 meshStart = importedMesh.GlobalPosition;
+        target.GlobalPosition += offset;
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        Vector3 observedOffset = importedMesh.GlobalPosition - meshStart;
+        target.GlobalPosition = targetStart;
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        if (observedOffset.DistanceTo(offset) > Tolerance)
+        {
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} Blender reference did not follow its runtime target; expected={offset}, actual={observedOffset}.");
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private static int AuditLighting(Node3D room, int roomNumber)
+    {
+        WorldEnvironment? world = room.GetNodeOrNull<WorldEnvironment>("WorldEnvironment");
+        if (world?.Environment is null ||
+            world.Environment.AmbientLightEnergy < 2.25f - Tolerance ||
+            world.Environment.TonemapExposure < 1.5f - Tolerance)
+        {
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} is below the Room 01 lighting baseline.");
+            return 1;
+        }
+
+        return 0;
     }
 
     private static int AuditLegacyVisuals(
@@ -140,6 +211,16 @@ public partial class BlenderRoomExactSmokeTest : Node
             if (IsVisible(oldWallVisual))
             {
                 GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} legacy wall visual {oldWallVisual.GetPath()} is still visible.");
+                failures++;
+            }
+        }
+
+        foreach (MeshInstance3D cornerJoin in legacyVisuals.Where(mesh =>
+            mesh.Name.ToString().EndsWith("CornerJoin", StringComparison.Ordinal)))
+        {
+            if (IsVisible(cornerJoin))
+            {
+                GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} legacy corner strip {cornerJoin.GetPath()} is still visible.");
                 failures++;
             }
         }
@@ -187,10 +268,12 @@ public partial class BlenderRoomExactSmokeTest : Node
             .Where(pair => pair.Key.StartsWith("REF_", StringComparison.Ordinal)))
         {
             string targetName = ReferenceTargetName(name);
-            Node3D? target = EnumerateDescendants(room)
-                .OfType<Node3D>()
-                .Where(node => !IsDescendantOf(node, blenderGeometry))
-                .FirstOrDefault(node => NamesMatch(node.Name.ToString(), targetName));
+            Node3D? target = importedMesh.HasMeta(BlenderRoomEdits.ReferenceTargetPathMetadata)
+                ? room.GetNodeOrNull<Node3D>(importedMesh.GetMeta(BlenderRoomEdits.ReferenceTargetPathMetadata).AsNodePath())
+                : EnumerateDescendants(room)
+                    .OfType<Node3D>()
+                    .Where(node => !IsDescendantOf(node, blenderGeometry))
+                    .FirstOrDefault(node => NamesMatch(node.Name.ToString(), targetName));
             MeshInstance3D[] targetVisuals = target is null
                 ? Array.Empty<MeshInstance3D>()
                 : EnumerateDescendants(target).Prepend(target).OfType<MeshInstance3D>().ToArray();
@@ -207,6 +290,25 @@ public partial class BlenderRoomExactSmokeTest : Node
                 }
 
                 continue;
+            }
+
+            if (!importedMesh.HasMeta(BlenderRoomEdits.ReferenceTargetPathMetadata))
+            {
+                GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} matched reference {name} is not bound to its runtime target.");
+                failures++;
+            }
+
+            if (!BlenderRoomEdits.IsVisibleThrough(target, room) && IsVisible(importedMesh))
+            {
+                GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} hidden doorway wall reference {name} covers its runtime opening.");
+                failures++;
+            }
+
+            MeshInstance3D? originalVisual = targetVisuals.FirstOrDefault();
+            if (originalVisual is not null && importedMesh.CastShadow != originalVisual.CastShadow)
+            {
+                GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} reference {name} changed the target's shadow policy.");
+                failures++;
             }
 
             foreach (MeshInstance3D targetVisual in targetVisuals)

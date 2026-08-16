@@ -29,7 +29,47 @@ public partial class RoomRuntime : Node3D
 
     private void ApplyBlenderRoomEdits()
     {
+        NormalizeRoomLighting();
         BlenderRoomEdits.Apply(this, RoomNumber);
+    }
+
+    private void NormalizeRoomLighting()
+    {
+        const float roomOneAmbientEnergy = 2.25f;
+        const float roomOneExposure = 1.5f;
+        const float roomOneFillEnergy = 7.0f;
+        const float roomOneFillRange = 32.0f;
+
+        WorldEnvironment? world = GetNodeOrNull<WorldEnvironment>("WorldEnvironment");
+        if (world?.Environment is Godot.Environment source)
+        {
+            Godot.Environment environment = (Godot.Environment)source.Duplicate();
+            environment.AmbientLightEnergy = Mathf.Max(environment.AmbientLightEnergy, roomOneAmbientEnergy);
+            environment.TonemapExposure = Mathf.Max(environment.TonemapExposure, roomOneExposure);
+            world.Environment = environment;
+        }
+
+        foreach (OmniLight3D fill in EnumerateDescendants(this)
+            .OfType<OmniLight3D>()
+            .Where(light =>
+                light.Name.ToString().Equals("Fill", StringComparison.Ordinal) ||
+                light.Name.ToString().StartsWith("RoomFill", StringComparison.Ordinal)))
+        {
+            fill.LightEnergy = Mathf.Max(fill.LightEnergy, roomOneFillEnergy);
+            fill.OmniRange = Mathf.Max(fill.OmniRange, roomOneFillRange);
+        }
+    }
+
+    private static IEnumerable<Node> EnumerateDescendants(Node root)
+    {
+        foreach (Node child in root.GetChildren())
+        {
+            yield return child;
+            foreach (Node descendant in EnumerateDescendants(child))
+            {
+                yield return descendant;
+            }
+        }
     }
 
     protected void CompleteRoom()

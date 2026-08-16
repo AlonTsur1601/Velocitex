@@ -100,10 +100,44 @@ public partial class PanoramaCaptureController : Node
         }
 
         string path = System.IO.Path.Combine(directory, $"{_view.Id}.png");
-        Error saveError = _captureViewport.GetTexture().GetImage().SavePng(path);
+        string temporaryPath = System.IO.Path.Combine(
+            System.IO.Path.GetTempPath(),
+            $"velocitex-panorama-{_view.Id}-{Guid.NewGuid():N}.png");
+        Error saveError = _captureViewport.GetTexture().GetImage().SavePng(temporaryPath);
         if (saveError != Error.Ok)
         {
             GD.PushError($"PANORAMA_CAPTURE_FAIL: {_view.Id} could not be saved ({saveError}).");
+            GetTree().Quit(1);
+            return;
+        }
+
+        Exception? replaceError = null;
+        bool replaced = false;
+        for (int attempt = 0; attempt < 20 && !replaced; attempt++)
+        {
+            try
+            {
+                System.IO.File.Copy(temporaryPath, path, overwrite: true);
+                replaced = true;
+            }
+            catch (Exception error) when (error is System.IO.IOException or UnauthorizedAccessException)
+            {
+                replaceError = error;
+                System.Threading.Thread.Sleep(250);
+            }
+        }
+
+        try
+        {
+            System.IO.File.Delete(temporaryPath);
+        }
+        catch (System.IO.IOException)
+        {
+        }
+
+        if (!replaced)
+        {
+            GD.PushError($"PANORAMA_CAPTURE_FAIL: {_view.Id} could not replace '{path}' ({replaceError?.Message}).");
             GetTree().Quit(1);
             return;
         }
