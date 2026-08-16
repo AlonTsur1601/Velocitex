@@ -24,6 +24,7 @@ logs/
 
 # Generated Godot and QA artifacts
 *.import
+!assets/models/EditableWallsBlender/*.blend.import
 tmp/
 output/
 submission/video/recordings/*.mp4

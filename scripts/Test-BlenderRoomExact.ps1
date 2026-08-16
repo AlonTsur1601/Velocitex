@@ -12,5 +12,5 @@ $exitCode = $LASTEXITCODE
 $ErrorActionPreference = "Stop"
 $output | Write-Output
 if ($exitCode -ne 0 -or ($output -join "`n") -notmatch "BLENDER_ROOM_EXACT_PASS") {
-    throw "Rooms 01-02 do not exactly match their exported Blender wall geometry."
+    throw "One or more rooms do not render every imported Blender mesh exactly."
 }

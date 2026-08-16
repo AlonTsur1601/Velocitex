@@ -5,30 +5,7 @@ namespace Velocitex.Gameplay.Rooms;
 
 internal static class BlenderRoomEdits
 {
-    private const string EditDirectory = "res://resources/blender_room_edits";
-
     public static void Apply(Node3D room, int roomNumber)
-    {
-        string path = $"{EditDirectory}/Room{roomNumber:00}.json";
-        if (!Godot.FileAccess.FileExists(path))
-        {
-            return;
-        }
-
-        using Godot.FileAccess file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
-        Variant parsed = Json.ParseString(file.GetAsText());
-        if (parsed.VariantType != Variant.Type.Dictionary)
-        {
-            GD.PushError($"BLENDER_ROOM_EDIT_FAIL: invalid JSON in {path}");
-            return;
-        }
-
-        Godot.Collections.Dictionary data = parsed.AsGodotDictionary();
-        ApplyWalls(room, roomNumber);
-        ApplyPlatforms(room, ReadArray(data, "platforms"));
-    }
-
-    private static void ApplyWalls(Node3D room, int roomNumber)
     {
         Node? wallsRoot = room.GetNodeOrNull<Node>("EditableWalls");
         if (wallsRoot is null)
@@ -44,247 +21,253 @@ internal static class BlenderRoomEdits
             return;
         }
 
-        MeshInstance3D[] importedWalls = importedRoot.GetChildren()
-            .OfType<MeshInstance3D>()
-            .Where(mesh => !mesh.Name.ToString().StartsWith("REF_", StringComparison.Ordinal))
-            .ToArray();
-        if (importedWalls.Length == 0)
+        MeshInstance3D[] importedMeshes = importedRoot.GetChildren().OfType<MeshInstance3D>().ToArray();
+        if (importedMeshes.Length == 0)
         {
             importedRoot.Free();
-            GD.PushError($"BLENDER_ROOM_EDIT_FAIL: {blendPath} contains no editable walls");
+            GD.PushError($"BLENDER_ROOM_EDIT_FAIL: {blendPath} contains no visible geometry");
             return;
         }
 
-        Material? wallMaterial = wallsRoot.GetChildren()
-            .OfType<StaticBody3D>()
-            .SelectMany(body => body.GetChildren().OfType<MeshInstance3D>())
-            .Select(mesh => mesh.MaterialOverride ?? mesh.Mesh?.SurfaceGetMaterial(0))
-            .FirstOrDefault(material => material is not null);
+        importedRoot.Name = "BlenderGeometry";
+        room.AddChild(importedRoot);
 
-        foreach (Node oldWall in wallsRoot.GetChildren())
+        Dictionary<ulong, Material> blenderMaterials = new();
+        Material? wallMaterial = PrepareBlenderMaterial(FindFirstMaterial(wallsRoot), blenderMaterials);
+        foreach (MeshInstance3D importedWall in importedMeshes.Where(mesh => !IsReferenceMesh(mesh)))
         {
-            wallsRoot.RemoveChild(oldWall);
-            oldWall.QueueFree();
+            importedWall.MaterialOverride = wallMaterial;
         }
 
-        foreach (MeshInstance3D importedWall in importedWalls)
+        foreach (MeshInstance3D importedMesh in importedMeshes.Where(IsReferenceMesh))
         {
-            Transform3D importedTransform = importedWall.Transform;
-            importedRoot.RemoveChild(importedWall);
-            importedWall.Owner = null;
+            Node3D? target = FindReferenceTarget(room, importedMesh);
+            if (target is null)
+            {
+                importedMesh.Visible = false;
+                continue;
+            }
 
+            Material? targetMaterial = PrepareBlenderMaterial(FindFirstMaterial(target), blenderMaterials);
+            if (targetMaterial is null)
+            {
+                importedMesh.Visible = false;
+                continue;
+            }
+
+            importedMesh.MaterialOverride = targetMaterial;
+            if (target is StaticBody3D targetBody)
+            {
+                AlignCollisionToImportedMesh(room, targetBody, importedMesh);
+            }
+
+            HideVisuals(target);
+        }
+
+        foreach (StaticBody3D oldWall in EnumerateDescendants(room)
+            .OfType<StaticBody3D>()
+            .Where(body =>
+                IsDescendantOf(body, wallsRoot) ||
+                (body.HasMeta(RoomGeometry.GeneratedPlatformWallMetadata) &&
+                    body.GetMeta(RoomGeometry.GeneratedPlatformWallMetadata).AsBool())))
+        {
+            oldWall.CollisionLayer = 0;
+            oldWall.CollisionMask = 0;
+            HideVisuals(oldWall);
+        }
+
+        Node3D blenderCollisions = new() { Name = "BlenderCollisions" };
+        room.AddChild(blenderCollisions);
+        foreach (MeshInstance3D importedWall in importedMeshes.Where(mesh => !IsReferenceMesh(mesh)))
+        {
             StaticBody3D body = new()
             {
-                Name = importedWall.Name,
+                Name = $"{importedWall.Name}_Collision",
                 CollisionLayer = 1,
                 CollisionMask = 1
             };
-            wallsRoot.AddChild(body);
-
-            importedWall.Transform = importedTransform;
-            if (wallMaterial is not null)
-            {
-                importedWall.MaterialOverride = wallMaterial;
-            }
-            body.AddChild(importedWall);
+            blenderCollisions.AddChild(body);
 
             CollisionShape3D collision = new()
             {
                 Name = "BlenderWallCollision",
-                Transform = importedTransform,
+                Transform = importedWall.Transform,
                 Shape = importedWall.Mesh?.CreateTrimeshShape()
             };
             body.AddChild(collision);
         }
-
-        importedRoot.Free();
     }
 
-    private static void ApplyPlatforms(Node3D room, Godot.Collections.Array edits)
+    private static bool IsReferenceMesh(MeshInstance3D mesh) =>
+        mesh.Name.ToString().StartsWith("REF_", StringComparison.Ordinal);
+
+    private static Material? FindFirstMaterial(Node root)
     {
-        List<StaticBody3D> platforms = new();
-        CollectPlatformBodies(room, platforms);
-        bool hasExportedExitShell = false;
-        foreach (Variant value in edits)
+        foreach (MeshInstance3D visual in EnumerateDescendants(root)
+            .Prepend(root)
+            .OfType<MeshInstance3D>())
         {
-            Godot.Collections.Dictionary edit = value.AsGodotDictionary();
-            string exportedName = edit["name"].AsString();
-            hasExportedExitShell |= exportedName.EndsWith("_ExitCorridorFloor", StringComparison.Ordinal);
-            int separator = exportedName.IndexOf('_', 4);
-            if (!exportedName.StartsWith("REF_", StringComparison.Ordinal) ||
-                separator < 0 ||
-                !int.TryParse(exportedName.AsSpan(4, separator - 4), out int index) ||
-                index < 0 ||
-                index >= platforms.Count)
+            if (visual.MaterialOverride is Material materialOverride)
             {
-                GD.PushError($"BLENDER_ROOM_EDIT_FAIL: invalid platform reference {exportedName}");
-                continue;
+                return materialOverride;
             }
 
-            // The Blender reference scene also shows collision boxes belonging to
-            // mechanisms. RoomGeometry boxes and the explicitly named shared-exit
-            // shell are editable; moving any other hitbox would detach it from its owner.
-            StaticBody3D platform = platforms[index];
-            if (!platform.HasMeta(RoomGeometry.StickyRollSfxMetadata) &&
-                !IsEditableExitReference(platform, exportedName[(separator + 1)..]))
+            if (visual.Mesh?.GetSurfaceCount() > 0 && visual.GetActiveMaterial(0) is Material activeMaterial)
             {
-                continue;
+                return activeMaterial;
             }
-
-            ApplyBoxEdit(room, platform, edit, resetBoxChildren: false);
         }
 
-        if (!hasExportedExitShell)
-        {
-            ApplyDefaultExitPolish(room);
-        }
+        return null;
     }
 
-    private static void ApplyDefaultExitPolish(Node3D room)
+    private static Material? PrepareBlenderMaterial(
+        Material? source,
+        IDictionary<ulong, Material> cache)
     {
-        ResizeAndMove(room, "ExitCorridorFloor", new Vector3(1.29f, 1.0f, 0.99f), new Vector3(0.0f, 0.0f, 0.055f));
-        ResizeAndMove(room, "ExitCorridorCeiling", new Vector3(1.29f, 1.0f, 0.99f), new Vector3(0.0f, 0.0f, 0.055f));
-        ResizeAndMove(room, "ExitCorridorLeftWall", Vector3.One, new Vector3(-0.29f, 0.0f, 0.09f));
-        ResizeAndMove(room, "ExitCorridorRightWall", Vector3.One, new Vector3(0.29f, 0.0f, 0.09f));
-        ResizeAndMove(room, "ExitCorridorEndWall", new Vector3(1.14f, 1.06f, 1.0f), Vector3.Zero);
-        ResizeAndMove(room, "ClosedDoorBlocker", new Vector3(1.15f, 0.97f, 1.0f), new Vector3(0.0f, -0.05f, 0.0f));
-        ResizeAndMove(room, "ExitDoorBackingAbove", new Vector3(1.0f, 1.014f, 1.0f), new Vector3(0.0f, -0.10f, 0.0f));
+        if (source is null)
+        {
+            return null;
+        }
+
+        ulong sourceId = source.GetInstanceId();
+        if (cache.TryGetValue(sourceId, out Material? cached))
+        {
+            return cached;
+        }
+
+        Material prepared = (Material)source.Duplicate();
+        if (prepared is BaseMaterial3D spatialMaterial)
+        {
+            spatialMaterial.CullMode = BaseMaterial3D.CullModeEnum.Disabled;
+            spatialMaterial.Uv1Triplanar = true;
+            spatialMaterial.Uv1WorldTriplanar = true;
+            spatialMaterial.Uv1Scale = Vector3.One / SurfaceMeshFactory.DefaultTileWorldSize;
+        }
+
+        cache[sourceId] = prepared;
+        return prepared;
     }
 
-    private static void ResizeAndMove(Node3D room, string name, Vector3 sizeScale, Vector3 localOffset)
+    private static string ReferenceTargetName(MeshInstance3D mesh)
     {
-        if (room.FindChild(name, recursive: true, owned: false) is not StaticBody3D body ||
-            body.GetChildren().OfType<CollisionShape3D>().FirstOrDefault(child => child.Shape is BoxShape3D) is not CollisionShape3D collision ||
-            collision.Shape is not BoxShape3D box)
-        {
-            return;
-        }
-
-        Vector3 previousSize = box.Size;
-        Vector3 size = previousSize * sizeScale;
-        body.Position += localOffset;
-        box.Size = size;
-        MeshInstance3D? visual = body.GetChildren().OfType<MeshInstance3D>().FirstOrDefault();
-        if (visual is not null && IsBoxVisual(visual, previousSize))
-        {
-            visual.Mesh = SurfaceMeshFactory.CreateTiledBox(size);
-        }
+        string name = mesh.Name.ToString();
+        int separator = name.IndexOf('_', 4);
+        return separator >= 0 ? name[(separator + 1)..] : name;
     }
 
-    private static bool IsEditableExitReference(StaticBody3D body, string referenceName)
+    private static Node3D? FindReferenceTarget(Node root, MeshInstance3D importedMesh)
     {
-        if (!body.Name.ToString().Equals(referenceName, StringComparison.Ordinal))
+        string importedName = ReferenceTargetName(importedMesh);
+        string dottedName = importedName.Replace("_001", ".001", StringComparison.Ordinal);
+        Node3D[] candidates = EnumerateDescendants(root)
+            .OfType<Node3D>()
+            .Where(node =>
+                node.Name.ToString().Equals(importedName, StringComparison.Ordinal) ||
+                node.Name.ToString().Equals(dottedName, StringComparison.Ordinal))
+            .ToArray();
+        if (candidates.Length <= 1)
         {
-            return false;
+            return candidates.FirstOrDefault();
         }
 
-        return referenceName is
-            "ExitCorridorFloor" or
-            "ExitCorridorCeiling" or
-            "ExitCorridorLeftWall" or
-            "ExitCorridorRightWall" or
-            "ExitCorridorEndWall" or
-            "ClosedDoorBlocker" or
-            "ExitDoorBackingLeft" or
-            "ExitDoorBackingRight" or
-            "ExitDoorBackingBelow" or
-            "ExitDoorBackingAbove";
+        Aabb importedBounds = GlobalBounds(importedMesh);
+        return candidates
+            .Select(candidate => new
+            {
+                Candidate = candidate,
+                Score = EnumerateDescendants(candidate)
+                    .Prepend(candidate)
+                    .OfType<MeshInstance3D>()
+                    .Select(visual => BoundsError(importedBounds, GlobalBounds(visual)))
+                    .DefaultIfEmpty(float.PositiveInfinity)
+                    .Min()
+            })
+            .OrderBy(match => match.Score)
+            .Select(match => match.Candidate)
+            .FirstOrDefault();
     }
 
-    private static void ApplyBoxEdit(
-        Node3D room,
-        StaticBody3D body,
-        Godot.Collections.Dictionary edit,
-        bool resetBoxChildren)
+    private static float BoundsError(Aabb left, Aabb right) =>
+        left.Position.DistanceTo(right.Position) + left.Size.DistanceTo(right.Size);
+
+    private static Aabb GlobalBounds(MeshInstance3D mesh)
+    {
+        Aabb local = mesh.Mesh?.GetAabb() ?? default;
+        Vector3[] corners =
+        {
+            local.Position,
+            local.Position + new Vector3(local.Size.X, 0, 0),
+            local.Position + new Vector3(0, local.Size.Y, 0),
+            local.Position + new Vector3(0, 0, local.Size.Z),
+            local.Position + new Vector3(local.Size.X, local.Size.Y, 0),
+            local.Position + new Vector3(local.Size.X, 0, local.Size.Z),
+            local.Position + new Vector3(0, local.Size.Y, local.Size.Z),
+            local.End
+        };
+        Vector3 first = mesh.GlobalTransform * corners[0];
+        Vector3 minimum = first;
+        Vector3 maximum = first;
+        foreach (Vector3 corner in corners.Skip(1))
+        {
+            Vector3 transformed = mesh.GlobalTransform * corner;
+            minimum = minimum.Min(transformed);
+            maximum = maximum.Max(transformed);
+        }
+
+        return new Aabb(minimum, maximum - minimum);
+    }
+
+    private static IEnumerable<Node> EnumerateDescendants(Node root)
+    {
+        foreach (Node child in root.GetChildren())
+        {
+            yield return child;
+            foreach (Node descendant in EnumerateDescendants(child))
+            {
+                yield return descendant;
+            }
+        }
+    }
+
+    private static bool IsDescendantOf(Node node, Node ancestor)
+    {
+        for (Node? current = node; current is not null; current = current.GetParent())
+        {
+            if (current == ancestor)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void HideVisuals(Node target)
+    {
+        foreach (MeshInstance3D visual in EnumerateDescendants(target)
+            .Prepend(target)
+            .OfType<MeshInstance3D>())
+        {
+            visual.Visible = false;
+        }
+    }
+
+    private static void AlignCollisionToImportedMesh(Node3D room, StaticBody3D body, MeshInstance3D mesh)
     {
         CollisionShape3D? collision = body.GetChildren()
             .OfType<CollisionShape3D>()
             .FirstOrDefault(child => child.Shape is BoxShape3D);
-        if (collision?.Shape is not BoxShape3D box)
+        if (collision?.Shape is not BoxShape3D box || mesh.Mesh is null)
         {
             return;
         }
 
-        Vector3 size = ReadVector3(edit["size"].AsGodotArray());
-        Transform3D geometryTransform = ReadTransform(edit["transform"].AsGodotArray());
-        Transform3D targetGlobal = room.GlobalTransform * geometryTransform;
-        body.GlobalTransform = resetBoxChildren
-            ? targetGlobal
-            : targetGlobal * collision.Transform.AffineInverse();
-        Vector3 previousSize = box.Size;
-        box.Size = size;
-
-        MeshInstance3D? visual = body.GetChildren().OfType<MeshInstance3D>().FirstOrDefault();
-        if (visual is not null && IsBoxVisual(visual, previousSize))
-        {
-            visual.Mesh = SurfaceMeshFactory.CreateTiledBox(size);
-            if (resetBoxChildren)
-            {
-                visual.Transform = Transform3D.Identity;
-                collision.Transform = Transform3D.Identity;
-            }
-        }
-
-        if (body.HasMeta(RoomGeometry.BarrierBaseSeamSizeMetadata))
-        {
-            body.SetMeta(RoomGeometry.BarrierBaseSeamSizeMetadata, size);
-            body.SetMeta(RoomGeometry.BarrierBaseSeamOffsetMetadata, Vector3.Zero);
-        }
-    }
-
-    private static bool IsBoxVisual(MeshInstance3D visual, Vector3 collisionSize)
-    {
-        if (visual.Mesh is null)
-        {
-            return false;
-        }
-
-        Vector3 meshSize = visual.Mesh.GetAabb().Size;
-        return meshSize.IsEqualApprox(collisionSize) ||
-            new Vector3(
-                Mathf.Abs(meshSize.X - collisionSize.X),
-                Mathf.Abs(meshSize.Y - collisionSize.Y),
-                Mathf.Abs(meshSize.Z - collisionSize.Z)).Length() < 1.0f;
-    }
-
-    private static void CollectPlatformBodies(Node node, List<StaticBody3D> output)
-    {
-        if (node is StaticBody3D body &&
-            !body.HasMeta(RoomGeometry.GeneratedPlatformWallMetadata) &&
-            body.GetChildren().OfType<CollisionShape3D>().Any(child => child.Shape is BoxShape3D))
-        {
-            output.Add(body);
-        }
-
-        foreach (Node child in node.GetChildren())
-        {
-            CollectPlatformBodies(child, output);
-        }
-    }
-
-    private static Godot.Collections.Array ReadArray(Godot.Collections.Dictionary data, string key)
-    {
-        return data.TryGetValue(key, out Variant value)
-            ? value.AsGodotArray()
-            : new Godot.Collections.Array();
-    }
-
-    private static Vector3 ReadVector3(Godot.Collections.Array values)
-    {
-        return new Vector3(
-            values[0].AsSingle(),
-            values[1].AsSingle(),
-            values[2].AsSingle());
-    }
-
-    private static Transform3D ReadTransform(Godot.Collections.Array values)
-    {
-        Basis basis = new(
-            new Vector3(values[0].AsSingle(), values[1].AsSingle(), values[2].AsSingle()),
-            new Vector3(values[3].AsSingle(), values[4].AsSingle(), values[5].AsSingle()),
-            new Vector3(values[6].AsSingle(), values[7].AsSingle(), values[8].AsSingle()));
-        return new Transform3D(
-            basis,
-            new Vector3(values[9].AsSingle(), values[10].AsSingle(), values[11].AsSingle()));
+        Aabb aabb = mesh.Mesh.GetAabb();
+        Vector3 scale = mesh.Transform.Basis.Scale.Abs();
+        Basis rotation = mesh.Transform.Basis.Orthonormalized();
+        Transform3D geometryTransform = new(rotation, mesh.Transform * aabb.GetCenter());
+        body.GlobalTransform = room.GlobalTransform * geometryTransform * collision.Transform.AffineInverse();
+        box.Size = aabb.Size * scale;
     }
 }
