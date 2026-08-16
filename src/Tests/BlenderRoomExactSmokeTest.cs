@@ -76,12 +76,12 @@ public partial class BlenderRoomExactSmokeTest : Node
             float error = GeometryError(actualMesh, expectedMesh);
             maximumError = Mathf.Max(maximumError, error);
             bool isReference = name.StartsWith("REF_", StringComparison.Ordinal);
-            Node? collisionRoot = room.GetNodeOrNull<Node>("BlenderCollisions");
-            bool hasCollision = isReference || collisionRoot?.GetChildren()
-                .OfType<StaticBody3D>()
-                .Any(body => body.Name.ToString().Equals($"{name}_Collision", StringComparison.Ordinal) &&
-                    body.GetChildren().OfType<CollisionShape3D>()
-                        .Any(collision => collision.Shape is ConcavePolygonShape3D)) == true;
+            int collisionFailures = isReference
+                ? AuditReferenceCollision(room, actualMesh, roomNumber)
+                : AuditWallCollision(room, actualMesh, roomNumber);
+            failures += collisionFailures;
+            bool hasCollision = collisionFailures == 0;
+
             if (error > Tolerance || !hasCollision)
             {
                 GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} wall {name} error={error:F6}, collision={hasCollision}.");
@@ -140,6 +140,72 @@ public partial class BlenderRoomExactSmokeTest : Node
 
         importedRoot.Free();
         return failures;
+    }
+
+    private static int AuditWallCollision(Node3D room, MeshInstance3D importedMesh, int roomNumber)
+    {
+        string name = importedMesh.Name.ToString();
+        StaticBody3D? body = room.GetNodeOrNull<Node>("BlenderCollisions")?.GetChildren()
+            .OfType<StaticBody3D>()
+            .FirstOrDefault(candidate => candidate.Name.ToString().Equals($"{name}_Collision", StringComparison.Ordinal));
+        CollisionShape3D? collision = body?.GetChildren().OfType<CollisionShape3D>().FirstOrDefault();
+        if (collision?.Shape is not ConcavePolygonShape3D actualShape || importedMesh.Mesh is null)
+        {
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} wall {name} does not use an imported trimesh hitbox.");
+            return 1;
+        }
+
+        ConcavePolygonShape3D? expectedShape = importedMesh.Mesh.CreateTrimeshShape();
+        float transformError = TransformError(collision.Transform, importedMesh.Transform);
+        float meshError = ConcaveShapeError(actualShape, expectedShape);
+        bool doubleSided = actualShape.BackfaceCollision;
+        if (!doubleSided || transformError > Tolerance || meshError > Tolerance)
+        {
+            GD.PushError(
+                $"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} wall {name} hitbox differs from its rendered mesh; transform={transformError:F6}, triangles={meshError:F6}, double_sided={doubleSided}.");
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private static int AuditReferenceCollision(Node3D room, MeshInstance3D importedMesh, int roomNumber)
+    {
+        string name = importedMesh.Name.ToString();
+        if (!importedMesh.HasMeta(BlenderRoomEdits.ReferenceTargetPathMetadata))
+        {
+            // Unmatched references are intentionally hidden and do not replace
+            // a runtime object or its collision.
+            return IsVisible(importedMesh) ? 1 : 0;
+        }
+
+        NodePath targetPath = importedMesh.GetMeta(BlenderRoomEdits.ReferenceTargetPathMetadata).AsNodePath();
+        if (room.GetNodeOrNull<StaticBody3D>(targetPath) is not StaticBody3D targetBody)
+        {
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} reference {name} target {targetPath} is not a StaticBody3D.");
+            return 1;
+        }
+
+        CollisionShape3D? collision = targetBody.GetChildren().OfType<CollisionShape3D>().FirstOrDefault();
+        if (collision?.Shape is not ConcavePolygonShape3D actualShape || importedMesh.Mesh is null)
+        {
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} reference {name} does not use an imported trimesh hitbox.");
+            return 1;
+        }
+
+        ConcavePolygonShape3D? expectedShape = importedMesh.Mesh.CreateTrimeshShape();
+        Transform3D expectedTransform = targetBody.GlobalTransform.AffineInverse() * importedMesh.GlobalTransform;
+        float transformError = TransformError(collision.Transform, expectedTransform);
+        float meshError = ConcaveShapeError(actualShape, expectedShape);
+        bool doubleSided = actualShape.BackfaceCollision;
+        if (!doubleSided || transformError > Tolerance || meshError > Tolerance)
+        {
+            GD.PushError(
+                $"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} reference {name} hitbox differs from its rendered mesh; transform={transformError:F6}, triangles={meshError:F6}, double_sided={doubleSided}.");
+            return 1;
+        }
+
+        return 0;
     }
 
     private async Task<int> AuditReferenceMotion(Node3D room, int roomNumber)
@@ -400,5 +466,39 @@ public partial class BlenderRoomExactSmokeTest : Node
                 Mathf.Max(
                     actual.Transform.Basis.Y.DistanceTo(expected.Transform.Basis.Y),
                     actual.Transform.Basis.Z.DistanceTo(expected.Transform.Basis.Z))));
+    }
+
+    private static float TransformError(Transform3D actual, Transform3D expected) =>
+        Mathf.Max(
+            actual.Origin.DistanceTo(expected.Origin),
+            Mathf.Max(
+                actual.Basis.X.DistanceTo(expected.Basis.X),
+                Mathf.Max(
+                    actual.Basis.Y.DistanceTo(expected.Basis.Y),
+                    actual.Basis.Z.DistanceTo(expected.Basis.Z))));
+
+    private static float ConcaveShapeError(
+        ConcavePolygonShape3D actual,
+        ConcavePolygonShape3D? expected)
+    {
+        if (expected is null)
+        {
+            return float.PositiveInfinity;
+        }
+
+        Vector3[] actualFaces = actual.Data;
+        Vector3[] expectedFaces = expected.Data;
+        if (actualFaces.Length != expectedFaces.Length)
+        {
+            return float.PositiveInfinity;
+        }
+
+        float maximumError = 0.0f;
+        for (int index = 0; index < actualFaces.Length; index++)
+        {
+            maximumError = Mathf.Max(maximumError, actualFaces[index].DistanceTo(expectedFaces[index]));
+        }
+
+        return maximumError;
     }
 }

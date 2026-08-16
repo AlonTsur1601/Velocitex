@@ -84,7 +84,7 @@ internal static class BlenderRoomEdits
             importedMesh.CastShadow = targetVisual?.CastShadow ?? GeometryInstance3D.ShadowCastingSetting.Off;
             if (target is StaticBody3D targetBody)
             {
-                AlignCollisionToImportedMesh(room, targetBody, importedMesh);
+                ApplyImportedMeshCollision(targetBody, importedMesh);
             }
 
             HideVisuals(target);
@@ -129,7 +129,7 @@ internal static class BlenderRoomEdits
             {
                 Name = "BlenderWallCollision",
                 Transform = importedWall.Transform,
-                Shape = importedWall.Mesh?.CreateTrimeshShape()
+                Shape = CreateImportedCollisionShape(importedWall.Mesh)
             };
             body.AddChild(collision);
         }
@@ -431,22 +431,36 @@ internal static class BlenderRoomEdits
         }
     }
 
-    private static void AlignCollisionToImportedMesh(Node3D room, StaticBody3D body, MeshInstance3D mesh)
+    private static void ApplyImportedMeshCollision(StaticBody3D body, MeshInstance3D mesh)
     {
         CollisionShape3D? collision = body.GetChildren()
             .OfType<CollisionShape3D>()
-            .FirstOrDefault(child => child.Shape is BoxShape3D);
-        if (collision?.Shape is not BoxShape3D box || mesh.Mesh is null)
+            .FirstOrDefault();
+        ConcavePolygonShape3D? importedShape = CreateImportedCollisionShape(mesh.Mesh);
+        if (collision is null || importedShape is null)
         {
             return;
         }
 
-        Aabb aabb = mesh.Mesh.GetAabb();
-        Vector3 scale = mesh.Transform.Basis.Scale.Abs();
-        Basis rotation = mesh.Transform.Basis.Orthonormalized();
-        Transform3D geometryTransform = new(rotation, mesh.Transform * aabb.GetCenter());
-        body.GlobalTransform = room.GlobalTransform * geometryTransform * collision.Transform.AffineInverse();
-        box.Size = aabb.Size * scale;
+        // Keep this CollisionShape3D instance because room mechanisms retain
+        // references to it and toggle Disabled while doors and barriers move.
+        // Only replace its proxy box with the exact triangles and transform of
+        // the Blender mesh that is rendered for the same runtime body.
+        collision.Transform = body.GlobalTransform.AffineInverse() * mesh.GlobalTransform;
+        collision.Shape = importedShape;
+    }
+
+    private static ConcavePolygonShape3D? CreateImportedCollisionShape(Mesh? mesh)
+    {
+        ConcavePolygonShape3D? shape = mesh?.CreateTrimeshShape();
+        if (shape is not null)
+        {
+            // Imported materials are rendered double-sided, so the matching
+            // collision surface must also be solid from either side.
+            shape.BackfaceCollision = true;
+        }
+
+        return shape;
     }
 }
 
