@@ -29,7 +29,6 @@ public partial class Room02Runtime : RoomRuntime
     private int _nextRouteCheckpoint;
     private int _solutionWarmupTicks = 6;
     private ExitDoor3D? _exitDoor;
-    private CollisionShape3D? _routeLockCollision;
 
     public override void _Ready()
     {
@@ -329,8 +328,6 @@ public partial class Room02Runtime : RoomRuntime
         AddChild(goal);
 
         _exitDoor = RoomGeometry.AddGoalExitDoor(this, goalPosition);
-        AddRouteLockCollision(_exitDoor);
-        LockExitDoor();
     }
 
     private void AddRouteCheckpoint(
@@ -367,7 +364,7 @@ public partial class Room02Runtime : RoomRuntime
                 }
                 if (_nextRouteCheckpoint == _routeCheckpoints.Count)
                 {
-                    UnlockExitDoor();
+                    _exitDoor?.ResetClosed();
                 }
             }
         };
@@ -377,54 +374,6 @@ public partial class Room02Runtime : RoomRuntime
         _routeCheckpoints.Add(checkpoint);
     }
 
-
-    private void AddRouteLockCollision(ExitDoor3D door)
-    {
-        StaticBody3D lockBody = new()
-        {
-            Name = "RouteLockBarrier",
-            Position = new Vector3(0.0f, 0.0f, -0.26f),
-            CollisionLayer = 1,
-            CollisionMask = 1,
-        };
-        _routeLockCollision = new CollisionShape3D
-        {
-            Name = "RouteLockCollision",
-            Position = new Vector3(0.0f, 2.0f, 0.0f),
-            Shape = new BoxShape3D { Size = new Vector3(3.55f, 3.75f, 0.3f) },
-        };
-        lockBody.AddChild(_routeLockCollision);
-        door.AddChild(lockBody);
-    }
-
-    private void LockExitDoor()
-    {
-        if (IsInstanceValid(_exitDoor))
-        {
-            _exitDoor!.ResetClosed();
-            // Keep the actual door alive and visible while locked. Its own
-            // closed-door collider and the route barrier both remain solid;
-            // only completion of the ordered button route can release them.
-            _exitDoor.ProcessMode = ProcessModeEnum.Inherit;
-        }
-        if (IsInstanceValid(_routeLockCollision))
-        {
-            _routeLockCollision!.SetDeferred(CollisionShape3D.PropertyName.Disabled, false);
-        }
-    }
-
-    private void UnlockExitDoor()
-    {
-        if (IsInstanceValid(_routeLockCollision))
-        {
-            _routeLockCollision!.SetDeferred(CollisionShape3D.PropertyName.Disabled, true);
-        }
-        if (IsInstanceValid(_exitDoor))
-        {
-            _exitDoor!.ProcessMode = ProcessModeEnum.Inherit;
-        }
-    }
-
     private void ResetRouteCheckpoints()
     {
         _nextRouteCheckpoint = 0;
@@ -432,6 +381,6 @@ public partial class Room02Runtime : RoomRuntime
         {
             checkpoint.ResetCheckpoint();
         }
-        LockExitDoor();
+        _exitDoor?.ResetClosed();
     }
 }

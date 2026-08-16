@@ -210,6 +210,9 @@ public partial class ExitDoor3D : Node3D
     {
         if (IsInstanceValid(_darknessOverlay))
         {
+            Rect2 visibleRect = GetViewport().GetVisibleRect();
+            _darknessOverlay!.Position = visibleRect.Position;
+            _darknessOverlay.Size = visibleRect.Size;
             _darknessOverlay!.Color = new Color(0.0f, 0.0f, 0.0f, _darknessAmount);
         }
     }

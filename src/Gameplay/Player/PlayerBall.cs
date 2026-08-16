@@ -25,6 +25,7 @@ public partial class PlayerBall : RigidBody3D
     public bool IsTrailEmitting => _trail.Emitting;
     public bool IsTrailVisible => _trail.Visible;
     public bool IsTrailEnabled => _trailEnabled;
+    public Color TrailColor => _trailMaterial.AlbedoColor;
     public string AppliedPatternId { get; private set; } = "none";
     public string AppliedCrownId => _crown?.AppliedCrownId ?? "none-crown";
     public bool IsCrownVisible => _crown?.Visible == true;
@@ -60,8 +61,6 @@ public partial class PlayerBall : RigidBody3D
     private GpuParticles3D _trail = null!;
     private StandardMaterial3D _trailMaterial = null!;
     private CandyCrown3D _crown = null!;
-    private Color _baseTrailColor = Colors.White;
-    private bool _glassTrailTintApplied;
     private bool _trailEnabled;
     private bool _firstPersonView;
     private float _oneWayRetainedForwardSpeed;
@@ -260,8 +259,6 @@ public partial class PlayerBall : RigidBody3D
 
         Color trailColor = CandyVisualStyle.ResolveTrailColor(profile.TrailId);
         trailColor.A = 0.62f;
-        _baseTrailColor = trailColor;
-        _glassTrailTintApplied = false;
         ApplyTrailColor(trailColor);
     }
 
@@ -273,17 +270,6 @@ public partial class PlayerBall : RigidBody3D
         if (!_trail.Emitting)
         {
             return;
-        }
-
-        bool shouldUseGlassTint = GroundSurfaceKind == SurfaceKind.Frictionless;
-        if (shouldUseGlassTint != _glassTrailTintApplied)
-        {
-            _glassTrailTintApplied = shouldUseGlassTint;
-            Color color = shouldUseGlassTint
-                ? _baseTrailColor.Lerp(Colors.White, 0.48f)
-                : _baseTrailColor;
-            color.A = _baseTrailColor.A;
-            ApplyTrailColor(color);
         }
 
         _trail.GlobalPosition = GlobalPosition;

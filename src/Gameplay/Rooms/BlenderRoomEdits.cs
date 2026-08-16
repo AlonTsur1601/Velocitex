@@ -6,6 +6,7 @@ namespace Velocitex.Gameplay.Rooms;
 internal static class BlenderRoomEdits
 {
     internal const string ReferenceTargetPathMetadata = "blender_reference_target_path";
+    internal const string ReferenceCollisionPathMetadata = "blender_reference_collision_path";
 
     public static void Apply(Node3D room, int roomNumber)
     {
@@ -60,6 +61,7 @@ internal static class BlenderRoomEdits
             importedWall.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
         }
 
+        Dictionary<StaticBody3D, List<MeshInstance3D>> collisionReferences = new();
         foreach (MeshInstance3D importedMesh in importedMeshes.Where(IsReferenceMesh))
         {
             Node3D? target = FindReferenceTarget(room, importedMesh);
@@ -77,6 +79,11 @@ internal static class BlenderRoomEdits
             if (targetMaterial is null)
             {
                 importedMesh.Visible = false;
+                if (target is StaticBody3D hiddenTargetBody)
+                {
+                    AddCollisionReference(collisionReferences, hiddenTargetBody, importedMesh);
+                    importedMesh.SetMeta(ReferenceTargetPathMetadata, room.GetPathTo(target));
+                }
                 continue;
             }
 
@@ -84,13 +91,18 @@ internal static class BlenderRoomEdits
             importedMesh.CastShadow = targetVisual?.CastShadow ?? GeometryInstance3D.ShadowCastingSetting.Off;
             if (target is StaticBody3D targetBody)
             {
-                ApplyImportedMeshCollision(targetBody, importedMesh);
+                AddCollisionReference(collisionReferences, targetBody, importedMesh);
             }
 
             HideVisuals(target);
             importedMesh.Visible = IsVisibleThrough(target, room);
             importedMesh.SetMeta(ReferenceTargetPathMetadata, room.GetPathTo(target));
             referenceBinding.Bind(importedMesh, target);
+        }
+
+        foreach ((StaticBody3D body, List<MeshInstance3D> references) in collisionReferences)
+        {
+            ApplyImportedMeshCollisions(body, references.OrderBy(mesh => mesh.Name.ToString(), StringComparer.Ordinal).ToArray());
         }
 
         foreach (StaticBody3D oldWall in EnumerateDescendants(room)
@@ -128,7 +140,11 @@ internal static class BlenderRoomEdits
             CollisionShape3D collision = new()
             {
                 Name = "BlenderWallCollision",
-                Transform = importedWall.Transform,
+                // BlenderGeometry and the imported mesh can both carry a
+                // transform.  The collision body is a sibling of that import
+                // root, so copying only the mesh's local transform puts the
+                // hitbox somewhere different from the rendered triangles.
+                Transform = body.GlobalTransform.AffineInverse() * importedWall.GlobalTransform,
                 Shape = CreateImportedCollisionShape(importedWall.Mesh)
             };
             body.AddChild(collision);
@@ -137,6 +153,19 @@ internal static class BlenderRoomEdits
 
     private static bool IsReferenceMesh(MeshInstance3D mesh) =>
         mesh.Name.ToString().StartsWith("REF_", StringComparison.Ordinal);
+
+    private static void AddCollisionReference(
+        IDictionary<StaticBody3D, List<MeshInstance3D>> referencesByBody,
+        StaticBody3D body,
+        MeshInstance3D mesh)
+    {
+        if (!referencesByBody.TryGetValue(body, out List<MeshInstance3D>? references))
+        {
+            references = new List<MeshInstance3D>();
+            referencesByBody[body] = references;
+        }
+        references.Add(mesh);
+    }
 
     private static Material? FindFirstMaterial(Node root)
     {
@@ -320,11 +349,13 @@ internal static class BlenderRoomEdits
     {
         string importedName = ReferenceTargetName(importedMesh);
         string dottedName = importedName.Replace("_001", ".001", StringComparison.Ordinal);
+        string unsuffixedName = RemoveNumericDuplicateSuffix(importedName);
         Node3D[] candidates = EnumerateDescendants(root)
             .OfType<Node3D>()
             .Where(node =>
                 node.Name.ToString().Equals(importedName, StringComparison.Ordinal) ||
-                node.Name.ToString().Equals(dottedName, StringComparison.Ordinal))
+                node.Name.ToString().Equals(dottedName, StringComparison.Ordinal) ||
+                node.Name.ToString().Equals(unsuffixedName, StringComparison.Ordinal))
             .ToArray();
         if (candidates.Length <= 1)
         {
@@ -346,6 +377,19 @@ internal static class BlenderRoomEdits
             .OrderBy(match => match.Score)
             .Select(match => match.Candidate)
             .FirstOrDefault();
+    }
+
+    private static string RemoveNumericDuplicateSuffix(string name)
+    {
+        int separator = Mathf.Max(name.LastIndexOf('.'), name.LastIndexOf('_'));
+        if (separator <= 0 || separator == name.Length - 1)
+        {
+            return name;
+        }
+
+        return name[(separator + 1)..].All(char.IsDigit)
+            ? name[..separator]
+            : name;
     }
 
     private static float BoundsError(Aabb left, Aabb right) =>
@@ -431,23 +475,45 @@ internal static class BlenderRoomEdits
         }
     }
 
-    private static void ApplyImportedMeshCollision(StaticBody3D body, MeshInstance3D mesh)
+    private static void ApplyImportedMeshCollisions(StaticBody3D body, IReadOnlyList<MeshInstance3D> meshes)
     {
-        CollisionShape3D? collision = body.GetChildren()
+        CollisionShape3D[] originalBoxCollisions = body.GetChildren()
             .OfType<CollisionShape3D>()
-            .FirstOrDefault();
-        ConcavePolygonShape3D? importedShape = CreateImportedCollisionShape(mesh.Mesh);
-        if (collision is null || importedShape is null)
+            .Where(collision => collision.Shape is BoxShape3D)
+            .ToArray();
+
+        for (int index = 0; index < meshes.Count; index++)
         {
-            return;
+            MeshInstance3D mesh = meshes[index];
+            ConcavePolygonShape3D? importedShape = CreateImportedCollisionShape(mesh.Mesh);
+            if (importedShape is null)
+            {
+                continue;
+            }
+
+            CollisionShape3D collision;
+            if (index < originalBoxCollisions.Length)
+            {
+                collision = originalBoxCollisions[index];
+            }
+            else
+            {
+                collision = new CollisionShape3D { Name = $"BlenderReferenceCollision{index + 1}" };
+                body.AddChild(collision);
+            }
+
+            // Keep the original CollisionShape3D instances where possible,
+            // because doors and mechanisms retain references to them. Replace
+            // every authored box, not only the first one, with the exact
+            // Blender triangles that are visible for that same body.
+            collision.Transform = body.GlobalTransform.AffineInverse() * mesh.GlobalTransform;
+            collision.Shape = importedShape;
+            mesh.SetMeta(ReferenceCollisionPathMetadata, body.GetPathTo(collision));
         }
 
-        // Keep this CollisionShape3D instance because room mechanisms retain
-        // references to it and toggle Disabled while doors and barriers move.
-        // Only replace its proxy box with the exact triangles and transform of
-        // the Blender mesh that is rendered for the same runtime body.
-        collision.Transform = body.GlobalTransform.AffineInverse() * mesh.GlobalTransform;
-        collision.Shape = importedShape;
+        // Additional boxes on gameplay mechanisms are intentionally kept.
+        // The Blender reference exporter includes every wall/platform body,
+        // but only the primary envelope of complex props such as cannons.
     }
 
     private static ConcavePolygonShape3D? CreateImportedCollisionShape(Mesh? mesh)

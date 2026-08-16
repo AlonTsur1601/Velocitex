@@ -42,6 +42,7 @@ public partial class MovementTestRoom : RoomRuntime
     private Transform3D _spawnTransform;
     private SolutionTrace? _solutionTrace;
     private bool _runMovementSmoke;
+    private Color _trailColorBeforeGlass;
     private bool _runRoom01SolutionSmoke;
     private bool _runRoom01GateBypassSmoke;
     private bool _runRoom01Preview;
@@ -425,11 +426,18 @@ public partial class MovementTestRoom : RoomRuntime
 
             _player.ResetTo(new Transform3D(Basis.Identity, new Vector3(100.0f, 0.9f, 0.0f)));
             _player.SimulatedMoveInput = Vector2.Zero;
+            _trailColorBeforeGlass = _player.TrailColor;
             return;
         }
 
         if (_smokeTick == 358)
         {
+            if (!_player.TrailColor.IsEqualApprox(_trailColorBeforeGlass))
+            {
+                FailMovementSmoke($"Frictionless glass changed the configured trail color from {_trailColorBeforeGlass} to {_player.TrailColor}.");
+                return;
+            }
+
             if (_timedGlassSmokePad!.IsBroken ||
                 _timedGlassSmokePad.LongestContinuousGlassContactSeconds >= _timedGlassSmokePad.BreakDelaySeconds)
             {
@@ -458,6 +466,12 @@ public partial class MovementTestRoom : RoomRuntime
             if (_timedGlassSmokePad.IsBroken || glassCollision.Disabled)
             {
                 FailMovementSmoke($"Timed glass did not restore on respawn: broken={_timedGlassSmokePad.IsBroken}, collision_disabled={glassCollision.Disabled}.");
+                return;
+            }
+
+            if (!_player.TrailColor.IsEqualApprox(_trailColorBeforeGlass))
+            {
+                FailMovementSmoke($"Respawning after glass changed the configured trail color from {_trailColorBeforeGlass} to {_player.TrailColor}.");
                 return;
             }
 

@@ -156,7 +156,8 @@ public partial class BlenderRoomExactSmokeTest : Node
         }
 
         ConcavePolygonShape3D? expectedShape = importedMesh.Mesh.CreateTrimeshShape();
-        float transformError = TransformError(collision.Transform, importedMesh.Transform);
+        Transform3D expectedTransform = body!.GlobalTransform.AffineInverse() * importedMesh.GlobalTransform;
+        float transformError = TransformError(collision.Transform, expectedTransform);
         float meshError = ConcaveShapeError(actualShape, expectedShape);
         bool doubleSided = actualShape.BackfaceCollision;
         if (!doubleSided || transformError > Tolerance || meshError > Tolerance)
@@ -186,7 +187,14 @@ public partial class BlenderRoomExactSmokeTest : Node
             return 1;
         }
 
-        CollisionShape3D? collision = targetBody.GetChildren().OfType<CollisionShape3D>().FirstOrDefault();
+        if (!importedMesh.HasMeta(BlenderRoomEdits.ReferenceCollisionPathMetadata))
+        {
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} reference {name} has no exact collision binding.");
+            return 1;
+        }
+
+        NodePath collisionPath = importedMesh.GetMeta(BlenderRoomEdits.ReferenceCollisionPathMetadata).AsNodePath();
+        CollisionShape3D? collision = targetBody.GetNodeOrNull<CollisionShape3D>(collisionPath);
         if (collision?.Shape is not ConcavePolygonShape3D actualShape || importedMesh.Mesh is null)
         {
             GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} reference {name} does not use an imported trimesh hitbox.");

@@ -9,6 +9,7 @@ public partial class Room02RouteFeedbackSmokeTest : Node
 {
     public override async void _Ready()
     {
+        bool captureDimming = OS.GetCmdlineUserArgs().Contains("--capture-room02-dimming", StringComparer.Ordinal);
         PackedScene? packed = GD.Load<PackedScene>("res://scenes/Room02.tscn");
         RoomRuntime? room = packed?.Instantiate<RoomRuntime>();
         if (room is null)
@@ -23,21 +24,26 @@ public partial class Room02RouteFeedbackSmokeTest : Node
 
         PlayerBall? player = room.GetNodeOrNull<PlayerBall>("Player");
         ExitDoor3D? door = room.GetNodeOrNull<ExitDoor3D>("ExitDoor");
-        CollisionShape3D? routeLock = door?.GetNodeOrNull<CollisionShape3D>("RouteLockBarrier/RouteLockCollision");
         CollisionShape3D? closedDoorBlocker = door?.GetNodeOrNull<CollisionShape3D>("ClosedDoorBlocker/CollisionShape3D");
         RouteCheckpoint3D[] checkpoints = EnumerateDescendants(room)
             .OfType<RouteCheckpoint3D>()
             .OrderBy(checkpoint => checkpoint.CheckpointIndex)
             .ToArray();
-        if (player is null || door is null || routeLock is null || closedDoorBlocker is null || checkpoints.Length != 4)
+        if (player is null || door is null || closedDoorBlocker is null || checkpoints.Length != 4)
         {
-            Fail("Room 02 is missing its player, four route buttons or route-locked exit.");
+            Fail("Room 02 is missing its player, four route buttons or shared exit door.");
             return;
         }
 
-        if (door.ProcessMode == ProcessModeEnum.Disabled || routeLock.Disabled || closedDoorBlocker.Disabled)
+        if (door.GetNodeOrNull<Node3D>("RouteLockBarrier") is not null)
         {
-            Fail("The visible exit door or one of its physical blockers was missing before completing the route.");
+            Fail("Room 02 still contains its obsolete private route-lock barrier instead of using the shared exit door.");
+            return;
+        }
+
+        if (door.ProcessMode == ProcessModeEnum.Disabled || closedDoorBlocker.Disabled)
+        {
+            Fail("The shared visible exit door was not physically closed before completing the route.");
             return;
         }
 
@@ -71,7 +77,7 @@ public partial class Room02RouteFeedbackSmokeTest : Node
         }
         if (checkpoints[2].IsActivated || wrongPlate.MaterialOverride == idleMaterial)
         {
-            Fail($"An out-of-order button activated or failed to flash its red error material. activated={checkpoints[2].IsActivated}, denied={checkpoints[2].IsDeniedFeedbackActive}, grounded={player.IsGrounded}, playerY={player.GlobalPosition.Y:0.###}, plateY={wrongPlate.GlobalPosition.Y:0.###}.");
+            Fail($"An out-of-order button activated or failed to show its solid red error material. activated={checkpoints[2].IsActivated}, denied={checkpoints[2].IsDeniedFeedbackActive}, grounded={player.IsGrounded}, playerY={player.GlobalPosition.Y:0.###}, plateY={wrongPlate.GlobalPosition.Y:0.###}.");
             return;
         }
         if (wrongPlate.MaterialOverride is not StandardMaterial3D errorMaterial ||
@@ -80,32 +86,33 @@ public partial class Room02RouteFeedbackSmokeTest : Node
             wrongFrame.MaterialOverride != frameMaterial ||
             wrongPlate.GetChildren().Any(child => child.Name.ToString().StartsWith("SequencePip", StringComparison.Ordinal) && child is GeometryInstance3D { Visible: false }))
         {
-            Fail("The out-of-order feedback did not flash only the inset button red while preserving its base and number dots.");
+            Fail("The out-of-order feedback did not color only the inset button solid red while preserving its base and number dots.");
             return;
         }
 
-        // Respawn/reset can happen before the physics overlap cache has moved
-        // the player away from the old button. The stale contact must not
-        // immediately recreate denied feedback after the visual was reset.
-        checkpoints[2].ResetCheckpoint();
+        Material solidDeniedMaterial = wrongPlate.MaterialOverride!;
+        for (int frame = 0; frame < 6; frame++)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            if (wrongPlate.MaterialOverride != solidDeniedMaterial)
+            {
+                Fail("The out-of-order button alternated red materials instead of remaining solid red.");
+                return;
+            }
+        }
+
+        // Exercise the same room-level restart path used after a real death.
+        // The player can die anywhere in the room; no button overlap is assumed.
+        room.RestartRoom();
         for (int frame = 0; frame < 6; frame++)
         {
             await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         }
-        if (checkpoints[2].IsDeniedFeedbackActive ||
-            wrongPlate.MaterialOverride != idleMaterial ||
-            checkpoints[2].IsShowingDeniedRed)
+        if (checkpoints.Any(checkpoint => checkpoint.IsDeniedFeedbackActive || checkpoint.IsShowingDeniedRed) ||
+            wrongPlate.MaterialOverride != idleMaterial)
         {
-            Fail("Respawn/reset retriggered the stale wrong-button contact and restored red feedback.");
-            return;
-        }
-
-        await MovePlayerAway(player);
-        await MovePlayerTo(player, checkpoints[2], Vector3.Zero);
-        if (!checkpoints[2].IsDeniedFeedbackActive)
-        {
-            Fail("The wrong button did not re-arm after the player left it following respawn/reset.");
+            Fail("RestartRoom left or recreated red button feedback after respawn.");
             return;
         }
 
@@ -155,9 +162,23 @@ public partial class Room02RouteFeedbackSmokeTest : Node
             Fail($"Room 02's four floor buttons produced {doorIndicators} door indicators instead of four.");
             return;
         }
-        if (door.ProcessMode == ProcessModeEnum.Disabled || !routeLock.Disabled)
+        if (door.ProcessMode == ProcessModeEnum.Disabled || closedDoorBlocker.Disabled)
         {
-            Fail("Completing the four-button sequence did not unlock the exit.");
+            Fail("The shared exit door changed its physical state before the player reached the goal.");
+            return;
+        }
+
+        Area3D goal = room.GetNode<Area3D>("GoalCup");
+        goal.EmitSignal(Area3D.SignalName.BodyEntered, player);
+        player.GlobalPosition = door.DoorwayCenter;
+        for (int frame = 0; frame < 20; frame++)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+        }
+        if (door.OpenAmount < 0.95f || !closedDoorBlocker.Disabled)
+        {
+            Fail($"Room 02 did not open through the shared exit-door behavior: open={door.OpenAmount:F3}, blocked={!closedDoorBlocker.Disabled}.");
             return;
         }
 
@@ -178,6 +199,19 @@ public partial class Room02RouteFeedbackSmokeTest : Node
             Fail($"Room 02's exit midpoint dimming is incorrect: amount={door.DarknessAmount:F3}, alpha={darknessOverlay.Color.A:F3}.");
             return;
         }
+        if (captureDimming)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            Image? image = GetViewport().GetTexture().GetImage();
+            if (image is null || image.IsEmpty())
+            {
+                Fail("Room 02 midpoint dimming screenshot could not be captured.");
+                return;
+            }
+            string capturePath = ProjectSettings.GlobalizePath("user://room02-dimming-midpoint.png");
+            image.SavePng(capturePath);
+            GD.Print($"ROOM02_DIMMING_CAPTURE: {capturePath}");
+        }
 
         player.GlobalPosition = door.ToGlobal(new Vector3(0.0f, 0.72f, -ExitDoor3D.CorridorFadeEndDepth));
         door._Process(0.0);
@@ -194,7 +228,7 @@ public partial class Room02RouteFeedbackSmokeTest : Node
             return;
         }
 
-        GD.Print("ROOM02_ROUTE_FEEDBACK_PASS: out-of-order input flashed red, the four-button sequence activated in order and the exit stayed physically locked until completion.");
+        GD.Print("ROOM02_ROUTE_FEEDBACK_PASS: out-of-order input stayed solid red, RestartRoom cleared it, the four-button sequence activated in order and Room 02 used the shared exit-door behavior.");
         StopAndReleaseAudio(room);
         room.QueueFree();
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);

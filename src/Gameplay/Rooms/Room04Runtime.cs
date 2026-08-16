@@ -284,30 +284,35 @@ public partial class Room04Runtime : RoomRuntime
             return;
         }
 
-        if (_sequenceSmokeTick == 32)
+        if (_sequenceSmokeTick == 42)
         {
             AssertIdleButtonVisual(_sequenceButtons[1], "second button after its wrong-order flash");
             _sequenceButtons[0].Press(_player);
             return;
         }
 
-        if (_sequenceSmokeTick == 33)
+        if (_sequenceSmokeTick == 43)
         {
             AssertWrongOrderFeedback(_sequenceButtons[0], "first button before the lever");
             return;
         }
 
-        if (_sequenceSmokeTick == 63)
+        if (_sequenceSmokeTick == 83)
         {
             AssertIdleButtonVisual(_sequenceButtons[0], "first button after its wrong-order flash");
             _player.ResetTo(new Transform3D(Basis.Identity, _lever.GlobalPosition + new Vector3(1.4f, 0.73f, 0.0f)));
             _lever.Interact(_player);
             _sequenceButtons[0].Press(_player);
+            return;
+        }
+
+        if (_sequenceSmokeTick == 84)
+        {
             _sequenceButtons[1].Press(_player);
             return;
         }
 
-        if (_sequenceSmokeTick < 64)
+        if (_sequenceSmokeTick < 85)
         {
             return;
         }
@@ -357,7 +362,7 @@ public partial class Room04Runtime : RoomRuntime
             return;
         }
 
-        GD.Print("ROOM04_SEQUENCE_PASS: the upright lever is required before two ordered floor buttons, wrong input flashes solid red, and sequence pips remain attached to the depressed plates.");
+        GD.Print("ROOM04_SEQUENCE_PASS: the upright lever is required before two ordered floor buttons, wrong input stays solid red, and sequence pips remain attached to the depressed plates.");
         GetTree().Quit(0);
     }
 
