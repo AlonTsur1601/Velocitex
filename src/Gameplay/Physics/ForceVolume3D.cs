@@ -6,6 +6,8 @@ namespace Velocitex.Gameplay.Physics;
 
 public partial class ForceVolume3D : Area3D
 {
+    public static readonly StringName ForceVolumeGroup = "force_volume";
+
     [Export] public ForceVolumeProfile? Profile { get; set; }
     [Export] public bool AirborneOnly { get; set; }
 
@@ -17,6 +19,7 @@ public partial class ForceVolume3D : Area3D
 
     public override void _Ready()
     {
+        AddToGroup(ForceVolumeGroup);
         CollisionLayer = 0;
         Monitoring = true;
         Monitorable = true;
@@ -62,6 +65,21 @@ public partial class ForceVolume3D : Area3D
         return _rigidBodies.Contains(body);
     }
 
+    public void ReleaseBody(RigidBody3D body)
+    {
+        if (!_rigidBodies.Remove(body))
+        {
+            return;
+        }
+
+        if (body is PlayerBall player)
+        {
+            player.ClearAirControlSource(GetInstanceId());
+        }
+
+        RigidBodyExited?.Invoke(body);
+    }
+
     private void OnBodyEntered(Node3D body)
     {
         if (body is not RigidBody3D rigidBody || !_rigidBodies.Add(rigidBody))
@@ -82,16 +100,11 @@ public partial class ForceVolume3D : Area3D
 
     private void OnBodyExited(Node3D body)
     {
-        if (body is not RigidBody3D rigidBody || !_rigidBodies.Remove(rigidBody))
+        if (body is not RigidBody3D rigidBody)
         {
             return;
         }
 
-        if (rigidBody is PlayerBall player)
-        {
-            player.ClearAirControlSource(GetInstanceId());
-        }
-
-        RigidBodyExited?.Invoke(rigidBody);
+        ReleaseBody(rigidBody);
     }
 }

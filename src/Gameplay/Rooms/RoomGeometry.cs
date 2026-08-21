@@ -1041,37 +1041,76 @@ internal readonly record struct PlatformWallStyle(
         };
         parent.AddChild(housing);
         AddCylinder(housing, "Hub", Vector3.Zero, new Vector3(Mathf.Pi / 2.0f, 0.0f, 0.0f), 0.48f * scale, 0.8f * scale, hubMaterial);
-        Node3D guard = new() { Name = "Guard" };
-        housing.AddChild(guard);
-        const int guardSegments = 16;
+
+        // A single smooth ring reads as a protective fan guard cleanly.
+        // Building it out of many short straight box segments (the old
+        // approach) creates a cluttered look with dozens of unnecessary
+        // visible edges/lines where the flat segments meet at angles
+        // instead of forming a true circle.
         const float guardRadius = 3.35f;
-        float guardSegmentLength = (Mathf.Tau * guardRadius / guardSegments) * 1.04f;
-        for (int index = 0; index < guardSegments; index++)
+        const float guardTubeRadius = 0.11f;
+        housing.AddChild(new MeshInstance3D
         {
-            float angle = index * Mathf.Tau / guardSegments;
-            AddVisualBox(
-                guard,
-                $"GuardSegment{index + 1}",
-                new Vector3(0.18f, guardSegmentLength, 0.18f) * scale,
-                new Vector3(Mathf.Sin(angle) * guardRadius, Mathf.Cos(angle) * guardRadius, 0.18f) * scale,
-                new Vector3(0.0f, 0.0f, angle + (Mathf.Pi * 0.5f)),
-                string.Empty,
-                Colors.White,
-                0.0f,
-                1.0f,
-                bladeMaterial);
-        }
+            Name = "Guard",
+            Position = new Vector3(0.0f, 0.0f, 0.18f * scale),
+            // TorusMesh's default axis is Y, but the fan's own axis (hub,
+            // blades) is Z - without this rotation the ring lies flat on
+            // the wrong plane entirely instead of standing upright around
+            // the blades.
+            Rotation = new Vector3(Mathf.Pi / 2.0f, 0.0f, 0.0f),
+            Mesh = new TorusMesh
+            {
+                InnerRadius = (guardRadius - guardTubeRadius) * scale,
+                OuterRadius = (guardRadius + guardTubeRadius) * scale,
+                Rings = 48,
+                RingSegments = 12,
+            },
+            MaterialOverride = bladeMaterial,
+        });
+
         Node3D rotor = new() { Name = "Rotor" };
         housing.AddChild(rotor);
-        for (int index = 0; index < 5; index++)
+
+        // A wide, shallow spinner cap gives the blades a solid visual
+        // anchor at the hub instead of appearing to float apart from it -
+        // thin blade roots meeting a thin hub edge read as disconnected
+        // even when their boxes technically overlap.
+        rotor.AddChild(new MeshInstance3D
         {
-            float angle = index * Mathf.Tau / 5.0f;
+            Name = "SpinnerCap",
+            Rotation = new Vector3(Mathf.Pi / 2.0f, 0.0f, 0.0f),
+            Mesh = new CylinderMesh
+            {
+                TopRadius = 0.62f * scale,
+                BottomRadius = 0.62f * scale,
+                Height = 0.14f * scale,
+                RadialSegments = 20,
+            },
+            MaterialOverride = bladeMaterial,
+        });
+
+        const int bladeCount = 5;
+        const float bladeInnerRadius = 0.45f;
+        const float bladeOuterRadius = 3.0f;
+        const float bladeLength = bladeOuterRadius - bladeInnerRadius;
+        const float bladeCenterRadius = bladeInnerRadius + (bladeLength * 0.5f);
+        for (int index = 0; index < bladeCount; index++)
+        {
+            float angle = index * Mathf.Tau / bladeCount;
             AddVisualBox(
                 rotor,
                 $"Blade{index + 1}",
-                new Vector3(0.3f, 3.1f, 0.16f) * scale,
-                new Vector3(Mathf.Sin(angle) * 1.4f, Mathf.Cos(angle) * 1.4f, 0.0f) * scale,
-                new Vector3(0.0f, 0.0f, angle),
+                new Vector3(0.42f, bladeLength, 0.16f) * scale,
+                new Vector3(Mathf.Sin(angle) * bladeCenterRadius, Mathf.Cos(angle) * bladeCenterRadius, 0.0f) * scale,
+                // A Z-rotation by +angle turns the box's own long (Y) axis
+                // to point in the (-sin, cos) direction, not (sin, cos) -
+                // the same direction used for the position above only at
+                // angle 0. At every other angle the blade's long axis was
+                // mismatched from its radial position, so it didn't point
+                // back through the hub at all - reading as disconnected
+                // sticks instead of spokes. Negating the angle here makes
+                // the box's long axis match the radial direction exactly.
+                new Vector3(0.0f, 0.0f, -angle),
                 string.Empty,
                 Colors.White,
                 0.0f,
@@ -1324,6 +1363,7 @@ internal readonly record struct PlatformWallStyle(
             ShadowEnabled = false,
         });
         parent.AddChild(door);
+        ConfigureCorridorDepthMaterials(door);
         return door;
     }
 
@@ -1696,6 +1736,15 @@ internal readonly record struct PlatformWallStyle(
         corridorFloor.Position = new Vector3(0.0f, 0.0f, (corridorBackZ + platformEdgeZ) * 0.5f);
         floorMesh.Mesh = SurfaceMeshFactory.CreateTiledBox(floorSize);
         floorCollision.Shape = new BoxShape3D { Size = floorSize };
+        if (floorMesh.MaterialOverride is ShaderMaterial floorDimMaterial)
+        {
+            // The depth-fade dimming shader computes its fade using the
+            // corridor_length uniform it was created with. The floor gets
+            // resized here to reach the adjoining platform edge, so without
+            // updating this uniform to match, the dimming fade is computed
+            // against the wrong length and stops covering the real surface.
+            floorDimMaterial.SetShaderParameter("corridor_length", floorDepth);
+        }
     }
 
     private static void ConfigureCorridorEntranceTrigger(Node parent, ExitDoor3D door)
@@ -1835,12 +1884,32 @@ internal readonly record struct PlatformWallStyle(
             return;
         }
 
+        Vector3 center = (minimum + maximum) * 0.5f;
+        // A cleared blocker piece rebuilt deep inside the dark exit
+        // corridor (negative door-local Z) must not keep the source body's
+        // bright room material - that leaves a lit patch breaking the
+        // corridor's dimming, which is exactly the "bad door dimming" seen
+        // in rooms where some room geometry happened to cross the doorway.
+        Material resolvedMaterial = center.Z < -0.1f ? GetCorridorInfillMaterial() : material;
+
         AddCorridorPanel(
             door,
             $"ExitDoorwayTrim{sourceName}{side}",
             size,
-            (minimum + maximum) * 0.5f,
-            material);
+            center,
+            resolvedMaterial);
+    }
+
+    private static StandardMaterial3D? _corridorInfillMaterial;
+
+    private static StandardMaterial3D GetCorridorInfillMaterial()
+    {
+        return _corridorInfillMaterial ??= new StandardMaterial3D
+        {
+            AlbedoColor = new Color("010203"),
+            Roughness = 1.0f,
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+        };
     }
 
     private static (Vector3 Minimum, Vector3 Maximum) GetBoxBoundsInDoorSpace(
@@ -1931,17 +2000,20 @@ internal readonly record struct PlatformWallStyle(
         Shader shader = new()
         {
             Code = @"shader_type spatial;
-render_mode diffuse_burley, specular_schlick_ggx;
+render_mode unshaded, cull_disabled;
 uniform sampler2D corridor_texture : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform float corridor_length = 9.6;
+uniform vec3 corridor_origin_world;
+uniform vec3 corridor_direction_world = vec3(0.0, 0.0, -1.0);
 varying float corridor_depth;
 void vertex() {
-    corridor_depth = clamp((-VERTEX.z + corridor_length * 0.5) / corridor_length, 0.0, 1.0);
+    vec3 world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+    corridor_depth = clamp(dot(world_position - corridor_origin_world, corridor_direction_world) / corridor_length, 0.0, 1.0);
 }
 void fragment() {
     vec3 detail = texture(corridor_texture, UV * vec2(8.0, 5.0)).rgb;
     float fade = smoothstep(0.0, 1.0, corridor_depth);
-    ALBEDO = detail * mix(vec3(0.095, 0.115, 0.125), vec3(0.002, 0.003, 0.004), fade);
+    ALBEDO = detail * mix(vec3(0.35, 0.39, 0.42), vec3(0.004, 0.006, 0.008), fade);
     ROUGHNESS = 0.96;
     METALLIC = 0.02;
 }",
@@ -1950,6 +2022,25 @@ void fragment() {
         material.SetShaderParameter("corridor_texture", GD.Load<Texture2D>("res://assets/textures/industrial_concrete.png"));
         material.SetShaderParameter("corridor_length", length);
         return material;
+    }
+
+    private static void ConfigureCorridorDepthMaterials(ExitDoor3D door)
+    {
+        Vector3 corridorDirection = (door.GlobalBasis * Vector3.Forward).Normalized();
+        foreach (ShaderMaterial material in EnumerateDescendants(door)
+            .OfType<MeshInstance3D>()
+            .Select(mesh => mesh.MaterialOverride)
+            .OfType<ShaderMaterial>()
+            .Distinct())
+        {
+            if (material.Shader?.Code.Contains("corridor_origin_world", StringComparison.Ordinal) != true)
+            {
+                continue;
+            }
+
+            material.SetShaderParameter("corridor_origin_world", door.GlobalPosition);
+            material.SetShaderParameter("corridor_direction_world", corridorDirection);
+        }
     }
 
     private static StaticBody3D AddCorridorPanel(
@@ -2020,10 +2111,26 @@ void fragment() {
 
         wall.Visible = false;
         wallCollision.Disabled = true;
+        // Splitting a single wall into Left/Right/Below/Above pieces creates
+        // a T-junction: Left and Right each run the wall's full height,
+        // while Below and Above only span the doorway's width. Even with
+        // pixel-perfect coplanar placement this configuration is prone to
+        // hairline rendering cracks along the shared edge (no gap needed -
+        // it's a mesh-tessellation seam, not a positional one), which reads
+        // as a faint shadow line. Extending Below/Above horizontally into
+        // Left/Right's territory turns the single continuous T-junction
+        // line into two shorter, overlapping seams instead, hiding the
+        // crack rather than relying on exact edge alignment.
+        const float wallSeamOverlap = 0.03f;
         AddDoorwayWallPiece(shell, wallName, "Left", sideWall, wall.Position, wallSize, wallHorizontalMin, openingHorizontalMin, wallVerticalMin, wallVerticalMax, wallMaterial);
         AddDoorwayWallPiece(shell, wallName, "Right", sideWall, wall.Position, wallSize, openingHorizontalMax, wallHorizontalMax, wallVerticalMin, wallVerticalMax, wallMaterial);
-        AddDoorwayWallPiece(shell, wallName, "Below", sideWall, wall.Position, wallSize, openingHorizontalMin, openingHorizontalMax, wallVerticalMin, openingVerticalMin, wallMaterial);
-        AddDoorwayWallPiece(shell, wallName, "Above", sideWall, wall.Position, wallSize, openingHorizontalMin, openingHorizontalMax, openingVerticalMax, wallVerticalMax, wallMaterial);
+        AddDoorwayWallPiece(shell, wallName, "Below", sideWall, wall.Position, wallSize, openingHorizontalMin - wallSeamOverlap, openingHorizontalMax + wallSeamOverlap, wallVerticalMin, openingVerticalMin, wallMaterial);
+        // Dip this piece down into the frame opening by the same overlap
+        // used for the door's own backing piece below, so the two
+        // independently-transformed header pieces provably interpenetrate
+        // instead of relying on an exact face-to-face join that can leave a
+        // hairline gap (visible as a shadow line) above the frame.
+        AddDoorwayWallPiece(shell, wallName, "Above", sideWall, wall.Position, wallSize, openingHorizontalMin - wallSeamOverlap, openingHorizontalMax + wallSeamOverlap, openingVerticalMax - headerWallOverlap, wallVerticalMax, wallMaterial);
 
         // Always finish the carved wall in the frame's own plane. Even when
         // the shell wall is nearby, its front face can still sit a few tenths

@@ -33,6 +33,7 @@ public partial class InterferenceCannon3D : Node3D
     [Export] public bool UseBatchedDenseVisuals { get; set; }
 
     public int ShotsFired { get; private set; }
+    public int ProjectilePoolCount => _projectiles.Count;
     public int ScheduledFirstFireTick => _nextFireTick;
     public bool UsesRandomizedTiming => InitialDelayJitterTicks > 0 && CadenceJitterTicks > 0;
     public bool HasSolidBodyHitbox =>
@@ -53,7 +54,6 @@ public partial class InterferenceCannon3D : Node3D
     public override void _Ready()
     {
         BuildVisual();
-        BuildProjectilePool();
         SetProcess(_warningLamp is not null);
         _deterministicSmokeTiming = OS.GetCmdlineUserArgs().Any(argument => argument.Contains("solution-smoke", StringComparison.Ordinal));
         if (_deterministicSmokeTiming)
@@ -184,6 +184,7 @@ public partial class InterferenceCannon3D : Node3D
 
     private void FireProjectile()
     {
+        EnsureProjectilePool();
         ProjectileState projectile = _projectiles.FirstOrDefault(state => !state.Active) ?? _projectiles[0];
         Deactivate(projectile);
         RigidBody3D body = projectile.Body;
@@ -210,16 +211,48 @@ public partial class InterferenceCannon3D : Node3D
         ProjectileFired?.Invoke();
     }
 
-    private void BuildProjectilePool()
-    {
-        StandardMaterial3D projectileMaterial = RoomGeometry.CreateMaterial(
-            "res://assets/textures/rubber_chevrons.svg",
-            new Color("d2603e"),
-            0.08f,
-            0.82f,
-            emissionEnabled: true,
-            emission: new Color("5c160b"));
+    private static SphereMesh? _sharedProjectileMesh;
+    private static SphereShape3D? _sharedProjectileShape;
+    private static StandardMaterial3D? _sharedProjectileMaterial;
+    private static BoxShape3D? _sharedBodyEnvelopeShape;
+    private static BoxShape3D? _sharedMountShape;
+    private static BoxShape3D? _sharedHousingShape;
+    private static BoxShape3D? _sharedMuzzleShape;
 
+    private static SphereMesh SharedProjectileMesh => _sharedProjectileMesh ??= new SphereMesh { Radius = 0.62f, Height = 1.24f, RadialSegments = 20, Rings = 10 };
+
+    private static SphereShape3D SharedProjectileShape => _sharedProjectileShape ??= new SphereShape3D { Radius = 0.62f };
+
+    private static BoxShape3D SharedBodyEnvelopeShape => _sharedBodyEnvelopeShape ??= new BoxShape3D { Size = new Vector3(3.08f, 3.32f, 2.24f) };
+
+    private static BoxShape3D SharedMountShape => _sharedMountShape ??= new BoxShape3D { Size = new Vector3(0.36f, 3.2f, 2.2f) };
+
+    private static BoxShape3D SharedHousingShape => _sharedHousingShape ??= new BoxShape3D { Size = new Vector3(2.4f, 1.25f, 1.25f) };
+
+    private static BoxShape3D SharedMuzzleShape => _sharedMuzzleShape ??= new BoxShape3D { Size = new Vector3(0.32f, 1.65f, 1.65f) };
+
+    private static StandardMaterial3D SharedProjectileMaterial => _sharedProjectileMaterial ??= RoomGeometry.CreateMaterial(
+        "res://assets/textures/rubber_chevrons.svg",
+        new Color("d2603e"),
+        0.08f,
+        0.82f,
+        emissionEnabled: true,
+        emission: new Color("5c160b"));
+
+    private void EnsureProjectilePool()
+    {
+        if (_projectiles.Count > 0)
+        {
+            return;
+        }
+
+        // Every cannon calls this regardless of UseBatchedDenseVisuals, and
+        // rooms with dozens of cannons x PoolSize projectiles each used to
+        // allocate a brand new SphereMesh/SphereShape3D/StandardMaterial3D
+        // per projectile - hundreds of duplicate resources with identical
+        // values. Sharing one instance of each across every cannon in every
+        // room cuts that allocation cost drastically without changing cannon
+        // count, fire rate, or appearance at all.
         for (int index = 0; index < Math.Max(2, PoolSize); index++)
         {
             RigidBody3D body = new()
@@ -236,11 +269,11 @@ public partial class InterferenceCannon3D : Node3D
                 Visible = false,
             };
             body.AddCollisionExceptionWith(_cannonHitbox);
-            body.AddChild(new CollisionShape3D { Shape = new SphereShape3D { Radius = 0.62f } });
+            body.AddChild(new CollisionShape3D { Shape = SharedProjectileShape });
             body.AddChild(new MeshInstance3D
             {
-                Mesh = new SphereMesh { Radius = 0.62f, Height = 1.24f, RadialSegments = 20, Rings = 10 },
-                MaterialOverride = projectileMaterial,
+                Mesh = SharedProjectileMesh,
+                MaterialOverride = SharedProjectileMaterial,
             });
             ProjectileState state = new() { Body = body };
             body.BodyEntered += otherBody =>
@@ -313,30 +346,36 @@ public partial class InterferenceCannon3D : Node3D
             CollisionLayer = 1,
             CollisionMask = 1,
         };
+        // These four hitbox shapes are the same size for every cannon (only
+        // their per-CollisionShape3D Position offset varies, which is fine
+        // to share since offset lives on the node, not the Shape resource).
         _cannonHitbox.AddChild(new CollisionShape3D
         {
             Name = "BodyEnvelopeHitbox",
             Position = new Vector3(firingDirection * 1.34f, 1.66f, 0.0f),
-            Shape = new BoxShape3D { Size = new Vector3(3.08f, 3.32f, 2.24f) },
+            Shape = SharedBodyEnvelopeShape,
         });
-        _cannonHitbox.AddChild(new CollisionShape3D
+        if (!UseBatchedDenseVisuals)
         {
-            Name = "MountHitbox",
-            Position = new Vector3(firingDirection * 0.08f, 1.6f, 0.0f),
-            Shape = new BoxShape3D { Size = new Vector3(0.36f, 3.2f, 2.2f) },
-        });
-        _cannonHitbox.AddChild(new CollisionShape3D
-        {
-            Name = "HousingHitbox",
-            Position = new Vector3(firingDirection * 1.35f, 2.35f, 0.0f),
-            Shape = new BoxShape3D { Size = new Vector3(2.4f, 1.25f, 1.25f) },
-        });
-        _cannonHitbox.AddChild(new CollisionShape3D
-        {
-            Name = "MuzzleHitbox",
-            Position = new Vector3(firingDirection * 2.62f, 2.35f, 0.0f),
-            Shape = new BoxShape3D { Size = new Vector3(0.32f, 1.65f, 1.65f) },
-        });
+            _cannonHitbox.AddChild(new CollisionShape3D
+            {
+                Name = "MountHitbox",
+                Position = new Vector3(firingDirection * 0.08f, 1.6f, 0.0f),
+                Shape = SharedMountShape,
+            });
+            _cannonHitbox.AddChild(new CollisionShape3D
+            {
+                Name = "HousingHitbox",
+                Position = new Vector3(firingDirection * 1.35f, 2.35f, 0.0f),
+                Shape = SharedHousingShape,
+            });
+            _cannonHitbox.AddChild(new CollisionShape3D
+            {
+                Name = "MuzzleHitbox",
+                Position = new Vector3(firingDirection * 2.62f, 2.35f, 0.0f),
+                Shape = SharedMuzzleShape,
+            });
+        }
         AddChild(_cannonHitbox);
 
         if (EnableAudio)

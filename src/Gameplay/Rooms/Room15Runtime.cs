@@ -109,7 +109,7 @@ public partial class Room15Runtime : RoomRuntime
         float rotorStep = (float)delta * 7.5f;
         foreach (Node3D rotor in _fanRotors)
         {
-            rotor.RotateObjectLocal(Vector3.Right, rotorStep);
+            rotor.RotateObjectLocal(Vector3.Forward, rotorStep);
         }
 
         if (_runPreview && ++_previewFrames >= 30)

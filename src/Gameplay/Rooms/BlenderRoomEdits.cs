@@ -1,4 +1,5 @@
 using Godot;
+using System.Text.Json;
 using Velocitex.Gameplay.Visual;
 
 namespace Velocitex.Gameplay.Rooms;
@@ -7,6 +8,8 @@ internal static class BlenderRoomEdits
 {
     internal const string ReferenceTargetPathMetadata = "blender_reference_target_path";
     internal const string ReferenceCollisionPathMetadata = "blender_reference_collision_path";
+    internal const string DeletedByBlenderMetadata = "blender_reference_deleted";
+    internal const string JoinShadowSuppressedMetadata = "blender_join_shadow_suppressed";
 
     public static void Apply(Node3D room, int roomNumber)
     {
@@ -62,8 +65,19 @@ internal static class BlenderRoomEdits
         }
 
         Dictionary<StaticBody3D, List<MeshInstance3D>> collisionReferences = new();
+        HashSet<MeshInstance3D> replacedDoorFrameVisuals = new();
         foreach (MeshInstance3D importedMesh in importedMeshes.Where(IsReferenceMesh))
         {
+            if (IsDenseCannonRoom(roomNumber) &&
+                ReferenceTargetName(importedMesh).Equals("CannonHitbox", StringComparison.Ordinal))
+            {
+                // Dense cannon rooms already keep one independent runtime
+                // hitbox per cannon. Importing a second triangle mesh for
+                // every hitbox adds hundreds of meshes and concave shapes.
+                importedMesh.Visible = false;
+                continue;
+            }
+
             Node3D? target = FindReferenceTarget(room, importedMesh);
             if (target is null)
             {
@@ -71,9 +85,12 @@ internal static class BlenderRoomEdits
                 continue;
             }
 
-            MeshInstance3D? targetVisual = FindFirstVisual(target);
+            MeshInstance3D? targetVisual = FindFirstVisual(target) ??
+                FindDoorFrameVisual(target, importedMesh, replacedDoorFrameVisuals);
+            Material? sourceMaterial = FindFirstMaterial(target) ??
+                (targetVisual is null ? null : FindFirstMaterial(targetVisual));
             Material? targetMaterial = PrepareBlenderMaterial(
-                FindFirstMaterial(target),
+                sourceMaterial,
                 blenderMaterials,
                 HasUvLayer(importedMesh.Mesh));
             if (targetMaterial is null)
@@ -88,13 +105,25 @@ internal static class BlenderRoomEdits
             }
 
             importedMesh.MaterialOverride = targetMaterial;
-            importedMesh.CastShadow = targetVisual?.CastShadow ?? GeometryInstance3D.ShadowCastingSetting.Off;
+            bool suppressJoinShadow = IsVerticalJoinPanel(importedMesh);
+            importedMesh.CastShadow = suppressJoinShadow
+                ? GeometryInstance3D.ShadowCastingSetting.Off
+                : targetVisual?.CastShadow ?? GeometryInstance3D.ShadowCastingSetting.Off;
+            if (suppressJoinShadow)
+            {
+                importedMesh.SetMeta(JoinShadowSuppressedMetadata, true);
+            }
             if (target is StaticBody3D targetBody)
             {
                 AddCollisionReference(collisionReferences, targetBody, importedMesh);
             }
 
             HideVisuals(target);
+            if (targetVisual is not null)
+            {
+                targetVisual.Visible = false;
+                replacedDoorFrameVisuals.Add(targetVisual);
+            }
             importedMesh.Visible = IsVisibleThrough(target, room);
             importedMesh.SetMeta(ReferenceTargetPathMetadata, room.GetPathTo(target));
             referenceBinding.Bind(importedMesh, target);
@@ -104,6 +133,8 @@ internal static class BlenderRoomEdits
         {
             ApplyImportedMeshCollisions(body, references.OrderBy(mesh => mesh.Name.ToString(), StringComparer.Ordinal).ToArray());
         }
+
+        ApplyDeletedReferences(room, roomNumber, importedMeshes);
 
         foreach (StaticBody3D oldWall in EnumerateDescendants(room)
             .OfType<StaticBody3D>()
@@ -153,6 +184,123 @@ internal static class BlenderRoomEdits
 
     private static bool IsReferenceMesh(MeshInstance3D mesh) =>
         mesh.Name.ToString().StartsWith("REF_", StringComparison.Ordinal);
+
+    private static bool IsDenseCannonRoom(int roomNumber) => roomNumber is 17 or 20 or 30;
+
+    private static bool IsVerticalJoinPanel(MeshInstance3D mesh)
+    {
+        Aabb bounds = GlobalBounds(mesh);
+        float horizontalThickness = Mathf.Min(bounds.Size.X, bounds.Size.Z);
+        return bounds.Size.Y >= 1.0f && horizontalThickness <= 1.0f;
+    }
+
+    private static MeshInstance3D? FindDoorFrameVisual(
+        Node3D target,
+        MeshInstance3D importedMesh,
+        ISet<MeshInstance3D> claimed)
+    {
+        if (!target.Name.ToString().Equals("FrameCollision", StringComparison.Ordinal) ||
+            target.GetParent() is not Node parent)
+        {
+            return null;
+        }
+
+        string[] frameVisualNames =
+        {
+            "LeftDoorPocketMask",
+            "RightDoorPocketMask",
+            "LeftFrame",
+            "RightFrame",
+            "Header",
+        };
+        Aabb importedBounds = GlobalBounds(importedMesh);
+        return parent.GetChildren()
+            .OfType<MeshInstance3D>()
+            .Where(visual => frameVisualNames.Contains(visual.Name.ToString(), StringComparer.Ordinal) && !claimed.Contains(visual))
+            .OrderBy(visual => BoundsError(importedBounds, GlobalBounds(visual)))
+            .FirstOrDefault();
+    }
+
+    private static void ApplyDeletedReferences(
+        Node3D room,
+        int roomNumber,
+        IReadOnlyCollection<MeshInstance3D> importedMeshes)
+    {
+        string referencePath = $"res://tools/blender/reference/Room{roomNumber:00}.json";
+        string json = Godot.FileAccess.GetFileAsString(referencePath);
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            GD.PushError($"BLENDER_ROOM_EDIT_FAIL: unable to read deletion manifest {referencePath}");
+            return;
+        }
+
+        HashSet<string> importedNames = importedMeshes
+            .Where(IsReferenceMesh)
+            .Select(mesh => mesh.Name.ToString())
+            .ToHashSet(StringComparer.Ordinal);
+        using JsonDocument document = JsonDocument.Parse(json);
+        int index = 0;
+        foreach (JsonElement entry in document.RootElement.EnumerateArray())
+        {
+            string targetName = entry.GetProperty("name").GetString() ?? string.Empty;
+            string referenceName = $"REF_{index:000}_{targetName}";
+            index++;
+            if (IsOuterShellReferenceTarget(targetName) ||
+                (IsDenseCannonRoom(roomNumber) && targetName.Equals("CannonHitbox", StringComparison.Ordinal)) ||
+                importedNames.Any(name => name.Equals(referenceName, StringComparison.Ordinal) ||
+                    name.StartsWith(referenceName + ".", StringComparison.Ordinal)))
+            {
+                continue;
+            }
+
+            Node3D? target = FindReferenceTargetByName(room, targetName);
+            if (target is null)
+            {
+                continue;
+            }
+
+            DisableDeletedTarget(target);
+            target.SetMeta(DeletedByBlenderMetadata, true);
+        }
+    }
+
+    private static bool IsOuterShellReferenceTarget(string targetName) =>
+        targetName is "HazardFloor" or "Ceiling" or "LeftWall" or "RightWall" or "BackWall" or "ExitWall";
+
+    private static Node3D? FindReferenceTargetByName(Node root, string importedName)
+    {
+        string dottedName = importedName.Replace("_001", ".001", StringComparison.Ordinal);
+        string unsuffixedName = RemoveNumericDuplicateSuffix(importedName);
+        return EnumerateDescendants(root)
+            .OfType<Node3D>()
+            .FirstOrDefault(node =>
+                node.Name.ToString().Equals(importedName, StringComparison.Ordinal) ||
+                node.Name.ToString().Equals(dottedName, StringComparison.Ordinal) ||
+                node.Name.ToString().Equals(unsuffixedName, StringComparison.Ordinal));
+    }
+
+    private static void DisableDeletedTarget(Node3D target)
+    {
+        target.Visible = false;
+        target.ProcessMode = Node.ProcessModeEnum.Disabled;
+        foreach (Node node in EnumerateDescendants(target).Prepend(target))
+        {
+            if (node is CollisionObject3D collisionObject)
+            {
+                collisionObject.CollisionLayer = 0;
+                collisionObject.CollisionMask = 0;
+            }
+            if (node is CollisionShape3D collisionShape)
+            {
+                collisionShape.Disabled = true;
+            }
+            if (node is Area3D area)
+            {
+                area.Monitoring = false;
+                area.Monitorable = false;
+            }
+        }
+    }
 
     private static void AddCollisionReference(
         IDictionary<StaticBody3D, List<MeshInstance3D>> referencesByBody,

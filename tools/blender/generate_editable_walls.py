@@ -117,7 +117,13 @@ def build_room(source, destination, reference_path):
         created_objects.append(obj)
         created_meshes.append(mesh)
 
+    room_number = int(re.search(r"Room(\d{2})", source.stem).group(1))
     for index, entry in enumerate(json.loads(reference_path.read_text(encoding="utf-8"))):
+        # Dense cannon rooms already expose one independent runtime hitbox per
+        # cannon. Duplicating those hitboxes as hundreds of editable meshes
+        # makes both the .blend import and room startup needlessly expensive.
+        if room_number in {17, 20, 30} and entry["name"] == "CannonHitbox":
+            continue
         body = Matrix(((entry["transform"][0], entry["transform"][3], entry["transform"][6], entry["transform"][9]),
                        (entry["transform"][1], entry["transform"][4], entry["transform"][7], entry["transform"][10]),
                        (entry["transform"][2], entry["transform"][5], entry["transform"][8], entry["transform"][11]),

@@ -1,3 +1,4 @@
+using Godot;
 using Velocitex.Gameplay.Player;
 
 namespace Velocitex.Gameplay.Rooms;
@@ -38,7 +39,7 @@ public static class RouteCheckpointPressPolicy
         // A physical press which the room did not accept is always rejected in
         // the same way: the plate stays raised and flashes red. A successful
         // callback activates and depresses it before this method returns.
-        checkpoint.ApplyDeniedFeedback();
+        checkpoint.ScheduleDeniedFeedback(player, Engine.GetPhysicsFrames());
         return RouteCheckpointPressResult.Denied;
     }
 }

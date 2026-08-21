@@ -353,7 +353,9 @@ public partial class BlenderRoomExactSmokeTest : Node
                 : EnumerateDescendants(target).Prepend(target).OfType<MeshInstance3D>().ToArray();
             bool hasReusableMaterial = targetVisuals.Any(visual =>
                 visual.MaterialOverride is not null ||
-                (visual.Mesh?.GetSurfaceCount() > 0 && visual.GetActiveMaterial(0) is not null));
+                (visual.Mesh?.GetSurfaceCount() > 0 && visual.GetActiveMaterial(0) is not null)) ||
+                (target?.Name.ToString().Equals("FrameCollision", StringComparison.Ordinal) == true &&
+                    importedMesh.MaterialOverride is not null);
 
             if (target is null || !hasReusableMaterial)
             {
@@ -379,7 +381,9 @@ public partial class BlenderRoomExactSmokeTest : Node
             }
 
             MeshInstance3D? originalVisual = targetVisuals.FirstOrDefault();
-            if (originalVisual is not null && importedMesh.CastShadow != originalVisual.CastShadow)
+            if (originalVisual is not null &&
+                importedMesh.CastShadow != originalVisual.CastShadow &&
+                !importedMesh.HasMeta(BlenderRoomEdits.JoinShadowSuppressedMetadata))
             {
                 GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} reference {name} changed the target's shadow policy.");
                 failures++;

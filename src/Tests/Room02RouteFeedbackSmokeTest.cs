@@ -77,7 +77,7 @@ public partial class Room02RouteFeedbackSmokeTest : Node
         }
         if (checkpoints[2].IsActivated || wrongPlate.MaterialOverride == idleMaterial)
         {
-            Fail($"An out-of-order button activated or failed to show its solid red error material. activated={checkpoints[2].IsActivated}, denied={checkpoints[2].IsDeniedFeedbackActive}, grounded={player.IsGrounded}, playerY={player.GlobalPosition.Y:0.###}, plateY={wrongPlate.GlobalPosition.Y:0.###}.");
+            Fail($"An out-of-order button activated or failed to begin its red flash. activated={checkpoints[2].IsActivated}, denied={checkpoints[2].IsDeniedFeedbackActive}, grounded={player.IsGrounded}, playerY={player.GlobalPosition.Y:0.###}, plateY={wrongPlate.GlobalPosition.Y:0.###}.");
             return;
         }
         if (wrongPlate.MaterialOverride is not StandardMaterial3D errorMaterial ||
@@ -86,19 +86,21 @@ public partial class Room02RouteFeedbackSmokeTest : Node
             wrongFrame.MaterialOverride != frameMaterial ||
             wrongPlate.GetChildren().Any(child => child.Name.ToString().StartsWith("SequencePip", StringComparison.Ordinal) && child is GeometryInstance3D { Visible: false }))
         {
-            Fail("The out-of-order feedback did not color only the inset button solid red while preserving its base and number dots.");
+            Fail("The out-of-order feedback did not color only the inset button red while preserving its base and number dots.");
             return;
         }
 
-        Material solidDeniedMaterial = wrongPlate.MaterialOverride!;
-        for (int frame = 0; frame < 6; frame++)
+        Material firstDeniedMaterial = wrongPlate.MaterialOverride!;
+        bool sawAlternateRedPhase = false;
+        for (int frame = 0; frame < 12; frame++)
         {
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-            if (wrongPlate.MaterialOverride != solidDeniedMaterial)
-            {
-                Fail("The out-of-order button alternated red materials instead of remaining solid red.");
-                return;
-            }
+            sawAlternateRedPhase |= checkpoints[2].IsDeniedFeedbackActive && wrongPlate.MaterialOverride != firstDeniedMaterial;
+        }
+        if (!sawAlternateRedPhase)
+        {
+            Fail("The out-of-order button stayed solid red instead of blinking.");
+            return;
         }
 
         // Exercise the same room-level restart path used after a real death.
@@ -228,7 +230,7 @@ public partial class Room02RouteFeedbackSmokeTest : Node
             return;
         }
 
-        GD.Print("ROOM02_ROUTE_FEEDBACK_PASS: out-of-order input stayed solid red, RestartRoom cleared it, the four-button sequence activated in order and Room 02 used the shared exit-door behavior.");
+        GD.Print("ROOM02_ROUTE_FEEDBACK_PASS: out-of-order input blinked red, RestartRoom cleared it, the four-button sequence activated in order and Room 02 used the shared exit-door behavior.");
         StopAndReleaseAudio(room);
         room.QueueFree();
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);

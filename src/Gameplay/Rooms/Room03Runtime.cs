@@ -395,6 +395,7 @@ public partial class Room03Runtime : RoomRuntime
         const float hazardFloor = -6.0f;
         const float ceiling = 24.0f;
         const float panelDepth = 0.52f;
+        const float verticalJoinOverlap = 0.04f;
         // Leave enough clearance for the complete player collision sphere
         // while the FlightGate itself still decides whether the ball's center
         // crossed the circular opening.
@@ -423,14 +424,14 @@ public partial class Room03Runtime : RoomRuntime
         float lowerHeight = lowerEdge - hazardFloor;
         if (lowerHeight > 0.01f)
         {
-            RoomGeometry.AddBox(this, $"FlightAperture{index + 1}Lower", new Vector3(openingHalf * 2.0f, lowerHeight, panelDepth), new Vector3(center.X, hazardFloor + (lowerHeight * 0.5f), center.Z), Vector3.Zero, texture, tint.Darkened(0.08f), 0.46f, 0.66f);
+            RoomGeometry.AddBox(this, $"FlightAperture{index + 1}Lower", new Vector3((openingHalf * 2.0f) + (verticalJoinOverlap * 2.0f), lowerHeight, panelDepth), new Vector3(center.X, hazardFloor + (lowerHeight * 0.5f), center.Z), Vector3.Zero, texture, tint, 0.46f, 0.66f);
         }
 
         float upperEdge = center.Y + openingHalf;
         float upperHeight = ceiling - upperEdge;
         if (upperHeight > 0.01f)
         {
-            RoomGeometry.AddBox(this, $"FlightAperture{index + 1}Upper", new Vector3(openingHalf * 2.0f, upperHeight, panelDepth), new Vector3(center.X, upperEdge + (upperHeight * 0.5f), center.Z), Vector3.Zero, texture, tint.Darkened(0.08f), 0.46f, 0.66f);
+            RoomGeometry.AddBox(this, $"FlightAperture{index + 1}Upper", new Vector3((openingHalf * 2.0f) + (verticalJoinOverlap * 2.0f), upperHeight, panelDepth), new Vector3(center.X, upperEdge + (upperHeight * 0.5f), center.Z), Vector3.Zero, texture, tint, 0.46f, 0.66f);
         }
     }
 

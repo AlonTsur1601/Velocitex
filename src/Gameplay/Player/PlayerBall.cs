@@ -70,6 +70,7 @@ public partial class PlayerBall : RigidBody3D
     private bool _groundedOnStaticSurface;
     private ulong _groundSurfaceInstanceId;
     private ulong _lastElasticBounceSurfaceInstanceId;
+    private Basis _visualRollingBasis = Basis.Identity;
     private readonly HashSet<ulong> _previousContactIds = new();
     private readonly HashSet<ulong> _currentContactIds = new();
     private readonly Dictionary<ulong, AirControlSource> _airControlSources = new();
@@ -94,6 +95,12 @@ public partial class PlayerBall : RigidBody3D
         ContactMonitor = true;
         MaxContactsReported = 8;
         CanSleep = false;
+        _visualRollingBasis = _visual.GlobalBasis.Orthonormalized();
+    }
+
+    public override void _Process(double delta)
+    {
+        _visual.GlobalBasis = _visualRollingBasis;
     }
 
     public override void _IntegrateForces(PhysicsDirectBodyState3D state)
@@ -113,6 +120,7 @@ public partial class PlayerBall : RigidBody3D
             ApplyGroundLinearDrag(state);
             ApplyOneWayGrip(state);
             ApplyGroundSurfaceAcceleration(state);
+            bool usesSimulatedInput = SimulatedMoveInput.HasValue;
             Vector2 input = SimulatedMoveInput ?? ReadMoveInput();
             CurrentMoveInput = input;
             if (MovementBasis is null)
@@ -127,31 +135,24 @@ public partial class PlayerBall : RigidBody3D
             }
 
             input = input.LimitLength(1.0f);
-            Vector3 cameraRight = MovementBasis.GlobalBasis.X;
-            Vector3 cameraForward = -MovementBasis.GlobalBasis.Z;
-            Vector3 desiredDirection = (cameraRight * input.X) + (cameraForward * -input.Y);
-            desiredDirection = desiredDirection.Slide(GroundNormal).Normalized();
-
+            Vector3 cameraForward = (-MovementBasis.GlobalBasis.Z).Slide(GroundNormal).Normalized();
+            Vector3 cameraRight = cameraForward.Cross(GroundNormal).Normalized();
+            Vector3 desiredDirection = ((cameraRight * input.X) + (cameraForward * -input.Y)).Normalized();
             Vector3 planarVelocity = state.LinearVelocity.Slide(GroundNormal);
-            float speedInDesiredDirection = planarVelocity.Dot(desiredDirection);
-            if (speedInDesiredDirection >= _config.MaximumDriveSpeed)
-            {
-                return;
-            }
-
             float driveTraction = ResolveDriveTraction(desiredDirection);
-            float acceleration = (planarVelocity.Dot(desiredDirection) < -0.1f
-                ? _config.GroundBraking
-                : _config.GroundAcceleration) * driveTraction;
-            float remainingSpeed = _config.MaximumDriveSpeed - speedInDesiredDirection;
-            float allowedAcceleration = Mathf.Min(acceleration, remainingSpeed / (float)state.Step);
-            Vector3 force = desiredDirection * allowedAcceleration * Mass;
-
-            state.ApplyCentralForce(force);
-            state.ApplyTorque(GroundNormal.Cross(desiredDirection) * allowedAcceleration * Mass * Radius * 0.45f);
+            Vector3 driveAcceleration = usesSimulatedInput
+                ? ResolveVectorDriveAcceleration(planarVelocity, desiredDirection, driveTraction, (float)state.Step)
+                : ResolveDriveAxisAcceleration(planarVelocity, cameraRight, input.X, driveTraction, (float)state.Step) +
+                    ResolveDriveAxisAcceleration(planarVelocity, cameraForward, -input.Y, driveTraction, (float)state.Step);
+            if (driveAcceleration.LengthSquared() > 0.0001f)
+            {
+                state.ApplyCentralForce(driveAcceleration * Mass);
+                state.ApplyTorque(GroundNormal.Cross(driveAcceleration) * Mass * Radius * 0.45f);
+            }
         }
         finally
         {
+            UpdateVisualRollingBasis(state);
             MaximumSpeedSinceReset = Mathf.Max(MaximumSpeedSinceReset, state.LinearVelocity.Length());
             _previousLinearVelocity = state.LinearVelocity;
             _wasGroundedOnSuperElastic = IsGrounded && IsElasticSurface(GroundSurfaceKind);
@@ -171,6 +172,7 @@ public partial class PlayerBall : RigidBody3D
         GroundGripDirection = Vector3.Forward;
         GroundBounceMultiplier = 1.0f;
         CurrentMoveInput = Vector2.Zero;
+        _visualRollingBasis = spawnTransform.Basis.Orthonormalized();
         LastSuperElasticImpactSpeed = 0.0f;
         LastSuperElasticLaunchSpeed = 0.0f;
         SuperElasticBounceCount = 0;
@@ -189,6 +191,7 @@ public partial class PlayerBall : RigidBody3D
         _groundedOnStaticSurface = false;
         _groundSurfaceInstanceId = 0UL;
         _lastElasticBounceSurfaceInstanceId = 0UL;
+        ReleaseFromForceVolumes();
         _airControlSources.Clear();
         _oneWayRetainedForwardSpeed = 0.0f;
         _oneWaySurfaceInstanceId = 0UL;
@@ -444,22 +447,107 @@ public partial class PlayerBall : RigidBody3D
 
     private static Vector2 ReadMoveInput()
     {
-        Vector2 input = new(
-            Godot.Input.GetActionStrength(InputDefaults.MoveRight) - Godot.Input.GetActionStrength(InputDefaults.MoveLeft),
-            Godot.Input.GetActionStrength(InputDefaults.MoveBack) - Godot.Input.GetActionStrength(InputDefaults.MoveForward));
-        return input.LimitLength(1.0f);
+        float horizontal = Godot.Input.GetActionRawStrength(InputDefaults.MoveRight) -
+            Godot.Input.GetActionRawStrength(InputDefaults.MoveLeft);
+        float vertical = Godot.Input.GetActionRawStrength(InputDefaults.MoveBack) -
+            Godot.Input.GetActionRawStrength(InputDefaults.MoveForward);
+        return new Vector2(horizontal, vertical).LimitLength(1.0f);
+    }
+
+    private Vector3 ResolveDriveAxisAcceleration(
+        Vector3 planarVelocity,
+        Vector3 positiveAxis,
+        float inputStrength,
+        float driveTraction,
+        float step)
+    {
+        float strength = Mathf.Abs(inputStrength);
+        if (strength < 0.0001f)
+        {
+            return Vector3.Zero;
+        }
+
+        Vector3 direction = positiveAxis * Mathf.Sign(inputStrength);
+        float speedInDirection = planarVelocity.Dot(direction);
+        float maximumAxisSpeed = _config.MaximumDriveSpeed * strength;
+        if (speedInDirection >= maximumAxisSpeed)
+        {
+            return Vector3.Zero;
+        }
+
+        float acceleration = (speedInDirection < -0.1f
+            ? _config.GroundBraking
+            : _config.GroundAcceleration) * driveTraction * strength;
+        float remainingSpeed = maximumAxisSpeed - speedInDirection;
+        float allowedAcceleration = Mathf.Min(acceleration, remainingSpeed / step);
+        return direction * allowedAcceleration;
+    }
+
+    private Vector3 ResolveVectorDriveAcceleration(
+        Vector3 planarVelocity,
+        Vector3 desiredDirection,
+        float driveTraction,
+        float step)
+    {
+        float speedInDesiredDirection = planarVelocity.Dot(desiredDirection);
+        if (speedInDesiredDirection >= _config.MaximumDriveSpeed)
+        {
+            return Vector3.Zero;
+        }
+
+        float acceleration = (speedInDesiredDirection < -0.1f
+            ? _config.GroundBraking
+            : _config.GroundAcceleration) * driveTraction;
+        float remainingSpeed = _config.MaximumDriveSpeed - speedInDesiredDirection;
+        float allowedAcceleration = Mathf.Min(acceleration, remainingSpeed / step);
+        return desiredDirection * allowedAcceleration;
+    }
+
+    private void ReleaseFromForceVolumes()
+    {
+        if (!IsInsideTree())
+        {
+            return;
+        }
+
+        foreach (Node node in GetTree().GetNodesInGroup(ForceVolume3D.ForceVolumeGroup))
+        {
+            if (node is ForceVolume3D forceVolume)
+            {
+                forceVolume.ReleaseBody(this);
+            }
+        }
+    }
+
+    private void UpdateVisualRollingBasis(PhysicsDirectBodyState3D state)
+    {
+        Vector3 visualAngularVelocity = state.AngularVelocity;
+        if (IsGrounded)
+        {
+            Vector3 planarVelocity = state.LinearVelocity.Slide(GroundNormal);
+            Vector3 rollingAngularVelocity = GroundNormal.Cross(planarVelocity) / Radius;
+            visualAngularVelocity = rollingAngularVelocity + state.AngularVelocity.Project(GroundNormal);
+        }
+
+        float angularSpeed = visualAngularVelocity.Length();
+        if (angularSpeed <= 0.0001f)
+        {
+            return;
+        }
+
+        Basis rotation = new(visualAngularVelocity / angularSpeed, angularSpeed * (float)state.Step);
+        _visualRollingBasis = (rotation * _visualRollingBasis).Orthonormalized();
     }
 
     private void ApplyAirControl(PhysicsDirectBodyState3D state)
     {
+        Vector2 input = (SimulatedMoveInput ?? ReadMoveInput()).LimitLength(1.0f);
+        CurrentMoveInput = input;
         if (_airControlSources.Count == 0 || MovementBasis is null)
         {
-            CurrentMoveInput = Vector2.Zero;
             return;
         }
 
-        Vector2 input = (SimulatedMoveInput ?? ReadMoveInput()).LimitLength(1.0f);
-        CurrentMoveInput = input;
         if (input.LengthSquared() < 0.0001f)
         {
             return;

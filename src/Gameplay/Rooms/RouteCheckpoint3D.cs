@@ -6,6 +6,7 @@ namespace Velocitex.Gameplay.Rooms;
 public partial class RouteCheckpoint3D : Area3D
 {
     private const float DeniedFlashDuration = 0.64f;
+    private const float DeniedFlashInterval = 0.08f;
     private const float PlayerBallRadius = 0.6f;
     private const float FloorPressAboveTolerance = 0.16f;
     private const float FloorPressBelowTolerance = 0.46f;
@@ -44,6 +45,8 @@ public partial class RouteCheckpoint3D : Area3D
     private Material _deniedMaterial = null!;
     private float _activationAmount;
     private float _deniedFlashTime;
+    private float _deniedFlashElapsed;
+    private ulong _suppressAutomaticPressUntilPhysicsFrame;
 
     public override void _Ready()
     {
@@ -168,12 +171,14 @@ public partial class RouteCheckpoint3D : Area3D
             : Mathf.MoveToward(_activationAmount, 0.0f, (float)delta * 5.0f);
         if (_deniedFlashTime > 0.0f)
         {
+            _deniedFlashElapsed += (float)delta;
             _deniedFlashTime = Mathf.Max(0.0f, _deniedFlashTime - (float)delta);
         }
         bool deniedActive = _deniedFlashTime > 0.0f;
+        bool deniedRedPhase = ((int)(_deniedFlashElapsed / DeniedFlashInterval) & 1) == 0;
         _framePlate.MaterialOverride = _frameMaterial;
         _innerPlate.MaterialOverride = deniedActive
-            ? _deniedMaterial
+            ? (deniedRedPhase ? _deniedMaterial : _idleMaterial)
             : (IsActivated ? _activeMaterial : _idleMaterial);
         SetSequencePipsVisible(true);
         _innerPlate.Position = new Vector3(
@@ -219,10 +224,25 @@ public partial class RouteCheckpoint3D : Area3D
         if (!IsActivated)
         {
             _deniedFlashTime = DeniedFlashDuration;
+            _deniedFlashElapsed = 0.0f;
             _framePlate.MaterialOverride = _frameMaterial;
             _innerPlate.MaterialOverride = _deniedMaterial;
             SetSequencePipsVisible(true);
         }
+    }
+
+    internal void ScheduleDeniedFeedback(PlayerBall player, ulong pressPhysicsFrame)
+    {
+        Callable.From(() =>
+        {
+            bool acceptedInPressFrame = GodotObject.IsInstanceValid(player) &&
+                player.HasMeta(AcceptedButtonPhysicsFrameMetadata) &&
+                player.GetMeta(AcceptedButtonPhysicsFrameMetadata).AsUInt64() == pressPhysicsFrame;
+            if (!IsActivated && GodotObject.IsInstanceValid(player) && !acceptedInPressFrame)
+            {
+                ApplyDeniedFeedback();
+            }
+        }).CallDeferred();
     }
 
     public void Press(PlayerBall player)
@@ -269,10 +289,13 @@ public partial class RouteCheckpoint3D : Area3D
         IsActivated = false;
         _activationAmount = 0.0f;
         _deniedFlashTime = 0.0f;
+        _deniedFlashElapsed = 0.0f;
         _framePlate.MaterialOverride = _frameMaterial;
         _innerPlate.MaterialOverride = _idleMaterial;
         SetSequencePipsVisible(true);
         _handledFloorContacts.Clear();
+        _suppressAutomaticPressUntilPhysicsFrame = Engine.GetPhysicsFrames() + 2;
+        CaptureOverlappingPlayersAsHandled();
     }
 
     public override void _ExitTree()
@@ -298,6 +321,12 @@ public partial class RouteCheckpoint3D : Area3D
 
     private void ProcessFloorContacts()
     {
+        if (Engine.GetPhysicsFrames() <= _suppressAutomaticPressUntilPhysicsFrame)
+        {
+            CaptureOverlappingPlayersAsHandled();
+            return;
+        }
+
         PlayerBall[] overlappingPlayers = GetOverlappingBodies().OfType<PlayerBall>().ToArray();
         HashSet<ulong> touchingIds = new();
         foreach (PlayerBall player in overlappingPlayers)
@@ -402,6 +431,12 @@ public partial class RouteCheckpoint3D : Area3D
         }
 
         ulong id = player.GetInstanceId();
+        if (Engine.GetPhysicsFrames() <= _suppressAutomaticPressUntilPhysicsFrame)
+        {
+            _handledFloorContacts.Add(id);
+            return;
+        }
+
         if (_handledFloorContacts.Contains(id) || !IsClosestTouchedFloorButton(player))
         {
             return;
@@ -409,6 +444,14 @@ public partial class RouteCheckpoint3D : Area3D
 
         _handledFloorContacts.Add(id);
         Press(player);
+    }
+
+    private void CaptureOverlappingPlayersAsHandled()
+    {
+        foreach (PlayerBall player in GetOverlappingBodies().OfType<PlayerBall>())
+        {
+            _handledFloorContacts.Add(player.GetInstanceId());
+        }
     }
 
     private void ApplyAcceptedPressVisualImmediately()
@@ -428,6 +471,7 @@ public partial class RouteCheckpoint3D : Area3D
     private void ClearDeniedFeedback()
     {
         _deniedFlashTime = 0.0f;
+        _deniedFlashElapsed = 0.0f;
         if (!IsActivated && IsInstanceValid(_innerPlate))
         {
             _innerPlate.MaterialOverride = _idleMaterial;
