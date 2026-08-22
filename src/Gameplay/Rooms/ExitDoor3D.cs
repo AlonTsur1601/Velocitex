@@ -1,6 +1,7 @@
 using Godot;
 using Velocitex.Core.Rooms;
 using Velocitex.Gameplay.Player;
+using Velocitex.Gameplay.Visual;
 
 namespace Velocitex.Gameplay.Rooms;
 
@@ -34,6 +35,11 @@ public partial class ExitDoor3D : Node3D
     private bool _traversalActive;
     private float _openAmount;
     private float _darknessAmount;
+    private float _authoredDoorCenterX;
+    private float _authoredDoorLeafWidth = DoorLeafClosedWidth;
+    private Aabb? _authoredLeftPocketBounds;
+    private Aabb? _authoredRightPocketBounds;
+    private float _doorLeafTravelDistance = DoorLeafClosedWidth;
     private Material? _inactiveButtonIndicatorMaterial;
     private Material? _activeButtonIndicatorMaterial;
 
@@ -123,6 +129,113 @@ public partial class ExitDoor3D : Node3D
         _inactiveButtonIndicatorMaterial = inactiveMaterial;
         _activeButtonIndicatorMaterial = activeMaterial;
         UpdateButtonIndicators();
+    }
+
+    internal void ApplyAuthoredClosedDoorBounds(Aabb localBounds)
+    {
+        if (localBounds.Size.X <= 0.01f || localBounds.Size.Y <= 0.01f)
+        {
+            return;
+        }
+
+        float leafWidth = localBounds.Size.X * 0.5f;
+        Vector3 center = localBounds.GetCenter();
+        MeshInstance3D leftLeaf = GetNode<MeshInstance3D>("LeftDoorLeaf");
+        MeshInstance3D rightLeaf = GetNode<MeshInstance3D>("RightDoorLeaf");
+        float leftDepth = leftLeaf.Mesh?.GetAabb().Size.Z ?? 0.3f;
+        float rightDepth = rightLeaf.Mesh?.GetAabb().Size.Z ?? 0.3f;
+        leftLeaf.Mesh = SurfaceMeshFactory.CreateTiledBox(new Vector3(leafWidth, localBounds.Size.Y, leftDepth));
+        rightLeaf.Mesh = SurfaceMeshFactory.CreateTiledBox(new Vector3(leafWidth, localBounds.Size.Y, rightDepth));
+
+        leftLeaf.Position = new Vector3(center.X - (leafWidth * 0.5f), center.Y, leftLeaf.Position.Z);
+        rightLeaf.Position = new Vector3(center.X + (leafWidth * 0.5f), center.Y, rightLeaf.Position.Z);
+        Node3D leftHandle = GetNode<Node3D>("LeftHandle");
+        Node3D rightHandle = GetNode<Node3D>("RightHandle");
+        leftHandle.Position = new Vector3(center.X - 0.22f, center.Y, leftHandle.Position.Z);
+        rightHandle.Position = new Vector3(center.X + 0.22f, center.Y, rightHandle.Position.Z);
+        if (_centerSeam is not null)
+        {
+            _centerSeam.Position = new Vector3(center.X, center.Y, _centerSeam.Position.Z);
+            Vector3 seamSize = _centerSeam.Mesh?.GetAabb().Size ?? new Vector3(0.08f, localBounds.Size.Y, 0.08f);
+            _centerSeam.Mesh = SurfaceMeshFactory.CreateTiledBox(new Vector3(seamSize.X, localBounds.Size.Y, seamSize.Z));
+        }
+
+        _authoredDoorCenterX = center.X;
+        _authoredDoorLeafWidth = leafWidth;
+        UpdateAuthoredDoorTravelDistance();
+        _slidingParts.Clear();
+        foreach ((Node3D part, float direction) in new[]
+        {
+            (leftLeaf, -1.0f), (leftHandle, -1.0f),
+            (rightLeaf, 1.0f), (rightHandle, 1.0f),
+        })
+        {
+            _slidingParts.Add((part, part.Position, direction));
+        }
+        ApplyVisual();
+    }
+
+    internal void ApplyAuthoredDoorPocketBounds(Aabb localBounds)
+    {
+        if (localBounds.Size.X <= 0.01f)
+        {
+            return;
+        }
+
+        if (localBounds.GetCenter().X < _authoredDoorCenterX)
+        {
+            _authoredLeftPocketBounds = localBounds;
+        }
+        else
+        {
+            _authoredRightPocketBounds = localBounds;
+        }
+
+        UpdateAuthoredDoorTravelDistance();
+        UpdateAuthoredDoorHeader();
+        ApplyVisual();
+    }
+
+    private void UpdateAuthoredDoorTravelDistance()
+    {
+        float travelDistance = _authoredDoorLeafWidth;
+        if (_authoredLeftPocketBounds is Aabb leftPocket)
+        {
+            travelDistance = Mathf.Max(travelDistance, _authoredDoorCenterX - leftPocket.End.X);
+        }
+        if (_authoredRightPocketBounds is Aabb rightPocket)
+        {
+            travelDistance = Mathf.Max(travelDistance, rightPocket.Position.X - _authoredDoorCenterX);
+        }
+
+        _doorLeafTravelDistance = travelDistance;
+    }
+
+    private void UpdateAuthoredDoorHeader()
+    {
+        if (_authoredLeftPocketBounds is not Aabb leftPocket ||
+            _authoredRightPocketBounds is not Aabb rightPocket ||
+            GetNodeOrNull<MeshInstance3D>("Header") is not MeshInstance3D header ||
+            header.Mesh is null)
+        {
+            return;
+        }
+
+        float sideTop = Mathf.Max(leftPocket.End.Y, rightPocket.End.Y);
+        Vector3 headerSize = header.Mesh.GetAabb().Size;
+        header.Position = new Vector3(
+            (leftPocket.End.X + rightPocket.Position.X) * 0.5f,
+            sideTop + (headerSize.Y * 0.5f),
+            header.Position.Z);
+
+        CollisionShape3D? headerHitbox = GetNodeOrNull<CollisionShape3D>("FrameCollision/HeaderHitbox");
+        if (headerHitbox is not null)
+        {
+            headerHitbox.Position = new Vector3(
+                header.Position.X,
+                header.Position.Y,
+                headerHitbox.Position.Z);
+        }
     }
 
     private void UpdateButtonIndicators()
@@ -237,7 +350,7 @@ public partial class ExitDoor3D : Node3D
         {
             if (IsInstanceValid(part))
             {
-                part.Position = closedPosition + (Vector3.Right * direction * DoorLeafClosedWidth * _openAmount);
+                part.Position = closedPosition + (Vector3.Right * direction * _doorLeafTravelDistance * _openAmount);
             }
         }
 

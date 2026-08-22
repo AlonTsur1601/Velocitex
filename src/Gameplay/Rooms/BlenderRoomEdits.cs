@@ -6,10 +6,28 @@ namespace Velocitex.Gameplay.Rooms;
 
 internal static class BlenderRoomEdits
 {
+    private static readonly string[] DoorPocketVisualNames =
+    {
+        "LeftDoorPocketMask",
+        "RightDoorPocketMask",
+    };
+
+    private static readonly string[] CanonicalDoorReferenceTargets =
+    {
+        "FrameCollision",
+        "ClosedDoorBlocker",
+    };
+
+    private static readonly Transform3D Room02CanonicalDoorSpace = new(
+        Basis.Identity,
+        new Vector3(0.0f, 5.63f, -37.75f));
+
     internal const string ReferenceTargetPathMetadata = "blender_reference_target_path";
     internal const string ReferenceCollisionPathMetadata = "blender_reference_collision_path";
     internal const string DeletedByBlenderMetadata = "blender_reference_deleted";
     internal const string JoinShadowSuppressedMetadata = "blender_join_shadow_suppressed";
+    internal const string CanonicalDoorSourceRoomMetadata = "blender_canonical_door_source_room";
+    internal const string SeamSafeCollisionMetadata = "blender_seam_safe_collision";
 
     public static void Apply(Node3D room, int roomNumber)
     {
@@ -37,6 +55,7 @@ internal static class BlenderRoomEdits
 
         importedRoot.Name = "BlenderGeometry";
         room.AddChild(importedRoot);
+        importedMeshes = ApplyCanonicalDoorGeometry(room, roomNumber, importedRoot, importedMeshes);
 
         BlenderReferenceBinding referenceBinding = new(room)
         {
@@ -84,6 +103,8 @@ internal static class BlenderRoomEdits
                 importedMesh.Visible = false;
                 continue;
             }
+
+            ApplyAuthoredDoorVisualBounds(target, importedMesh);
 
             MeshInstance3D? targetVisual = FindFirstVisual(target) ??
                 FindDoorFrameVisual(target, importedMesh, replacedDoorFrameVisuals);
@@ -135,6 +156,16 @@ internal static class BlenderRoomEdits
         }
 
         ApplyDeletedReferences(room, roomNumber, importedMeshes);
+        if (room.GetNodeOrNull<ExitDoor3D>("ExitDoor") is ExitDoor3D exitDoor &&
+            RoomGeometry.CloseExitCorridorCollisionSeam(room, exitDoor))
+        {
+            foreach (MeshInstance3D floorReference in importedMeshes.Where(mesh =>
+                IsReferenceMesh(mesh) &&
+                RemoveNumericDuplicateSuffix(ReferenceTargetName(mesh)) == "ExitCorridorFloor"))
+            {
+                floorReference.SetMeta(SeamSafeCollisionMetadata, true);
+            }
+        }
 
         foreach (StaticBody3D oldWall in EnumerateDescendants(room)
             .OfType<StaticBody3D>()
@@ -185,6 +216,92 @@ internal static class BlenderRoomEdits
     private static bool IsReferenceMesh(MeshInstance3D mesh) =>
         mesh.Name.ToString().StartsWith("REF_", StringComparison.Ordinal);
 
+    private static MeshInstance3D[] ApplyCanonicalDoorGeometry(
+        Node3D room,
+        int roomNumber,
+        Node3D importedRoot,
+        IReadOnlyCollection<MeshInstance3D> roomMeshes)
+    {
+        ExitDoor3D? door = room.GetNodeOrNull<ExitDoor3D>("ExitDoor");
+        if (door is null)
+        {
+            return roomMeshes.ToArray();
+        }
+
+        MeshInstance3D[] existingDoorReferences = roomMeshes
+            .Where(mesh => IsReferenceMesh(mesh) &&
+                IsCanonicalDoorReference(mesh))
+            .ToArray();
+        if (roomNumber == 2)
+        {
+            foreach (MeshInstance3D reference in existingDoorReferences)
+            {
+                reference.SetMeta(CanonicalDoorSourceRoomMetadata, 2);
+            }
+            return roomMeshes.ToArray();
+        }
+
+        PackedScene? canonicalScene = GD.Load<PackedScene>(
+            "res://assets/models/EditableWallsBlender/Room02Walls.blend");
+        if (canonicalScene?.Instantiate() is not Node3D canonicalRoot)
+        {
+            GD.PushError("BLENDER_ROOM_EDIT_FAIL: unable to load the Room 02 canonical door geometry");
+            return roomMeshes.ToArray();
+        }
+
+        MeshInstance3D[] canonicalReferences = canonicalRoot.GetChildren()
+            .OfType<MeshInstance3D>()
+            .Where(mesh => IsReferenceMesh(mesh) &&
+                IsCanonicalDoorReference(mesh))
+            .ToArray();
+        Dictionary<string, Queue<string>> namesByTarget = existingDoorReferences
+            .GroupBy(CanonicalDoorTargetName, StringComparer.Ordinal)
+            .ToDictionary(
+                group => group.Key,
+                group => new Queue<string>(group
+                    .OrderBy(mesh => mesh.Transform.Origin.X)
+                    .Select(mesh => mesh.Name.ToString())),
+                StringComparer.Ordinal);
+        foreach (MeshInstance3D oldReference in existingDoorReferences)
+        {
+            importedRoot.RemoveChild(oldReference);
+            oldReference.Free();
+        }
+
+        foreach (MeshInstance3D canonicalReference in canonicalReferences
+            .OrderBy(CanonicalDoorTargetName, StringComparer.Ordinal)
+            .ThenBy(mesh => mesh.Transform.Origin.X))
+        {
+            string targetName = CanonicalDoorTargetName(canonicalReference);
+            string cloneName = namesByTarget.TryGetValue(targetName, out Queue<string>? availableNames) &&
+                availableNames.Count > 0
+                ? availableNames.Dequeue()
+                : canonicalReference.Name.ToString();
+            MeshInstance3D clone = new()
+            {
+                Name = cloneName,
+                Mesh = canonicalReference.Mesh,
+                CastShadow = canonicalReference.CastShadow,
+                Layers = canonicalReference.Layers,
+                Visible = canonicalReference.Visible,
+            };
+            importedRoot.AddChild(clone);
+            Transform3D canonicalRelative = Room02CanonicalDoorSpace.AffineInverse() *
+                canonicalReference.Transform;
+            clone.GlobalTransform = door.GlobalTransform * canonicalRelative;
+            clone.SetMeta(CanonicalDoorSourceRoomMetadata, 2);
+        }
+
+        canonicalRoot.Free();
+        return importedRoot.GetChildren().OfType<MeshInstance3D>().ToArray();
+    }
+
+    private static bool IsCanonicalDoorReference(MeshInstance3D mesh) =>
+        CanonicalDoorReferenceTargets.Contains(CanonicalDoorTargetName(mesh), StringComparer.Ordinal);
+
+    private static string CanonicalDoorTargetName(MeshInstance3D mesh) =>
+        RemoveNumericDuplicateSuffix(ReferenceTargetName(mesh));
+
     private static bool IsDenseCannonRoom(int roomNumber) => roomNumber is 17 or 20 or 30;
 
     private static bool IsVerticalJoinPanel(MeshInstance3D mesh)
@@ -205,20 +322,34 @@ internal static class BlenderRoomEdits
             return null;
         }
 
-        string[] frameVisualNames =
-        {
-            "LeftDoorPocketMask",
-            "RightDoorPocketMask",
-            "LeftFrame",
-            "RightFrame",
-            "Header",
-        };
         Aabb importedBounds = GlobalBounds(importedMesh);
         return parent.GetChildren()
             .OfType<MeshInstance3D>()
-            .Where(visual => frameVisualNames.Contains(visual.Name.ToString(), StringComparer.Ordinal) && !claimed.Contains(visual))
+            .Where(visual => DoorPocketVisualNames.Contains(visual.Name.ToString(), StringComparer.Ordinal) && !claimed.Contains(visual))
             .OrderBy(visual => BoundsError(importedBounds, GlobalBounds(visual)))
             .FirstOrDefault();
+    }
+
+    private static bool IsDoorFrameTarget(Node3D target) =>
+        target.Name.ToString().Equals("FrameCollision", StringComparison.Ordinal);
+
+    private static void ApplyAuthoredDoorVisualBounds(Node3D target, MeshInstance3D importedMesh)
+    {
+        if (target.GetParentOrNull<ExitDoor3D>() is not ExitDoor3D door)
+        {
+            return;
+        }
+
+        if (target.Name.ToString().Equals("ClosedDoorBlocker", StringComparison.Ordinal))
+        {
+            door.ApplyAuthoredClosedDoorBounds(BoundsRelativeTo(door, importedMesh));
+        }
+        else if (target.Name.ToString().Equals("FrameCollision", StringComparison.Ordinal))
+        {
+            door.ApplyAuthoredDoorPocketBounds(BoundsRelativeTo(door, importedMesh));
+            door.GetNodeOrNull<MeshInstance3D>("LeftFrame")?.Hide();
+            door.GetNodeOrNull<MeshInstance3D>("RightFrame")?.Hide();
+        }
     }
 
     private static void ApplyDeletedReferences(
@@ -544,6 +675,12 @@ internal static class BlenderRoomEdits
         left.Position.DistanceTo(right.Position) + left.Size.DistanceTo(right.Size);
 
     private static Aabb GlobalBounds(MeshInstance3D mesh)
+        => BoundsWithTransform(mesh, mesh.GlobalTransform);
+
+    private static Aabb BoundsRelativeTo(Node3D space, MeshInstance3D mesh)
+        => BoundsWithTransform(mesh, space.GlobalTransform.AffineInverse() * mesh.GlobalTransform);
+
+    private static Aabb BoundsWithTransform(MeshInstance3D mesh, Transform3D transform)
     {
         Aabb local = mesh.Mesh?.GetAabb() ?? default;
         Vector3[] corners =
@@ -557,12 +694,12 @@ internal static class BlenderRoomEdits
             local.Position + new Vector3(0, local.Size.Y, local.Size.Z),
             local.End
         };
-        Vector3 first = mesh.GlobalTransform * corners[0];
+        Vector3 first = transform * corners[0];
         Vector3 minimum = first;
         Vector3 maximum = first;
         foreach (Vector3 corner in corners.Skip(1))
         {
-            Vector3 transformed = mesh.GlobalTransform * corner;
+            Vector3 transformed = transform * corner;
             minimum = minimum.Min(transformed);
             maximum = maximum.Max(transformed);
         }
@@ -633,7 +770,19 @@ internal static class BlenderRoomEdits
         for (int index = 0; index < meshes.Count; index++)
         {
             MeshInstance3D mesh = meshes[index];
-            ConcavePolygonShape3D? importedShape = CreateImportedCollisionShape(mesh.Mesh);
+            Transform3D relativeTransform = body.GlobalTransform.AffineInverse() * mesh.GlobalTransform;
+            Shape3D? importedShape;
+            Transform3D collisionTransform;
+            if (TryCreateExactBoxCollision(mesh, relativeTransform, out BoxShape3D? boxShape, out Transform3D boxTransform))
+            {
+                importedShape = boxShape;
+                collisionTransform = boxTransform;
+            }
+            else
+            {
+                importedShape = CreateImportedCollisionShape(mesh.Mesh);
+                collisionTransform = relativeTransform;
+            }
             if (importedShape is null)
             {
                 continue;
@@ -650,18 +799,44 @@ internal static class BlenderRoomEdits
                 body.AddChild(collision);
             }
 
-            // Keep the original CollisionShape3D instances where possible,
-            // because doors and mechanisms retain references to them. Replace
-            // every authored box, not only the first one, with the exact
-            // Blender triangles that are visible for that same body.
-            collision.Transform = body.GlobalTransform.AffineInverse() * mesh.GlobalTransform;
-            collision.Shape = importedShape;
+            if (importedShape is BoxShape3D &&
+                index < originalBoxCollisions.Length &&
+                IsConnectedRollingSlope(originalBoxCollisions[index]))
+            {
+                // Non-uniformly scaled Blender cuboids can leave a raised edge
+                // at a ramp end. Retain the original single-piece gameplay box
+                // for rolling slopes; flat boxes and non-box edits still use
+                // their imported geometry.
+                collision = originalBoxCollisions[index];
+                mesh.SetMeta(SeamSafeCollisionMetadata, true);
+            }
+            else
+            {
+                collision.Transform = collisionTransform;
+                collision.Shape = importedShape;
+            }
+
+            // Cuboid platforms keep one continuous box collision, avoiding
+            // internal triangle edges and join impulses. Edited non-box meshes
+            // retain their exact double-sided Blender triangle collision.
             mesh.SetMeta(ReferenceCollisionPathMetadata, body.GetPathTo(collision));
         }
 
         // Additional boxes on gameplay mechanisms are intentionally kept.
         // The Blender reference exporter includes every wall/platform body,
         // but only the primary envelope of complex props such as cannons.
+    }
+
+    private static bool IsConnectedRollingSlope(CollisionShape3D collision)
+    {
+        if (collision.Shape is not BoxShape3D box)
+        {
+            return false;
+        }
+
+        float upAlignment = Mathf.Abs(collision.GlobalBasis.Y.Normalized().Dot(Vector3.Up));
+        bool thinRollingSurface = box.Size.Y <= Mathf.Min(box.Size.X, box.Size.Z) * 0.25f;
+        return thinRollingSurface && upAlignment is > 0.45f and < 0.995f;
     }
 
     private static ConcavePolygonShape3D? CreateImportedCollisionShape(Mesh? mesh)
@@ -675,6 +850,78 @@ internal static class BlenderRoomEdits
         }
 
         return shape;
+    }
+
+    internal static bool TryCreateExactBoxCollision(
+        MeshInstance3D mesh,
+        Transform3D relativeTransform,
+        out BoxShape3D? shape,
+        out Transform3D collisionTransform)
+    {
+        shape = null;
+        collisionTransform = relativeTransform;
+        if (mesh.Mesh is not Mesh source)
+        {
+            return false;
+        }
+
+        Aabb bounds = source.GetAabb();
+        Vector3[] vertices = source.GetFaces();
+        if (vertices.Length == 0 || bounds.Size.X <= 0.0001f ||
+            bounds.Size.Y <= 0.0001f || bounds.Size.Z <= 0.0001f)
+        {
+            return false;
+        }
+
+        HashSet<int> corners = new();
+        const float tolerance = 0.0005f;
+        foreach (Vector3 vertex in vertices)
+        {
+            int mask = 0;
+            foreach ((float coordinate, float minimum, float maximum, int bit) in new[]
+            {
+                (vertex.X, bounds.Position.X, bounds.End.X, 1),
+                (vertex.Y, bounds.Position.Y, bounds.End.Y, 2),
+                (vertex.Z, bounds.Position.Z, bounds.End.Z, 4),
+            })
+            {
+                if (Mathf.Abs(coordinate - minimum) <= tolerance)
+                {
+                    continue;
+                }
+                if (Mathf.Abs(coordinate - maximum) <= tolerance)
+                {
+                    mask |= bit;
+                    continue;
+                }
+                return false;
+            }
+            corners.Add(mask);
+        }
+        if (corners.Count != 8)
+        {
+            return false;
+        }
+
+        Vector3 scale = relativeTransform.Basis.Scale.Abs();
+        if (scale.X <= 0.0001f || scale.Y <= 0.0001f || scale.Z <= 0.0001f)
+        {
+            return false;
+        }
+        Basis orientation = new(
+            relativeTransform.Basis.X / scale.X,
+            relativeTransform.Basis.Y / scale.Y,
+            relativeTransform.Basis.Z / scale.Z);
+        if (Mathf.Abs(orientation.X.Dot(orientation.Y)) > tolerance ||
+            Mathf.Abs(orientation.X.Dot(orientation.Z)) > tolerance ||
+            Mathf.Abs(orientation.Y.Dot(orientation.Z)) > tolerance)
+        {
+            return false;
+        }
+
+        shape = new BoxShape3D { Size = bounds.Size * scale };
+        collisionTransform = new Transform3D(orientation, relativeTransform * bounds.GetCenter());
+        return true;
     }
 }
 

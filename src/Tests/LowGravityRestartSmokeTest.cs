@@ -34,7 +34,29 @@ public partial class LowGravityRestartSmokeTest : Node
             return;
         }
 
+        Vector3 staleLinearMomentum = new(6.0f, 9.0f, -4.0f);
+        Vector3 staleAngularMomentum = new(4.0f, -3.0f, 2.0f);
+        player.LinearVelocity = staleLinearMomentum;
+        player.AngularVelocity = staleAngularMomentum;
+        player.SetDeferred(RigidBody3D.PropertyName.LinearVelocity, staleLinearMomentum);
+        player.SetDeferred(RigidBody3D.PropertyName.AngularVelocity, staleAngularMomentum);
         room.RestartRoom();
+        if (!player.LinearVelocity.IsZeroApprox() || !player.AngularVelocity.IsZeroApprox())
+        {
+            Fail($"Restart did not clear momentum immediately: linear={player.LinearVelocity}, angular={player.AngularVelocity}.");
+            return;
+        }
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        if (!player.LinearVelocity.IsZeroApprox() || !player.AngularVelocity.IsZeroApprox())
+        {
+            Fail($"A stale physics write restored momentum after restart: linear={player.LinearVelocity}, angular={player.AngularVelocity}.");
+            return;
+        }
+        if (player.Freeze)
+        {
+            Fail("Restart left the player frozen instead of completing the same-frame momentum reset.");
+            return;
+        }
         float spawnY = player.GlobalPosition.Y;
         float maximumRise = 0.0f;
         float maximumUpwardSpeed = 0.0f;
@@ -47,7 +69,46 @@ public partial class LowGravityRestartSmokeTest : Node
 
         if (player.Freeze || lowGravity.ContainsBody(player) || maximumRise > 0.035f || maximumUpwardSpeed > 0.12f)
         {
-            Fail($"Restart retained low-gravity lift: frozen={player.Freeze}, still_overlapping={lowGravity.ContainsBody(player)}, rise={maximumRise:F4}, upward_speed={maximumUpwardSpeed:F4}.");
+            Fail($"Restart did not clear low-gravity lift in its own frame: frozen={player.Freeze}, still_overlapping={lowGravity.ContainsBody(player)}, rise={maximumRise:F4}, upward_speed={maximumUpwardSpeed:F4}.");
+            return;
+        }
+
+        // The real pause-menu restart calls RestartRoom while the SceneTree is
+        // paused, then resumes physics. Reproduce that ordering as well; Area3D
+        // overlap notifications from the old position must not reapply a force
+        // after the teleport to the spawn floor.
+        player.GlobalPosition = lowGravity.GlobalPosition;
+        player.LinearVelocity = Vector3.Zero;
+        for (int frame = 0; frame < 4; frame++)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+        }
+        if (!lowGravity.ContainsBody(player))
+        {
+            Fail("The player did not re-enter low gravity before the paused restart case.");
+            return;
+        }
+
+        GetTree().Paused = true;
+        room.RestartRoom();
+        if (!player.LinearVelocity.IsZeroApprox() || !player.AngularVelocity.IsZeroApprox() || player.Freeze)
+        {
+            Fail($"Paused restart did not clear momentum before resuming physics: linear={player.LinearVelocity}, angular={player.AngularVelocity}, frozen={player.Freeze}.");
+            return;
+        }
+        float pausedSpawnY = player.GlobalPosition.Y;
+        GetTree().Paused = false;
+        float pausedMaximumRise = 0.0f;
+        float pausedMaximumUpwardSpeed = 0.0f;
+        for (int frame = 0; frame < 18; frame++)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+            pausedMaximumRise = Mathf.Max(pausedMaximumRise, player.GlobalPosition.Y - pausedSpawnY);
+            pausedMaximumUpwardSpeed = Mathf.Max(pausedMaximumUpwardSpeed, player.LinearVelocity.Y);
+        }
+        if (player.Freeze || lowGravity.ContainsBody(player) || pausedMaximumRise > 0.035f || pausedMaximumUpwardSpeed > 0.12f)
+        {
+            Fail($"Paused restart did not preserve the same-frame zero momentum: frozen={player.Freeze}, still_overlapping={lowGravity.ContainsBody(player)}, rise={pausedMaximumRise:F4}, upward_speed={pausedMaximumUpwardSpeed:F4}.");
             return;
         }
 
@@ -94,9 +155,10 @@ public partial class LowGravityRestartSmokeTest : Node
         SendKey(Key.W, false);
         SendKey(Key.D, false);
         await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
-        if (speedBeforeSecondKey < 10.0f || sustainedRightSpeed < 5.5f || sustainedForwardSpeed < 5.5f)
+        float sequentialAxisDifference = Mathf.Abs(sustainedRightSpeed - sustainedForwardSpeed);
+        if (speedBeforeSecondKey < 10.0f || sustainedRightSpeed < 7.5f || sustainedForwardSpeed < 7.5f || sequentialAxisDifference > 0.18f)
         {
-            Fail($"Adding D while W was already at speed produced only a momentary turn: before={speedBeforeSecondKey:F3}, right={sustainedRightSpeed:F3}, forward={sustainedForwardSpeed:F3}.");
+            Fail($"Adding D while W was already at speed did not converge to equal sustained axes: before={speedBeforeSecondKey:F3}, right={sustainedRightSpeed:F3}, forward={sustainedForwardSpeed:F3}, difference={sequentialAxisDifference:F3}.");
             return;
         }
 
@@ -117,8 +179,8 @@ public partial class LowGravityRestartSmokeTest : Node
 
             Vector3 startPosition = player.GlobalPosition;
             SendKey(first, true);
-            await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
             SendKey(second, true);
+            float maximumVelocityDifference = 0.0f;
             for (int heldFrame = 0; heldFrame < 45; heldFrame++)
             {
                 await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
@@ -132,6 +194,15 @@ public partial class LowGravityRestartSmokeTest : Node
                     Fail($"Held diagonal {first}+{second} was lost on frame {heldFrame}: input={input}.");
                     return;
                 }
+
+                Vector3 sampleRight = player.MovementBasis!.GlobalBasis.X.Slide(Vector3.Up).Normalized();
+                Vector3 sampleForward = (-player.MovementBasis.GlobalBasis.Z).Slide(Vector3.Up).Normalized();
+                float rightSpeed = player.LinearVelocity.Dot(sampleRight) * Mathf.Sign(expected.X);
+                float forwardSpeed = player.LinearVelocity.Dot(sampleForward) * -Mathf.Sign(expected.Y);
+                if (rightSpeed > 0.05f || forwardSpeed > 0.05f)
+                {
+                    maximumVelocityDifference = Mathf.Max(maximumVelocityDifference, Mathf.Abs(rightSpeed - forwardSpeed));
+                }
             }
 
             Vector3 displacement = player.GlobalPosition - startPosition;
@@ -142,14 +213,17 @@ public partial class LowGravityRestartSmokeTest : Node
             SendKey(first, false);
             SendKey(second, false);
             await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
-            if (rightDistance < 0.08f || forwardDistance < 0.08f || player.CurrentMoveInput != Vector2.Zero)
+            float distanceDifference = Mathf.Abs(rightDistance - forwardDistance);
+            if (rightDistance < 0.08f || forwardDistance < 0.08f ||
+                maximumVelocityDifference > 0.12f || distanceDifference > 0.08f ||
+                player.CurrentMoveInput != Vector2.Zero)
             {
-                Fail($"Held diagonal {first}+{second} did not produce sustained two-axis movement or release cleanly: right={rightDistance:F3}, forward={forwardDistance:F3}, released_input={player.CurrentMoveInput}.");
+                Fail($"Held diagonal {first}+{second} was not symmetric or did not release cleanly: right={rightDistance:F3}, forward={forwardDistance:F3}, distance_difference={distanceDifference:F3}, maximum_velocity_difference={maximumVelocityDifference:F3}, released_input={player.CurrentMoveInput}.");
                 return;
             }
         }
 
-        GD.Print($"LOW_GRAVITY_RESTART_PASS: Room 15 restart exited the old force volume without a jump (rise={maximumRise:F4}, upward_speed={maximumUpwardSpeed:F4}); adding D after W reached {speedBeforeSecondKey:F2} m/s sustained {sustainedRightSpeed:F2} m/s right and {sustainedForwardSpeed:F2} m/s forward; WA/WD/SA/SD remained two-axis input for every held frame.");
+        GD.Print($"LOW_GRAVITY_RESTART_PASS: Room 15 cleared linear and angular momentum on every axis in the restart frame, then exited the old force volume without a jump both live (rise={maximumRise:F4}, upward_speed={maximumUpwardSpeed:F4}) and through the paused menu path (rise={pausedMaximumRise:F4}, upward_speed={pausedMaximumUpwardSpeed:F4}); adding D after W reached {speedBeforeSecondKey:F2} m/s sustained {sustainedRightSpeed:F2} m/s right and {sustainedForwardSpeed:F2} m/s forward; WA/WD/SA/SD remained two-axis input for every held frame.");
         room.QueueFree();
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         GetTree().Quit(0);

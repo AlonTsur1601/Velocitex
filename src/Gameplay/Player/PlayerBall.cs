@@ -71,6 +71,7 @@ public partial class PlayerBall : RigidBody3D
     private ulong _groundSurfaceInstanceId;
     private ulong _lastElasticBounceSurfaceInstanceId;
     private Basis _visualRollingBasis = Basis.Identity;
+    private ulong _zeroMomentumPhysicsFrame = ulong.MaxValue;
     private readonly HashSet<ulong> _previousContactIds = new();
     private readonly HashSet<ulong> _currentContactIds = new();
     private readonly Dictionary<ulong, AirControlSource> _airControlSources = new();
@@ -105,6 +106,19 @@ public partial class PlayerBall : RigidBody3D
 
     public override void _IntegrateForces(PhysicsDirectBodyState3D state)
     {
+        if (_zeroMomentumPhysicsFrame == Engine.GetPhysicsFrames())
+        {
+            // ResetRoom can run from an Area3D callback while this physics step
+            // still owns an older direct-body snapshot. Overwrite that snapshot
+            // in the same step so no force, impulse or cached velocity can win.
+            state.Transform = GlobalTransform;
+            state.LinearVelocity = Vector3.Zero;
+            state.AngularVelocity = Vector3.Zero;
+            state.Sleeping = false;
+            _previousLinearVelocity = Vector3.Zero;
+            return;
+        }
+
         UpdateTrailEmission(state.LinearVelocity);
         UpdateGroundState(state);
         SuppressStaticSurfaceSeamLift(state);
@@ -142,8 +156,7 @@ public partial class PlayerBall : RigidBody3D
             float driveTraction = ResolveDriveTraction(desiredDirection);
             Vector3 driveAcceleration = usesSimulatedInput
                 ? ResolveVectorDriveAcceleration(planarVelocity, desiredDirection, driveTraction, (float)state.Step)
-                : ResolveDriveAxisAcceleration(planarVelocity, cameraRight, input.X, driveTraction, (float)state.Step) +
-                    ResolveDriveAxisAcceleration(planarVelocity, cameraForward, -input.Y, driveTraction, (float)state.Step);
+                : ResolveKeyboardDriveAcceleration(planarVelocity, desiredDirection, driveTraction, (float)state.Step);
             if (driveAcceleration.LengthSquared() > 0.0001f)
             {
                 state.ApplyCentralForce(driveAcceleration * Mass);
@@ -195,12 +208,31 @@ public partial class PlayerBall : RigidBody3D
         _airControlSources.Clear();
         _oneWayRetainedForwardSpeed = 0.0f;
         _oneWaySurfaceInstanceId = 0UL;
-        LinearVelocity = Vector3.Zero;
-        AngularVelocity = Vector3.Zero;
         GlobalTransform = spawnTransform;
+        ClearMomentumInCurrentPhysicsFrame();
         Sleeping = false;
         _trail.Emitting = false;
         ResetPerformed?.Invoke();
+    }
+
+    private void ClearMomentumInCurrentPhysicsFrame()
+    {
+        _zeroMomentumPhysicsFrame = Engine.GetPhysicsFrames();
+        LinearVelocity = Vector3.Zero;
+        AngularVelocity = Vector3.Zero;
+        ConstantForce = Vector3.Zero;
+        ConstantTorque = Vector3.Zero;
+        SetDeferred(RigidBody3D.PropertyName.LinearVelocity, Vector3.Zero);
+        SetDeferred(RigidBody3D.PropertyName.AngularVelocity, Vector3.Zero);
+
+        Rid body = GetRid();
+        if (body.IsValid)
+        {
+            PhysicsServer3D.BodySetState(body, PhysicsServer3D.BodyState.Transform, GlobalTransform);
+            PhysicsServer3D.BodySetState(body, PhysicsServer3D.BodyState.LinearVelocity, Vector3.Zero);
+            PhysicsServer3D.BodySetState(body, PhysicsServer3D.BodyState.AngularVelocity, Vector3.Zero);
+            PhysicsServer3D.BodySetState(body, PhysicsServer3D.BodyState.Sleeping, false);
+        }
     }
 
     public void SetAirControlSource(ulong sourceId, float acceleration, float maximumSpeed)
@@ -454,33 +486,38 @@ public partial class PlayerBall : RigidBody3D
         return new Vector2(horizontal, vertical).LimitLength(1.0f);
     }
 
-    private Vector3 ResolveDriveAxisAcceleration(
+    private Vector3 ResolveKeyboardDriveAcceleration(
         Vector3 planarVelocity,
-        Vector3 positiveAxis,
-        float inputStrength,
+        Vector3 desiredDirection,
         float driveTraction,
         float step)
     {
-        float strength = Mathf.Abs(inputStrength);
-        if (strength < 0.0001f)
+        float speedInDesiredDirection = planarVelocity.Dot(desiredDirection);
+        Vector3 acceleration = Vector3.Zero;
+        if (speedInDesiredDirection < _config.MaximumDriveSpeed)
         {
-            return Vector3.Zero;
+            float parallelRate = (speedInDesiredDirection < -0.1f
+                ? _config.GroundBraking
+                : _config.GroundAcceleration) * driveTraction;
+            float remainingSpeed = _config.MaximumDriveSpeed - speedInDesiredDirection;
+            acceleration += desiredDirection * Mathf.Min(parallelRate, remainingSpeed / step);
         }
 
-        Vector3 direction = positiveAxis * Mathf.Sign(inputStrength);
-        float speedInDirection = planarVelocity.Dot(direction);
-        float maximumAxisSpeed = _config.MaximumDriveSpeed * strength;
-        if (speedInDirection >= maximumAxisSpeed)
+        // A human rarely presses both diagonal keys on the exact same input
+        // frame. Remove velocity perpendicular to the new diagonal while
+        // accelerating along it, so W-then-D converges to the same symmetric
+        // result as pressing W+D together. Speed already aligned with the
+        // desired direction is preserved, including momentum above drive speed.
+        Vector3 lateralVelocity = planarVelocity - (desiredDirection * speedInDesiredDirection);
+        float lateralSpeed = lateralVelocity.Length();
+        if (lateralSpeed > 0.0001f)
         {
-            return Vector3.Zero;
+            float lateralRate = _config.GroundBraking * driveTraction;
+            acceleration -= lateralVelocity / lateralSpeed * Mathf.Min(lateralRate, lateralSpeed / step);
         }
 
-        float acceleration = (speedInDirection < -0.1f
-            ? _config.GroundBraking
-            : _config.GroundAcceleration) * driveTraction * strength;
-        float remainingSpeed = maximumAxisSpeed - speedInDirection;
-        float allowedAcceleration = Mathf.Min(acceleration, remainingSpeed / step);
-        return direction * allowedAcceleration;
+        float maximumAcceleration = Mathf.Max(_config.GroundAcceleration, _config.GroundBraking) * driveTraction;
+        return acceleration.LimitLength(maximumAcceleration);
     }
 
     private Vector3 ResolveVectorDriveAcceleration(
@@ -503,20 +540,24 @@ public partial class PlayerBall : RigidBody3D
         return desiredDirection * allowedAcceleration;
     }
 
-    private void ReleaseFromForceVolumes()
+    private bool ReleaseFromForceVolumes()
     {
         if (!IsInsideTree())
         {
-            return;
+            return false;
         }
 
+        bool released = false;
         foreach (Node node in GetTree().GetNodesInGroup(ForceVolume3D.ForceVolumeGroup))
         {
             if (node is ForceVolume3D forceVolume)
             {
+                released |= forceVolume.ContainsBody(this);
                 forceVolume.ReleaseBody(this);
             }
         }
+
+        return released;
     }
 
     private void UpdateVisualRollingBasis(PhysicsDirectBodyState3D state)

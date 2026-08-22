@@ -33,6 +33,8 @@ public partial class RouteCheckpoint3D : Area3D
     public bool IsShowingIdleVisual => _innerPlate is not null && _innerPlate.MaterialOverride == _idleMaterial;
     public bool IsShowingDeniedRed => _innerPlate is not null &&
         _innerPlate.MaterialOverride == _deniedMaterial;
+    public bool IsShowingDeniedLightRed => _innerPlate is not null &&
+        _innerPlate.MaterialOverride == _deniedLightMaterial;
 
     private readonly List<Node3D> _latches = new();
     private readonly HashSet<ulong> _handledFloorContacts = new();
@@ -43,9 +45,11 @@ public partial class RouteCheckpoint3D : Area3D
     private Material _idleMaterial = null!;
     private Material _activeMaterial = null!;
     private Material _deniedMaterial = null!;
+    private Material _deniedLightMaterial = null!;
     private float _activationAmount;
     private float _deniedFlashTime;
     private float _deniedFlashElapsed;
+    private ulong _deniedFeedbackPhysicsFrame = ulong.MaxValue;
     private ulong _suppressAutomaticPressUntilPhysicsFrame;
 
     public override void _Ready()
@@ -82,6 +86,13 @@ public partial class RouteCheckpoint3D : Area3D
             0.42f,
             emissionEnabled: true,
             emission: new Color("8f080e"));
+        _deniedLightMaterial = RoomGeometry.CreateMaterial(
+            string.Empty,
+            new Color("ff686d"),
+            0.04f,
+            0.36f,
+            emissionEnabled: true,
+            emission: new Color("ff3038"));
         Vector3 plateSize = new(
             Mathf.Max(1.8f, TriggerSize.X * 0.72f),
             0.12f,
@@ -178,7 +189,7 @@ public partial class RouteCheckpoint3D : Area3D
         bool deniedRedPhase = ((int)(_deniedFlashElapsed / DeniedFlashInterval) & 1) == 0;
         _framePlate.MaterialOverride = _frameMaterial;
         _innerPlate.MaterialOverride = deniedActive
-            ? (deniedRedPhase ? _deniedMaterial : _idleMaterial)
+            ? (deniedRedPhase ? _deniedMaterial : _deniedLightMaterial)
             : (IsActivated ? _activeMaterial : _idleMaterial);
         SetSequencePipsVisible(true);
         _innerPlate.Position = new Vector3(
@@ -212,7 +223,7 @@ public partial class RouteCheckpoint3D : Area3D
         {
             if (node is RouteCheckpoint3D checkpoint && checkpoint != this)
             {
-                checkpoint.ClearDeniedFeedback();
+                checkpoint.ClearDeniedFeedbackFromPhysicsFrame(Engine.GetPhysicsFrames());
             }
         }
         ApplyAcceptedPressVisualImmediately();
@@ -225,24 +236,11 @@ public partial class RouteCheckpoint3D : Area3D
         {
             _deniedFlashTime = DeniedFlashDuration;
             _deniedFlashElapsed = 0.0f;
+            _deniedFeedbackPhysicsFrame = Engine.GetPhysicsFrames();
             _framePlate.MaterialOverride = _frameMaterial;
             _innerPlate.MaterialOverride = _deniedMaterial;
             SetSequencePipsVisible(true);
         }
-    }
-
-    internal void ScheduleDeniedFeedback(PlayerBall player, ulong pressPhysicsFrame)
-    {
-        Callable.From(() =>
-        {
-            bool acceptedInPressFrame = GodotObject.IsInstanceValid(player) &&
-                player.HasMeta(AcceptedButtonPhysicsFrameMetadata) &&
-                player.GetMeta(AcceptedButtonPhysicsFrameMetadata).AsUInt64() == pressPhysicsFrame;
-            if (!IsActivated && GodotObject.IsInstanceValid(player) && !acceptedInPressFrame)
-            {
-                ApplyDeniedFeedback();
-            }
-        }).CallDeferred();
     }
 
     public void Press(PlayerBall player)
@@ -264,11 +262,12 @@ public partial class RouteCheckpoint3D : Area3D
 
     private void ClearAllDeniedFeedback()
     {
+        ulong acceptedFrame = Engine.GetPhysicsFrames();
         foreach (Node node in GetTree().GetNodesInGroup(PhysicalFloorButtonGroup))
         {
             if (node is RouteCheckpoint3D checkpoint)
             {
-                checkpoint.ClearDeniedFeedback();
+                checkpoint.ClearDeniedFeedbackFromPhysicsFrame(acceptedFrame);
             }
         }
     }
@@ -290,6 +289,7 @@ public partial class RouteCheckpoint3D : Area3D
         _activationAmount = 0.0f;
         _deniedFlashTime = 0.0f;
         _deniedFlashElapsed = 0.0f;
+        _deniedFeedbackPhysicsFrame = ulong.MaxValue;
         _framePlate.MaterialOverride = _frameMaterial;
         _innerPlate.MaterialOverride = _idleMaterial;
         SetSequencePipsVisible(true);
@@ -472,9 +472,18 @@ public partial class RouteCheckpoint3D : Area3D
     {
         _deniedFlashTime = 0.0f;
         _deniedFlashElapsed = 0.0f;
+        _deniedFeedbackPhysicsFrame = ulong.MaxValue;
         if (!IsActivated && IsInstanceValid(_innerPlate))
         {
             _innerPlate.MaterialOverride = _idleMaterial;
+        }
+    }
+
+    private void ClearDeniedFeedbackFromPhysicsFrame(ulong physicsFrame)
+    {
+        if (_deniedFeedbackPhysicsFrame == physicsFrame)
+        {
+            ClearDeniedFeedback();
         }
     }
 

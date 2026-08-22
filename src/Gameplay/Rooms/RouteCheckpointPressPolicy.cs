@@ -39,7 +39,11 @@ public static class RouteCheckpointPressPolicy
         // A physical press which the room did not accept is always rejected in
         // the same way: the plate stays raised and flashes red. A successful
         // callback activates and depresses it before this method returns.
-        checkpoint.ScheduleDeniedFeedback(player, Engine.GetPhysicsFrames());
+        // Apply the rejected visual in the press itself. If another overlapping
+        // plate is accepted later in this physics frame, Activate() clears this
+        // feedback immediately. Deferring the rejection left a stale callback
+        // which could turn a valid sequence red after it had already advanced.
+        checkpoint.ApplyDeniedFeedback();
         return RouteCheckpointPressResult.Denied;
     }
 }

@@ -9,6 +9,11 @@ public partial class BlenderRoomExactSmokeTest : Node
 
     public override async void _Ready()
     {
+        if (OS.GetCmdlineUserArgs().Contains("--negative-collision-control", StringComparer.Ordinal))
+        {
+            await RunNegativeCollisionControl();
+            return;
+        }
         int failures = 0;
         foreach (int roomNumber in Enumerable.Range(1, 30))
         {
@@ -42,6 +47,53 @@ public partial class BlenderRoomExactSmokeTest : Node
         GetTree().Quit(failures == 0 ? 0 : 1);
     }
 
+    private async Task RunNegativeCollisionControl()
+    {
+        PackedScene packed = GD.Load<PackedScene>("res://scenes/Room02.tscn");
+        Node3D room = (Node3D)packed.Instantiate();
+        AddChild(room);
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+
+        MeshInstance3D? importedMesh = room.GetNode<Node>("BlenderGeometry").GetChildren()
+            .OfType<MeshInstance3D>()
+            .FirstOrDefault(mesh =>
+                mesh.HasMeta(BlenderRoomEdits.ReferenceTargetPathMetadata) &&
+                mesh.HasMeta(BlenderRoomEdits.ReferenceCollisionPathMetadata) &&
+                !mesh.HasMeta(BlenderRoomEdits.SeamSafeCollisionMetadata));
+        StaticBody3D? target = importedMesh is null
+            ? null
+            : room.GetNodeOrNull<StaticBody3D>(
+                importedMesh.GetMeta(BlenderRoomEdits.ReferenceTargetPathMetadata).AsNodePath());
+        CollisionShape3D? collision = importedMesh is null || target is null
+            ? null
+            : target.GetNodeOrNull<CollisionShape3D>(
+                importedMesh.GetMeta(BlenderRoomEdits.ReferenceCollisionPathMetadata).AsNodePath());
+        if (collision is null)
+        {
+            GD.PushError("BLENDER_ROOM_EXACT_NEGATIVE_CONTROL_FAIL: could not find an imported Room 02 collision.");
+            GetTree().Quit(1);
+            return;
+        }
+
+        collision.Position += Vector3.Right * 0.25f;
+        int detectedFailures = AuditRoom(room, 2);
+        if (detectedFailures == 0)
+        {
+            GD.PushError("BLENDER_ROOM_EXACT_NEGATIVE_CONTROL_FAIL: a 0.25 m hitbox displacement was not detected.");
+            GetTree().Quit(1);
+            return;
+        }
+
+        GD.Print(
+            $"BLENDER_ROOM_EXACT_NEGATIVE_CONTROL_PASS: detected {detectedFailures} failure(s) " +
+            "after displacing one imported Room 02 hitbox by 0.25 m.");
+        room.QueueFree();
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        GetTree().Quit(0);
+    }
+
     private static int AuditRoom(Node3D room, int roomNumber)
     {
         string path = $"res://assets/models/EditableWallsBlender/Room{roomNumber:00}Walls.blend";
@@ -58,9 +110,16 @@ public partial class BlenderRoomExactSmokeTest : Node
 
         int failures = 0;
         float maximumError = 0.0f;
-        if (actual.Count != expected.Count)
+        int expectedRoomDoorReferenceCount = expected.Values.Count(mesh =>
+            IsCanonicalDoorReference(mesh.Name.ToString()));
+        int expectedRuntimeCount = roomNumber == 2
+            ? expected.Count
+            : expected.Count - expectedRoomDoorReferenceCount + 3;
+        if (actual.Count != expectedRuntimeCount)
         {
-            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} wall count runtime={actual.Count}, Blender={expected.Count}.");
+            GD.PushError(
+                $"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} wall count runtime={actual.Count}, " +
+                $"expected={expectedRuntimeCount} (Blender={expected.Count}, replaced door refs={expectedRoomDoorReferenceCount}).");
             failures++;
         }
 
@@ -73,7 +132,9 @@ public partial class BlenderRoomExactSmokeTest : Node
                 continue;
             }
 
-            float error = GeometryError(actualMesh, expectedMesh);
+            bool usesRoom02CanonicalDoor = actualMesh.HasMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata) &&
+                actualMesh.GetMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata).AsInt32() == 2;
+            float error = usesRoom02CanonicalDoor ? 0.0f : GeometryError(actualMesh, expectedMesh);
             maximumError = Mathf.Max(maximumError, error);
             bool isReference = name.StartsWith("REF_", StringComparison.Ordinal);
             int collisionFailures = isReference
@@ -131,6 +192,7 @@ public partial class BlenderRoomExactSmokeTest : Node
         }
 
         failures += AuditLegacyVisuals(room, blenderGeometry, actual, roomNumber);
+        failures += AuditDoorEntrance(room, actual, roomNumber);
         failures += AuditLighting(room, roomNumber);
 
         if (failures == 0)
@@ -139,6 +201,142 @@ public partial class BlenderRoomExactSmokeTest : Node
         }
 
         importedRoot.Free();
+        return failures;
+    }
+
+    private static int AuditDoorEntrance(
+        Node3D room,
+        IReadOnlyDictionary<string, MeshInstance3D> importedMeshes,
+        int roomNumber)
+    {
+        MeshInstance3D[] authoredEntranceMeshes = importedMeshes
+            .Where(pair =>
+            {
+                string target = ReferenceTargetName(pair.Key);
+                return target.StartsWith("ExitCorridor", StringComparison.Ordinal) ||
+                    target.StartsWith("ExitDoorBacking", StringComparison.Ordinal) ||
+                    target.StartsWith("FrameCollision", StringComparison.Ordinal);
+            })
+            .Select(pair => pair.Value)
+            .ToArray();
+        if (authoredEntranceMeshes.Length == 0)
+        {
+            return 0;
+        }
+
+        int failures = 0;
+        foreach (MeshInstance3D authoredMesh in authoredEntranceMeshes)
+        {
+            if (!authoredMesh.HasMeta(BlenderRoomEdits.ReferenceTargetPathMetadata) ||
+                !IsVisible(authoredMesh))
+            {
+                GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} authored entrance part {authoredMesh.Name} is not visibly bound in the game.");
+                failures++;
+            }
+        }
+
+        MeshInstance3D[] authoredFrameMeshes = authoredEntranceMeshes
+            .Where(mesh => ReferenceTargetName(mesh.Name.ToString()).StartsWith("FrameCollision", StringComparison.Ordinal))
+            .ToArray();
+        if (authoredFrameMeshes.Length == 0)
+        {
+            return failures;
+        }
+
+        MeshInstance3D? authoredClosedDoor = importedMeshes.Values.FirstOrDefault(mesh =>
+            ReferenceTargetName(mesh.Name.ToString()).StartsWith("ClosedDoorBlocker", StringComparison.Ordinal));
+        if (authoredFrameMeshes.Any(mesh =>
+                !mesh.HasMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata) ||
+                mesh.GetMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata).AsInt32() != 2) ||
+            authoredClosedDoor is null ||
+            !authoredClosedDoor.HasMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata) ||
+            authoredClosedDoor.GetMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata).AsInt32() != 2)
+        {
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} does not use Room 02 as its canonical door source.");
+            failures++;
+        }
+
+        StaticBody3D? frameCollision = room.GetNodeOrNull<StaticBody3D>("ExitDoor/FrameCollision");
+        if (frameCollision is null)
+        {
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} has authored frame meshes but no runtime FrameCollision target.");
+            return failures + 1;
+        }
+
+        string[] replacedPocketNames =
+        {
+            "LeftDoorPocketMask",
+            "RightDoorPocketMask",
+            "LeftFrame",
+            "RightFrame",
+        };
+        foreach (MeshInstance3D legacyFrame in frameCollision.GetParent().GetChildren()
+            .OfType<MeshInstance3D>()
+            .Where(mesh => replacedPocketNames.Contains(mesh.Name.ToString(), StringComparer.Ordinal)))
+        {
+            if (IsVisible(legacyFrame))
+            {
+                GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} legacy pocket part {legacyFrame.Name} remains visible over its Blender-authored replacement.");
+                failures++;
+            }
+        }
+
+        string[] intactFrameNames = { "Header" };
+        foreach (string frameName in intactFrameNames)
+        {
+            MeshInstance3D? intactFrame = frameCollision.GetParent().GetNodeOrNull<MeshInstance3D>(frameName);
+            if (intactFrame is null || !IsVisible(intactFrame))
+            {
+                GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} intact door structure {frameName} was removed while replacing the authored pocket pieces.");
+                failures++;
+            }
+        }
+
+        Node3D door = frameCollision.GetParent<Node3D>();
+        MeshInstance3D? header = door.GetNodeOrNull<MeshInstance3D>("Header");
+        Aabb[] pocketBounds = authoredFrameMeshes
+            .Select(mesh => BoundsRelativeTo(door, mesh))
+            .OrderBy(bounds => bounds.GetCenter().X)
+            .ToArray();
+        if (header is null || pocketBounds.Length != 2)
+        {
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} cannot verify the canonical upper-frame connection.");
+            failures++;
+        }
+        else
+        {
+            Aabb headerBounds = BoundsRelativeTo(door, header);
+            float sideTop = Mathf.Max(pocketBounds[0].End.Y, pocketBounds[1].End.Y);
+            bool connected = Mathf.Abs(headerBounds.Position.Y - sideTop) <= Tolerance &&
+                headerBounds.Position.X <= pocketBounds[0].End.X + Tolerance &&
+                headerBounds.End.X >= pocketBounds[1].Position.X - Tolerance;
+            if (!connected)
+            {
+                GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} upper frame does not connect to both canonical side pieces: header={headerBounds}, left={pocketBounds[0]}, right={pocketBounds[1]}.");
+                failures++;
+            }
+        }
+
+        CollisionShape3D[] activeFrameCollisions = frameCollision.GetChildren()
+            .OfType<CollisionShape3D>()
+            .Where(collision => !collision.Disabled)
+            .ToArray();
+        CollisionShape3D[] authoredPocketCollisions = activeFrameCollisions
+            .Where(collision => collision.Name.ToString() is "LeftPocketHitbox" or "RightPocketHitbox")
+            .ToArray();
+        CollisionShape3D[] intactFrameCollisions = activeFrameCollisions
+            .Where(collision => collision.Name.ToString() is "LeftFrameHitbox" or "RightFrameHitbox" or "HeaderHitbox")
+            .ToArray();
+        if (authoredPocketCollisions.Length != authoredFrameMeshes.Length ||
+            authoredPocketCollisions.Any(collision => collision.Shape is not BoxShape3D) ||
+            intactFrameCollisions.Length != 3 ||
+            intactFrameCollisions.Any(collision => collision.Shape is not BoxShape3D) ||
+            activeFrameCollisions.Length != authoredFrameMeshes.Length + 3)
+        {
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} door collision structure is incomplete: active={activeFrameCollisions.Length}, authored_pockets={authoredPocketCollisions.Length}/{authoredFrameMeshes.Length}, intact_frame={intactFrameCollisions.Length}/3.");
+            failures++;
+        }
+
         return failures;
     }
 
@@ -195,25 +393,64 @@ public partial class BlenderRoomExactSmokeTest : Node
 
         NodePath collisionPath = importedMesh.GetMeta(BlenderRoomEdits.ReferenceCollisionPathMetadata).AsNodePath();
         CollisionShape3D? collision = targetBody.GetNodeOrNull<CollisionShape3D>(collisionPath);
-        if (collision?.Shape is not ConcavePolygonShape3D actualShape || importedMesh.Mesh is null)
+        if (collision?.Shape is null || importedMesh.Mesh is null)
         {
-            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} reference {name} does not use an imported trimesh hitbox.");
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} reference {name} has no imported hitbox.");
             return 1;
         }
 
-        ConcavePolygonShape3D? expectedShape = importedMesh.Mesh.CreateTrimeshShape();
-        Transform3D expectedTransform = targetBody.GlobalTransform.AffineInverse() * importedMesh.GlobalTransform;
-        float transformError = TransformError(collision.Transform, expectedTransform);
-        float meshError = ConcaveShapeError(actualShape, expectedShape);
-        bool doubleSided = actualShape.BackfaceCollision;
-        if (!doubleSided || transformError > Tolerance || meshError > Tolerance)
+        if (importedMesh.HasMeta(BlenderRoomEdits.SeamSafeCollisionMetadata) &&
+            importedMesh.GetMeta(BlenderRoomEdits.SeamSafeCollisionMetadata).AsBool())
         {
+            if (collision.Shape is BoxShape3D && !collision.Disabled)
+            {
+                return 0;
+            }
+
             GD.PushError(
-                $"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} reference {name} hitbox differs from its rendered mesh; transform={transformError:F6}, triangles={meshError:F6}, double_sided={doubleSided}.");
+                $"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} seam-safe surface {name} " +
+                "does not retain one active box hitbox.");
             return 1;
         }
 
-        return 0;
+        Transform3D importedRelative = targetBody.GlobalTransform.AffineInverse() * importedMesh.GlobalTransform;
+        if (collision.Shape is BoxShape3D actualBox)
+        {
+            bool expectedIsBox = BlenderRoomEdits.TryCreateExactBoxCollision(
+                importedMesh,
+                importedRelative,
+                out BoxShape3D? expectedBox,
+                out Transform3D expectedBoxTransform);
+            float transformError = TransformError(collision.Transform, expectedBoxTransform);
+            float sizeError = expectedBox is null
+                ? float.PositiveInfinity
+                : actualBox.Size.DistanceTo(expectedBox.Size);
+            if (!expectedIsBox || transformError > Tolerance || sizeError > Tolerance)
+            {
+                GD.PushError(
+                    $"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} cuboid reference {name} hitbox differs from its Blender box; transform={transformError:F6}, size={sizeError:F6}.");
+                return 1;
+            }
+            return 0;
+        }
+
+        if (collision.Shape is ConcavePolygonShape3D actualShape)
+        {
+            ConcavePolygonShape3D? expectedShape = importedMesh.Mesh.CreateTrimeshShape();
+            float transformError = TransformError(collision.Transform, importedRelative);
+            float meshError = ConcaveShapeError(actualShape, expectedShape);
+            bool doubleSided = actualShape.BackfaceCollision;
+            if (doubleSided && transformError <= Tolerance && meshError <= Tolerance)
+            {
+                return 0;
+            }
+            GD.PushError(
+                $"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} non-box reference {name} hitbox differs from its Blender triangles; transform={transformError:F6}, triangles={meshError:F6}, double_sided={doubleSided}.");
+            return 1;
+        }
+
+        GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} reference {name} uses unsupported collision shape {collision.Shape.GetType().Name}.");
+        return 1;
     }
 
     private async Task<int> AuditReferenceMotion(Node3D room, int roomNumber)
@@ -436,11 +673,30 @@ public partial class BlenderRoomExactSmokeTest : Node
         return separator >= 0 ? name[(separator + 1)..] : name;
     }
 
+    private static bool IsCanonicalDoorReference(string name)
+    {
+        string target = ReferenceTargetName(name);
+        int separator = Mathf.Max(target.LastIndexOf('.'), target.LastIndexOf('_'));
+        if (separator > 0 && separator < target.Length - 1 &&
+            target[(separator + 1)..].All(char.IsDigit))
+        {
+            target = target[..separator];
+        }
+
+        return target is "FrameCollision" or "ClosedDoorBlocker";
+    }
+
     private static bool NamesMatch(string actual, string imported) =>
         actual.Equals(imported, StringComparison.Ordinal) ||
         actual.Equals(imported.Replace("_001", ".001", StringComparison.Ordinal), StringComparison.Ordinal);
 
     private static Aabb GlobalBounds(MeshInstance3D mesh)
+        => BoundsWithTransform(mesh, mesh.GlobalTransform);
+
+    private static Aabb BoundsRelativeTo(Node3D space, MeshInstance3D mesh)
+        => BoundsWithTransform(mesh, space.GlobalTransform.AffineInverse() * mesh.GlobalTransform);
+
+    private static Aabb BoundsWithTransform(MeshInstance3D mesh, Transform3D transform)
     {
         Aabb local = mesh.Mesh?.GetAabb() ?? default;
         Vector3[] corners =
@@ -454,12 +710,12 @@ public partial class BlenderRoomExactSmokeTest : Node
             local.Position + new Vector3(0, local.Size.Y, local.Size.Z),
             local.End
         };
-        Vector3 first = mesh.GlobalTransform * corners[0];
+        Vector3 first = transform * corners[0];
         Vector3 minimum = first;
         Vector3 maximum = first;
         foreach (Vector3 corner in corners.Skip(1))
         {
-            Vector3 transformed = mesh.GlobalTransform * corner;
+            Vector3 transformed = transform * corner;
             minimum = minimum.Min(transformed);
             maximum = maximum.Max(transformed);
         }

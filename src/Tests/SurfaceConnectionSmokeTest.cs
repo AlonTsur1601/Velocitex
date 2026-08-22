@@ -311,7 +311,16 @@ public partial class SurfaceConnectionSmokeTest : Node
         if (generatedWallMaterialIds.Length > 1)
         {
             issues++;
+            string materialAssignments = string.Join(", ", barriers
+                .Where(barrier => barrier.Body.HasMeta(RoomGeometry.GeneratedPlatformWallMetadata))
+                .Select(barrier =>
+                {
+                    Material? material = barrier.Body.GetChildren().OfType<MeshInstance3D>()
+                        .FirstOrDefault()?.MaterialOverride;
+                    return $"{barrier.Body.Name}={(material is null ? "none" : material.GetInstanceId())}";
+                }));
             GD.PushError($"SURFACE_BARRIER_COLOR: Room {room:00} uses {generatedWallMaterialIds.Length} different generated-wall materials instead of one room-wide material.");
+            GD.PushError($"SURFACE_BARRIER_COLOR_DETAILS: Room {room:00} {materialAssignments}.");
         }
 
         foreach (Barrier barrier in barriers)
@@ -392,11 +401,14 @@ public partial class SurfaceConnectionSmokeTest : Node
         CollectWindFanHousings(root, housings);
         bool sharedModel = housings.Count == expectedCount && housings.All(housing =>
             housing.GetNodeOrNull<MeshInstance3D>("Hub") is not null &&
-            housing.GetNodeOrNull<Node3D>("Guard") is Node3D guard && guard.GetChildCount() == 16 &&
-            housing.GetNodeOrNull<Node3D>("Rotor") is Node3D rotor && rotor.GetChildCount() == 5);
+            housing.GetNodeOrNull<MeshInstance3D>("Guard") is MeshInstance3D { Mesh: TorusMesh } &&
+            housing.GetNodeOrNull<Node3D>("Rotor") is Node3D rotor &&
+            rotor.GetNodeOrNull<MeshInstance3D>("SpinnerCap") is not null &&
+            Enumerable.Range(1, 5).All(index =>
+                rotor.GetNodeOrNull<MeshInstance3D>($"Blade{index}") is not null));
         if (sharedModel)
         {
-            GD.Print($"SHARED_WIND_FAN_PASS: Room {room:00} uses the canonical hub, 16-segment guard and five-blade rotor for all {housings.Count} fans.");
+            GD.Print($"SHARED_WIND_FAN_PASS: Room {room:00} uses the canonical hub, smooth torus guard, spinner cap and five-blade rotor for all {housings.Count} fans.");
             return 0;
         }
 
@@ -610,7 +622,7 @@ public partial class SurfaceConnectionSmokeTest : Node
                         continue;
                     }
 
-                    Vector3 local = surface.Body.ToLocal(bottomPoint);
+                    Vector3 local = surface.Collision.ToLocal(bottomPoint);
                     float horizontalTolerance = 0.015f;
                     float xOverrun = Mathf.Max(0.0f, Mathf.Abs(local.X) - surface.Shape.Size.X * 0.5f);
                     float zOverrun = Mathf.Max(0.0f, Mathf.Abs(local.Z) - surface.Shape.Size.Z * 0.5f);
@@ -824,7 +836,7 @@ public partial class SurfaceConnectionSmokeTest : Node
                     continue;
                 }
 
-                float up = Mathf.Abs((body.GlobalTransform.Basis * Vector3.Up).Normalized().Dot(Vector3.Up));
+                float up = Mathf.Abs((collision.GlobalTransform.Basis * Vector3.Up).Normalized().Dot(Vector3.Up));
                 surfaces.Add(new Surface(body, collision, box, up < 0.9995f));
                 break;
             }
@@ -838,7 +850,7 @@ public partial class SurfaceConnectionSmokeTest : Node
 
     private static void CollectBarriers(Node node, List<Barrier> barriers)
     {
-        if (node is StaticBody3D body && IsEdgeBarrier(body.Name.ToString()))
+        if (node is StaticBody3D body && body.CollisionLayer != 0 && IsEdgeBarrier(body.Name.ToString()))
         {
             foreach (CollisionShape3D collision in body.GetChildren().OfType<CollisionShape3D>())
             {
@@ -971,8 +983,8 @@ public partial class SurfaceConnectionSmokeTest : Node
         float flatTop = flat.Shape.Size.Y * 0.5f;
         foreach (Edge edge in GetTopEdges(slope))
         {
-            Vector3 localStart = flat.Body.ToLocal(edge.Start);
-            Vector3 localEnd = flat.Body.ToLocal(edge.End);
+            Vector3 localStart = flat.Collision.ToLocal(edge.Start);
+            Vector3 localEnd = flat.Collision.ToLocal(edge.End);
             Vector3 localMidpoint = (localStart + localEnd) * 0.5f;
             if (Mathf.Abs(localMidpoint.X) > flat.Shape.Size.X * 0.5f + 0.01f ||
                 Mathf.Abs(localMidpoint.Z) > flat.Shape.Size.Z * 0.5f + 0.01f)
@@ -1011,7 +1023,7 @@ public partial class SurfaceConnectionSmokeTest : Node
 
     private static Edge[] GetTopEdges(Surface surface)
     {
-        Transform3D transform = surface.Body.GlobalTransform;
+        Transform3D transform = surface.Collision.GlobalTransform;
         Vector3 center = transform * (Vector3.Up * surface.Shape.Size.Y * 0.5f);
         Vector3 halfX = transform.Basis * (Vector3.Right * surface.Shape.Size.X * 0.5f);
         Vector3 halfZ = transform.Basis * (Vector3.Back * surface.Shape.Size.Z * 0.5f);

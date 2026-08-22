@@ -853,7 +853,10 @@ public partial class Room13Runtime : RoomRuntime
     {
         _runVisualSmoke = false;
         bool completeFanBank = _fanRotors.Count == 3 &&
-            _fanRotors.All(rotor => rotor.GetChildCount() == 5);
+            _fanRotors.All(rotor =>
+                rotor.GetNodeOrNull<MeshInstance3D>("SpinnerCap") is not null &&
+                Enumerable.Range(1, 5).All(index =>
+                    rotor.GetNodeOrNull<MeshInstance3D>($"Blade{index}") is not null));
         bool everyFanRotated = _initialFanBases.Length == _fanRotors.Count &&
             _fanRotors.Select((rotor, index) => rotor.Transform.Basis.X.DistanceTo(_initialFanBases[index].X))
                 .All(distance => distance > 0.05f);

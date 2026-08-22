@@ -1656,7 +1656,7 @@ internal readonly record struct PlatformWallStyle(
         }
     }
 
-    private static void AlignExitCorridorFloorToPlatform(Node parent, ExitDoor3D door)
+    internal static void AlignExitCorridorFloorToPlatform(Node parent, ExitDoor3D door)
     {
         Node3D? shell = parent.GetNodeOrNull<Node3D>("RoomShell");
         CollisionShape3D? nearestPlatform = null;
@@ -1745,6 +1745,85 @@ internal readonly record struct PlatformWallStyle(
             // against the wrong length and stops covering the real surface.
             floorDimMaterial.SetShaderParameter("corridor_length", floorDepth);
         }
+    }
+
+    internal static bool CloseExitCorridorCollisionSeam(Node parent, ExitDoor3D door)
+    {
+        Node3D? shell = parent.GetNodeOrNull<Node3D>("RoomShell");
+        Vector3? nearestMinimum = null;
+        float bestDistance = float.PositiveInfinity;
+        foreach (StaticBody3D body in EnumerateDescendants(parent).OfType<StaticBody3D>())
+        {
+            string bodyName = body.Name.ToString();
+            if (door.IsAncestorOf(body) ||
+                (shell is not null && shell.IsAncestorOf(body)) ||
+                bodyName.Contains("Wall", StringComparison.OrdinalIgnoreCase) ||
+                bodyName.Contains("Hazard", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            foreach (CollisionShape3D collision in body.GetChildren().OfType<CollisionShape3D>())
+            {
+                if (collision.Disabled || collision.Shape is not BoxShape3D box ||
+                    Mathf.Abs(collision.GlobalBasis.Y.Normalized().Dot(Vector3.Up)) < 0.95f)
+                {
+                    continue;
+                }
+
+                (Vector3 minimum, Vector3 maximum) = GetBoxBoundsInDoorSpace(door, collision, box.Size);
+                if (Mathf.Abs(maximum.Y - 0.12f) > 0.06f ||
+                    maximum.X < -0.45f || minimum.X > 0.45f)
+                {
+                    continue;
+                }
+
+                const float goalLocalZ = 1.08f;
+                float distance = goalLocalZ < minimum.Z
+                    ? minimum.Z - goalLocalZ
+                    : goalLocalZ > maximum.Z
+                        ? goalLocalZ - maximum.Z
+                        : 0.0f;
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    nearestMinimum = minimum;
+                }
+            }
+        }
+
+        CollisionShape3D? floorCollision = door
+            .GetNodeOrNull<StaticBody3D>("ExitCorridorFloor")?
+            .GetChildren().OfType<CollisionShape3D>().FirstOrDefault();
+        if (nearestMinimum is null || bestDistance > 1.05f ||
+            floorCollision?.Shape is not BoxShape3D floorBox)
+        {
+            return false;
+        }
+
+        (Vector3 floorMinimum, Vector3 floorMaximum) =
+            GetBoxBoundsInDoorSpace(door, floorCollision, floorBox.Size);
+        float gap = nearestMinimum.Value.Z - floorMaximum.Z;
+        if (gap <= 0.001f)
+        {
+            return false;
+        }
+        if (gap > 0.25f ||
+            Mathf.Abs(floorCollision.GlobalBasis.Z.Normalized().Dot(door.GlobalBasis.Z.Normalized())) < 0.995f)
+        {
+            GD.PushError($"Exit door in {parent.Name} has an unsupported {gap:F3} m corridor collision seam.");
+            return false;
+        }
+
+        // Extend only the invisible hitbox toward the final imported platform.
+        // The Blender-authored corridor mesh and its dimming material stay
+        // byte-for-byte visually unchanged.
+        floorCollision.Shape = new BoxShape3D
+        {
+            Size = new Vector3(floorBox.Size.X, floorBox.Size.Y, floorBox.Size.Z + gap),
+        };
+        floorCollision.GlobalPosition += door.GlobalBasis.Z.Normalized() * (gap * 0.5f);
+        return true;
     }
 
     private static void ConfigureCorridorEntranceTrigger(Node parent, ExitDoor3D door)

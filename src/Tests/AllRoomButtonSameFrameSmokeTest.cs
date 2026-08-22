@@ -101,9 +101,9 @@ public partial class AllRoomButtonSameFrameSmokeTest : Node
                     ? Mathf.IsEqualApprox(plate.Position.Y, expectedPressedY) &&
                       !button.IsDeniedFeedbackActive &&
                       !IsVisiblyRed(plate.MaterialOverride)
-                    : !button.IsDeniedFeedbackActive &&
+                    : button.IsDeniedFeedbackActive &&
                       Mathf.IsEqualApprox(plate.Position.Y, expectedIdleY) &&
-                      !IsVisiblyRed(plate.MaterialOverride);
+                      IsVisiblyRed(plate.MaterialOverride);
                 if (!physicalPressDispatched || !physicalPressHadCorrectImmediateState ||
                     (button.IsActivated && !acceptedPressWasAlreadyDepressedInCallback))
                 {
@@ -112,14 +112,29 @@ public partial class AllRoomButtonSameFrameSmokeTest : Node
                 }
 
                 bool activatedByPress = button.IsActivated;
-                bool sawBrightPhase = false;
-                bool sawIdlePhase = false;
+                bool sawDarkRedPhase = false;
+                bool sawLightRedPhase = false;
+                bool sawNonRedDuringDenied = false;
+                float darkRedBrightness = 0.0f;
+                float lightRedBrightness = 0.0f;
                 for (int frame = 0; frame < 50; frame++)
                 {
                     await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
                     bool red = IsVisiblyRed(plate.MaterialOverride);
-                    sawBrightPhase |= button.IsDeniedFeedbackActive && red;
-                    sawIdlePhase |= button.IsDeniedFeedbackActive && button.IsShowingIdleVisual && !red;
+                    if (button.IsDeniedFeedbackActive)
+                    {
+                        sawNonRedDuringDenied |= !red;
+                        if (button.IsShowingDeniedRed)
+                        {
+                            sawDarkRedPhase = true;
+                            darkRedBrightness = Mathf.Max(darkRedBrightness, RedBrightness(plate.MaterialOverride));
+                        }
+                        if (button.IsShowingDeniedLightRed)
+                        {
+                            sawLightRedPhase = true;
+                            lightRedBrightness = Mathf.Max(lightRedBrightness, RedBrightness(plate.MaterialOverride));
+                        }
+                    }
 
                     if (activatedByPress && (button.IsDeniedFeedbackActive || red))
                     {
@@ -129,11 +144,12 @@ public partial class AllRoomButtonSameFrameSmokeTest : Node
                 }
 
                 if (!activatedByPress &&
-                    (!sawBrightPhase || !sawIdlePhase ||
+                    (!sawDarkRedPhase || !sawLightRedPhase || sawNonRedDuringDenied ||
+                     lightRedBrightness <= darkRedBrightness + 0.12f ||
                      button.IsDeniedFeedbackActive || IsVisiblyRed(plate.MaterialOverride) ||
                      !Mathf.IsEqualApprox(plate.Position.Y, expectedIdleY)))
                 {
-                    Fail($"{scenePath} / {button.Name}: denied feedback did not alternate red and the true idle material before returning to idle. bright={sawBrightPhase}, idle={sawIdlePhase}, active={button.IsDeniedFeedbackActive}, finalRed={IsVisiblyRed(plate.MaterialOverride)}, actualY={plate.Position.Y:0.####}.");
+                    Fail($"{scenePath} / {button.Name}: denied feedback was not a stable red-to-light-red blink. dark={sawDarkRedPhase}/{darkRedBrightness:F3}, light={sawLightRedPhase}/{lightRedBrightness:F3}, non_red={sawNonRedDuringDenied}, active={button.IsDeniedFeedbackActive}, finalRed={IsVisiblyRed(plate.MaterialOverride)}, actualY={plate.Position.Y:0.####}.");
                     return;
                 }
 
