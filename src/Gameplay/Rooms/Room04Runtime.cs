@@ -354,11 +354,11 @@ public partial class Room04Runtime : RoomRuntime
         ExitDoor3D door = GetNode<ExitDoor3D>("ExitDoor");
         if (door.GetNodeOrNull<MeshInstance3D>("LeftFrame") is null ||
             door.GetNodeOrNull<MeshInstance3D>("RightFrame") is null ||
-            door.GetNodeOrNull<MeshInstance3D>("Header") is null ||
+            door.GetNodeOrNull<MeshInstance3D>("Header") is not null ||
             door.GetNodeOrNull<MeshInstance3D>("ChevronLeft") is null ||
             door.GetNodeOrNull<MeshInstance3D>("ChevronRight") is null)
         {
-            FailSequenceSmoke("exit frame or its fixed chevron is missing.");
+            FailSequenceSmoke("headerless exit frame or its wall-mounted chevron is incorrect.");
             return;
         }
 

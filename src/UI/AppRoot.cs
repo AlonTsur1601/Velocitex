@@ -1969,7 +1969,11 @@ public partial class AppRoot : Node
             }
             StartRoomWithCandyHandoff(restart, saveRoomStart: CampaignModeRules.SavesRoomStart(_campaignMode, restart), elapsedSeconds: 0.0);
         }
-        else _currentRoom?.RestartRoom();
+        else if (_currentRoom is not null)
+        {
+            _currentRoom.RestartRoom();
+            _currentRoom.GetNodeOrNull<PlayerBall>("Player")?.BeginManualRestartStabilization();
+        }
 
         ResumeGame();
     }

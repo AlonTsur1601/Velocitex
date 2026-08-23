@@ -12,7 +12,9 @@ foreach ($room in 1..30)
     $ErrorActionPreference = "Stop"
     $output | Write-Output
     $joinedRoomOutput = $output -join "`n"
-    if ($exitCode -ne 0 -or $joinedRoomOutput -notmatch "ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room $($room.ToString('00'))")
+    if ($exitCode -ne 0 -or
+        $joinedRoomOutput -notmatch "ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room $($room.ToString('00'))" -or
+        $joinedRoomOutput -match 'ERROR:|ObjectDB instances were leaked|resources still in use')
     {
         throw "Same-frame button smoke test failed for Room $($room.ToString('00'))."
     }

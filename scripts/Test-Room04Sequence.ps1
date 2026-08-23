@@ -18,5 +18,9 @@ if ($exitCode -ne 0) {
 }
 
 if (($output -join "`n") -notmatch "ROOM04_SEQUENCE_PASS") {
-    throw "Room 04 did not prove lever-first ordering, solid-red wrong input, attached sequence pips, upright lever and visible exit frame."
+    throw "Room 04 did not prove lever-first ordering, solid-red wrong input, attached sequence pips, upright lever and headerless exit frame."
+}
+
+if (($output -join "`n") -match "ERROR:|ObjectDB instances were leaked|resources still in use") {
+    throw "Room 04 sequence smoke reported an error or leaked resource."
 }

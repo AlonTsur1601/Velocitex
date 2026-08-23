@@ -42,7 +42,11 @@ public partial class AllRoomButtonSameFrameSmokeTest : Node
                 return;
             }
 
+            room.ProcessMode = ProcessModeEnum.Disabled;
             AddChild(room);
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            DisableRuntimeAudio(room);
+            room.ProcessMode = ProcessModeEnum.Inherit;
             await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 
@@ -195,6 +199,10 @@ public partial class AllRoomButtonSameFrameSmokeTest : Node
         {
             GD.Print($"ALL_ROOM_BUTTON_SAME_FRAME_PASS: verified {buttonCount} buttons across Rooms 01-30.");
         }
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         GetTree().Quit(0);
     }
 
@@ -206,6 +214,31 @@ public partial class AllRoomButtonSameFrameSmokeTest : Node
             foreach (Node descendant in EnumerateDescendants(child))
             {
                 yield return descendant;
+            }
+        }
+    }
+
+    private static void DisableRuntimeAudio(Node room)
+    {
+        foreach (Node node in EnumerateDescendants(room))
+        {
+            switch (node)
+            {
+                case AudioStreamPlayer player:
+                    player.Stop();
+                    player.Stream = null;
+                    player.ProcessMode = ProcessModeEnum.Disabled;
+                    break;
+                case AudioStreamPlayer2D player2D:
+                    player2D.Stop();
+                    player2D.Stream = null;
+                    player2D.ProcessMode = ProcessModeEnum.Disabled;
+                    break;
+                case AudioStreamPlayer3D player3D:
+                    player3D.Stop();
+                    player3D.Stream = null;
+                    player3D.ProcessMode = ProcessModeEnum.Disabled;
+                    break;
             }
         }
     }

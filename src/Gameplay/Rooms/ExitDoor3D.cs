@@ -36,6 +36,7 @@ public partial class ExitDoor3D : Node3D
     private float _openAmount;
     private float _darknessAmount;
     private float _authoredDoorCenterX;
+    private float _authoredDoorTopY = DoorLeafClosedCenterY + (DoorLeafClosedHeight * 0.5f);
     private float _authoredDoorLeafWidth = DoorLeafClosedWidth;
     private Aabb? _authoredLeftPocketBounds;
     private Aabb? _authoredRightPocketBounds;
@@ -49,6 +50,8 @@ public partial class ExitDoor3D : Node3D
     public float DarknessAmount => _darknessAmount;
     public bool TraversalActive => _traversalActive;
     public Vector3 DoorwayCenter => GlobalPosition + (GlobalBasis.Y.Normalized() * 2.0f);
+    internal float AuthoredDoorCenterX => _authoredDoorCenterX;
+    internal float AuthoredDoorTopY => _authoredDoorTopY;
 
     public override void _Ready()
     {
@@ -161,7 +164,9 @@ public partial class ExitDoor3D : Node3D
         }
 
         _authoredDoorCenterX = center.X;
+        _authoredDoorTopY = localBounds.End.Y;
         _authoredDoorLeafWidth = leafWidth;
+        AlignWallArrowToAuthoredDoor();
         UpdateAuthoredDoorTravelDistance();
         _slidingParts.Clear();
         foreach ((Node3D part, float direction) in new[]
@@ -173,6 +178,20 @@ public partial class ExitDoor3D : Node3D
             _slidingParts.Add((part, part.Position, direction));
         }
         ApplyVisual();
+    }
+
+    private void AlignWallArrowToAuthoredDoor()
+    {
+        const float halfArrowWidth = 0.43f;
+        float arrowY = _authoredDoorTopY + 0.70f;
+        if (GetNodeOrNull<Node3D>("ChevronLeft") is Node3D leftChevron)
+        {
+            leftChevron.Position = new Vector3(_authoredDoorCenterX - halfArrowWidth, arrowY, leftChevron.Position.Z);
+        }
+        if (GetNodeOrNull<Node3D>("ChevronRight") is Node3D rightChevron)
+        {
+            rightChevron.Position = new Vector3(_authoredDoorCenterX + halfArrowWidth, arrowY, rightChevron.Position.Z);
+        }
     }
 
     internal void ApplyAuthoredDoorPocketBounds(Aabb localBounds)
@@ -192,7 +211,6 @@ public partial class ExitDoor3D : Node3D
         }
 
         UpdateAuthoredDoorTravelDistance();
-        UpdateAuthoredDoorHeader();
         ApplyVisual();
     }
 
@@ -209,33 +227,6 @@ public partial class ExitDoor3D : Node3D
         }
 
         _doorLeafTravelDistance = travelDistance;
-    }
-
-    private void UpdateAuthoredDoorHeader()
-    {
-        if (_authoredLeftPocketBounds is not Aabb leftPocket ||
-            _authoredRightPocketBounds is not Aabb rightPocket ||
-            GetNodeOrNull<MeshInstance3D>("Header") is not MeshInstance3D header ||
-            header.Mesh is null)
-        {
-            return;
-        }
-
-        float sideTop = Mathf.Max(leftPocket.End.Y, rightPocket.End.Y);
-        Vector3 headerSize = header.Mesh.GetAabb().Size;
-        header.Position = new Vector3(
-            (leftPocket.End.X + rightPocket.Position.X) * 0.5f,
-            sideTop + (headerSize.Y * 0.5f),
-            header.Position.Z);
-
-        CollisionShape3D? headerHitbox = GetNodeOrNull<CollisionShape3D>("FrameCollision/HeaderHitbox");
-        if (headerHitbox is not null)
-        {
-            headerHitbox.Position = new Vector3(
-                header.Position.X,
-                header.Position.Y,
-                headerHitbox.Position.Z);
-        }
     }
 
     private void UpdateButtonIndicators()

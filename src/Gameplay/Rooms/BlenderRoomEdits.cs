@@ -16,6 +16,11 @@ internal static class BlenderRoomEdits
     {
         "FrameCollision",
         "ClosedDoorBlocker",
+        "ExitCorridorFloor",
+        "ExitCorridorCeiling",
+        "ExitCorridorLeftWall",
+        "ExitCorridorRightWall",
+        "ExitCorridorEndWall",
     };
 
     private static readonly Transform3D Room02CanonicalDoorSpace = new(
@@ -27,6 +32,8 @@ internal static class BlenderRoomEdits
     internal const string DeletedByBlenderMetadata = "blender_reference_deleted";
     internal const string JoinShadowSuppressedMetadata = "blender_join_shadow_suppressed";
     internal const string CanonicalDoorSourceRoomMetadata = "blender_canonical_door_source_room";
+    internal const string CanonicalDoorVisualOnlyMetadata = "blender_canonical_door_visual_only";
+    internal const string LocalDoorCollisionSourceMetadata = "blender_local_door_collision_source";
     internal const string SeamSafeCollisionMetadata = "blender_seam_safe_collision";
 
     public static void Apply(Node3D room, int roomNumber)
@@ -104,6 +111,17 @@ internal static class BlenderRoomEdits
                 continue;
             }
 
+            if (importedMesh.HasMeta(LocalDoorCollisionSourceMetadata))
+            {
+                importedMesh.Visible = false;
+                importedMesh.SetMeta(ReferenceTargetPathMetadata, room.GetPathTo(target));
+                if (target is StaticBody3D localDoorTarget)
+                {
+                    AddCollisionReference(collisionReferences, localDoorTarget, importedMesh);
+                }
+                continue;
+            }
+
             ApplyAuthoredDoorVisualBounds(target, importedMesh);
 
             MeshInstance3D? targetVisual = FindFirstVisual(target) ??
@@ -117,10 +135,11 @@ internal static class BlenderRoomEdits
             if (targetMaterial is null)
             {
                 importedMesh.Visible = false;
-                if (target is StaticBody3D hiddenTargetBody)
+                importedMesh.SetMeta(ReferenceTargetPathMetadata, room.GetPathTo(target));
+                if (target is StaticBody3D hiddenTargetBody &&
+                    !importedMesh.HasMeta(CanonicalDoorVisualOnlyMetadata))
                 {
                     AddCollisionReference(collisionReferences, hiddenTargetBody, importedMesh);
-                    importedMesh.SetMeta(ReferenceTargetPathMetadata, room.GetPathTo(target));
                 }
                 continue;
             }
@@ -134,7 +153,8 @@ internal static class BlenderRoomEdits
             {
                 importedMesh.SetMeta(JoinShadowSuppressedMetadata, true);
             }
-            if (target is StaticBody3D targetBody)
+            if (target is StaticBody3D targetBody &&
+                !importedMesh.HasMeta(CanonicalDoorVisualOnlyMetadata))
             {
                 AddCollisionReference(collisionReferences, targetBody, importedMesh);
             }
@@ -156,14 +176,32 @@ internal static class BlenderRoomEdits
         }
 
         ApplyDeletedReferences(room, roomNumber, importedMeshes);
-        if (room.GetNodeOrNull<ExitDoor3D>("ExitDoor") is ExitDoor3D exitDoor &&
-            RoomGeometry.CloseExitCorridorCollisionSeam(room, exitDoor))
+        if (room.GetNodeOrNull<ExitDoor3D>("ExitDoor") is ExitDoor3D exitDoor)
         {
-            foreach (MeshInstance3D floorReference in importedMeshes.Where(mesh =>
-                IsReferenceMesh(mesh) &&
-                RemoveNumericDuplicateSuffix(ReferenceTargetName(mesh)) == "ExitCorridorFloor"))
+            // Imported reference collisions replace the generated platform
+            // hitboxes after the first doorway trim. Reapply the trim to those
+            // final Blender-derived hitboxes so the runtime collision cannot
+            // protrude back through the canonical Room 02 entrance.
+            HashSet<StaticBody3D> trimmedImportedTargets =
+                RoomGeometry.TrimExitPlatformsToThreshold(room, exitDoor, preserveBodyTransform: true);
+            foreach (MeshInstance3D importedReference in importedMeshes.Where(mesh =>
+                IsReferenceMesh(mesh) && mesh.HasMeta(ReferenceTargetPathMetadata)))
             {
-                floorReference.SetMeta(SeamSafeCollisionMetadata, true);
+                StaticBody3D? target = room.GetNodeOrNull<StaticBody3D>(
+                    importedReference.GetMeta(ReferenceTargetPathMetadata).AsNodePath());
+                if (target is not null && trimmedImportedTargets.Contains(target))
+                {
+                    importedReference.SetMeta(SeamSafeCollisionMetadata, true);
+                }
+            }
+            if (RoomGeometry.CloseExitCorridorCollisionSeam(room, exitDoor))
+            {
+                foreach (MeshInstance3D floorReference in importedMeshes.Where(mesh =>
+                    IsReferenceMesh(mesh) &&
+                    RemoveNumericDuplicateSuffix(ReferenceTargetName(mesh)) == "ExitCorridorFloor"))
+                {
+                    floorReference.SetMeta(SeamSafeCollisionMetadata, true);
+                }
             }
         }
 
@@ -262,10 +300,23 @@ internal static class BlenderRoomEdits
                     .OrderBy(mesh => mesh.Transform.Origin.X)
                     .Select(mesh => mesh.Name.ToString())),
                 StringComparer.Ordinal);
+        HashSet<string> localCollisionTargets = existingDoorReferences
+            .Select(CanonicalDoorTargetName)
+            .ToHashSet(StringComparer.Ordinal);
+        Node3D localCollisionSources = new()
+        {
+            Name = "LocalDoorCollisionSources",
+            Visible = false,
+        };
+        importedRoot.AddChild(localCollisionSources);
         foreach (MeshInstance3D oldReference in existingDoorReferences)
         {
+            Transform3D globalTransform = oldReference.GlobalTransform;
             importedRoot.RemoveChild(oldReference);
-            oldReference.Free();
+            localCollisionSources.AddChild(oldReference);
+            oldReference.GlobalTransform = globalTransform;
+            oldReference.Visible = false;
+            oldReference.SetMeta(LocalDoorCollisionSourceMetadata, true);
         }
 
         foreach (MeshInstance3D canonicalReference in canonicalReferences
@@ -290,10 +341,16 @@ internal static class BlenderRoomEdits
                 canonicalReference.Transform;
             clone.GlobalTransform = door.GlobalTransform * canonicalRelative;
             clone.SetMeta(CanonicalDoorSourceRoomMetadata, 2);
+            if (localCollisionTargets.Contains(targetName))
+            {
+                clone.SetMeta(CanonicalDoorVisualOnlyMetadata, true);
+            }
         }
 
         canonicalRoot.Free();
-        return importedRoot.GetChildren().OfType<MeshInstance3D>().ToArray();
+        return importedRoot.GetChildren().OfType<MeshInstance3D>()
+            .Concat(localCollisionSources.GetChildren().OfType<MeshInstance3D>())
+            .ToArray();
     }
 
     private static bool IsCanonicalDoorReference(MeshInstance3D mesh) =>
@@ -766,6 +823,7 @@ internal static class BlenderRoomEdits
             .OfType<CollisionShape3D>()
             .Where(collision => collision.Shape is BoxShape3D)
             .ToArray();
+        bool replaceCompleteDoorFrame = IsDoorFrameTarget(body);
 
         for (int index = 0; index < meshes.Count; index++)
         {
@@ -815,11 +873,23 @@ internal static class BlenderRoomEdits
                 collision.Transform = collisionTransform;
                 collision.Shape = importedShape;
             }
-
             // Cuboid platforms keep one continuous box collision, avoiding
             // internal triangle edges and join impulses. Edited non-box meshes
             // retain their exact double-sided Blender triangle collision.
             mesh.SetMeta(ReferenceCollisionPathMetadata, body.GetPathTo(collision));
+        }
+
+        // FrameCollision is authored as a complete collision envelope in the
+        // canonical Room 02 Blender model. Do not leave any generated frame
+        // boxes active behind that imported envelope: those stale shapes are
+        // invisible and can otherwise block the player where the latest model
+        // is open.
+        if (replaceCompleteDoorFrame)
+        {
+            for (int index = meshes.Count; index < originalBoxCollisions.Length; index++)
+            {
+                originalBoxCollisions[index].Disabled = true;
+            }
         }
 
         // Additional boxes on gameplay mechanisms are intentionally kept.

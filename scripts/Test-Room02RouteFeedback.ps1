@@ -7,10 +7,12 @@ if (-not $godot) {
 }
 
 $ErrorActionPreference = "Continue"
-$output = & $godot.FullName --headless --fixed-fps 60 --path $root "res://scenes/Room02RouteFeedbackSmokeTest.tscn" --quit-after 900 2>&1
+$output = & $godot.FullName --headless --fixed-fps 60 --path $root "res://scenes/Room02RouteFeedbackSmokeTest.tscn" --quit-after 900 -- "--room02-route-feedback-smoke" 2>&1
 $exitCode = $LASTEXITCODE
 $ErrorActionPreference = "Stop"
 $output | Write-Output
-if ($exitCode -ne 0 -or ($output -join "`n") -notmatch "ROOM02_ROUTE_FEEDBACK_PASS") {
+if ($exitCode -ne 0 -or
+    ($output -join "`n") -notmatch "ROOM02_ROUTE_FEEDBACK_PASS" -or
+    ($output -join "`n") -match 'ERROR:|ObjectDB instances were leaked|resources still in use') {
     throw "Room 02 route-feedback smoke failed."
 }

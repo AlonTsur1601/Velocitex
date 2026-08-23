@@ -18,6 +18,9 @@ for ($room = 1; $room -le 30; $room++) {
     if (($output -join "`n") -notmatch "EXIT_PRESENTATION_ROOM_PASS: Room $($room.ToString('00'))") {
         throw "Exit presentation smoke for Room $room did not report success."
     }
+    if (($output -join "`n") -match "ERROR:|ObjectDB instances were leaked|resources still in use") {
+        throw "Exit presentation smoke for Room $room reported an error or leaked resource."
+    }
 }
 
 Write-Output "EXIT_PRESENTATION_PASS: Rooms 01-30 use wall-proud threshold-free frames, level lever bases, sealed corridors and requirement-locked doors."

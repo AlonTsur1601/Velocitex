@@ -17,7 +17,7 @@ $output = & $godot.FullName --headless --fixed-fps 60 --path $root "res://scenes
 $exitCode = $LASTEXITCODE
 $ErrorActionPreference = "Stop"
 $output | Write-Output
-if ($exitCode -ne 0) {
+if ($exitCode -ne 0 -or ($output -join "`n") -match 'ERROR:|ObjectDB instances were leaked|resources still in use') {
     throw "Room 11 air-control smoke test exited with code $exitCode."
 }
 

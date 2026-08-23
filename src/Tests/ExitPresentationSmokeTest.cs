@@ -108,19 +108,26 @@ public partial class ExitPresentationSmokeTest : Node
         {
             Name = "ExitDoorCaptureCamera",
             Current = true,
-            Fov = 50.0f,
+            Fov = 55.0f,
         };
         door.AddChild(camera);
-        camera.Position = new Vector3(0.0f, 3.2f, 6.2f);
-        camera.LookAt(door.ToGlobal(new Vector3(0.0f, 0.18f, 0.35f)), Vector3.Up);
+        camera.Position = new Vector3(0.0f, 2.5f, 10.5f);
+        camera.LookAt(door.ToGlobal(new Vector3(0.0f, 2.45f, 0.35f)), Vector3.Up);
         camera.MakeCurrent();
         for (int frame = 0; frame < 24; frame++)
         {
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         }
         await ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
-        string path = ProjectSettings.GlobalizePath($"user://exit-door-room{room:00}.png");
-        GetViewport().GetTexture().GetImage().SavePng(path);
+        string captureDirectory = ProjectSettings.GlobalizePath("res://artifacts/exit-door");
+        DirAccess.MakeDirRecursiveAbsolute(captureDirectory);
+        string path = System.IO.Path.Combine(captureDirectory, $"room{room:00}.png");
+        Error saveError = GetViewport().GetTexture().GetImage().SavePng(path);
+        if (saveError != Error.Ok)
+        {
+            Report(room, $"runtime capture could not be saved ({saveError})");
+            return;
+        }
         GD.Print($"EXIT_DOOR_CAPTURE_PASS: Room {room:00} -> {path}");
     }
 
@@ -266,6 +273,7 @@ public partial class ExitPresentationSmokeTest : Node
             MeshInstance3D? authoredClosedDoor = descendants
                 .OfType<MeshInstance3D>()
                 .SingleOrDefault(mesh => mesh.HasMeta(BlenderRoomEdits.ReferenceTargetPathMetadata) &&
+                    mesh.HasMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata) &&
                     ReferenceTargetName(mesh).Equals("ClosedDoorBlocker", StringComparison.Ordinal));
             if (door.GetNodeOrNull<Node3D>("LeftDoorLeaf") is null ||
                 door.GetNodeOrNull<Node3D>("RightDoorLeaf") is null ||
@@ -285,7 +293,7 @@ public partial class ExitPresentationSmokeTest : Node
             }
             Node3D? leftFrame = door.GetNodeOrNull<Node3D>("LeftFrame");
             Node3D? rightFrame = door.GetNodeOrNull<Node3D>("RightFrame");
-            Node3D? header = door.GetNodeOrNull<Node3D>("Header");
+            MeshInstance3D? header = door.GetNodeOrNull<MeshInstance3D>("Header");
             MeshInstance3D? leftLeaf = door.GetNodeOrNull<MeshInstance3D>("LeftDoorLeaf");
             MeshInstance3D? rightLeaf = door.GetNodeOrNull<MeshInstance3D>("RightDoorLeaf");
             Aabb authoredDoorBounds = authoredClosedDoor is null
@@ -307,30 +315,41 @@ public partial class ExitPresentationSmokeTest : Node
                 issues++;
             }
             if (door.GetNodeOrNull<Node3D>("Threshold") is not null ||
-                leftFrame is null || rightFrame is null || header is null ||
+                leftFrame is null || rightFrame is null || header is not null ||
                 (authoredFramePieces.Length > 0 && (leftFrame.Visible || rightFrame.Visible)) ||
                 (authoredFramePieces.Length == 0 && (!leftFrame.Visible || !rightFrame.Visible)) ||
                 Mathf.Abs(leftFrame.Position.Z - ExitDoor3D.FrameRoomSideCenterZ) > 0.001f ||
-                Mathf.Abs(rightFrame.Position.Z - ExitDoor3D.FrameRoomSideCenterZ) > 0.001f ||
-                Mathf.Abs(header.Position.Z - ExitDoor3D.FrameRoomSideCenterZ) > 0.001f)
+                Mathf.Abs(rightFrame.Position.Z - ExitDoor3D.FrameRoomSideCenterZ) > 0.001f)
             {
-                Report(room, "door frame is not fully proud of the wall or still has a raised threshold");
+                Report(room, "door frame still has a top piece, is not fully proud of the wall, or still has a raised threshold");
                 issues++;
             }
             StaticBody3D? frameCollision = door.GetNodeOrNull<StaticBody3D>("FrameCollision");
             bool authoredPocketsHaveCollision = authoredFramePieces.Length > 0 &&
-                authoredFramePieces.All(piece => piece.HasMeta(BlenderRoomEdits.ReferenceCollisionPathMetadata)) &&
-                frameCollision?.GetChildren().OfType<CollisionShape3D>()
-                    .Count(collision => !collision.Disabled && collision.Shape is ConcavePolygonShape3D) == authoredFramePieces.Length;
+                authoredFramePieces.All(piece => HasMatchingReferenceCollision(root, door, piece));
             bool standardPocketsHaveCollision = authoredFramePieces.Length == 0 &&
                 HasNamedCollisionBox(frameCollision, "LeftPocketHitbox", new Vector3(1.5f, 4.02f, 0.38f), new Vector3(-3.1f, 2.13f, ExitDoor3D.FrameRoomSideCenterZ)) &&
                 HasNamedCollisionBox(frameCollision, "RightPocketHitbox", new Vector3(1.5f, 4.02f, 0.38f), new Vector3(3.1f, 2.13f, ExitDoor3D.FrameRoomSideCenterZ));
             if ((!authoredPocketsHaveCollision && !standardPocketsHaveCollision) ||
-                !HasNamedCollisionBox(frameCollision, "LeftFrameHitbox", new Vector3(0.5f, 4.46f, 0.58f), new Vector3(-2.1f, 2.35f, ExitDoor3D.FrameRoomSideCenterZ)) ||
-                !HasNamedCollisionBox(frameCollision, "RightFrameHitbox", new Vector3(0.5f, 4.46f, 0.58f), new Vector3(2.1f, 2.35f, ExitDoor3D.FrameRoomSideCenterZ)) ||
-                !HasNamedCollisionBox(frameCollision, "HeaderHitbox", new Vector3(4.7f, 0.58f, 0.58f), new Vector3(0.0f, 4.55f, ExitDoor3D.FrameRoomSideCenterZ)))
+                frameCollision?.GetNodeOrNull<CollisionShape3D>("HeaderHitbox") is not null)
             {
-                Report(room, "visible door frame or side pocket is missing its matching hitbox");
+                Report(room, "side door frame or pocket has an incorrect hitbox, or the removed top frame still has collision");
+                issues++;
+            }
+            MeshInstance3D? leftArrow = door.GetNodeOrNull<MeshInstance3D>("ChevronLeft");
+            MeshInstance3D? rightArrow = door.GetNodeOrNull<MeshInstance3D>("ChevronRight");
+            const float wallRoomSideZ = 0.23f;
+            float expectedArrowY = authoredDoorBounds.End.Y + 0.70f;
+            if (leftArrow?.Mesh is null || rightArrow?.Mesh is null ||
+                Mathf.Abs(((leftArrow.Position.X + rightArrow.Position.X) * 0.5f) - authoredDoorCenter.X) > 0.001f ||
+                Mathf.Abs(leftArrow.Position.X - (authoredDoorCenter.X - 0.43f)) > 0.001f ||
+                Mathf.Abs(rightArrow.Position.X - (authoredDoorCenter.X + 0.43f)) > 0.001f ||
+                Mathf.Abs(leftArrow.Position.Y - expectedArrowY) > 0.001f ||
+                Mathf.Abs(rightArrow.Position.Y - expectedArrowY) > 0.001f ||
+                Mathf.Abs((leftArrow.Position.Z - (leftArrow.Mesh.GetAabb().Size.Z * 0.5f)) - wallRoomSideZ) > 0.001f ||
+                Mathf.Abs((rightArrow.Position.Z - (rightArrow.Mesh.GetAabb().Size.Z * 0.5f)) - wallRoomSideZ) > 0.001f)
+            {
+                Report(room, "door arrow is not mounted directly against the wall");
                 issues++;
             }
             int floorButtonCount = descendants.OfType<RouteCheckpoint3D>().Count(button => button.IsPhysicalFloorButton);
@@ -338,21 +357,32 @@ public partial class ExitPresentationSmokeTest : Node
                 .OfType<MeshInstance3D>()
                 .Where(indicator => indicator.Name.ToString().StartsWith("ButtonRequirementIndicator", StringComparison.Ordinal))
                 .ToArray();
-            bool hasIndicatorHousing = door.GetNodeOrNull<MeshInstance3D>("ButtonIndicatorHousing") is not null;
+            MeshInstance3D? indicatorHousing = door.GetNodeOrNull<MeshInstance3D>("ButtonIndicatorHousing");
+            bool hasIndicatorHousing = indicatorHousing is not null;
+            float expectedIndicatorY = authoredDoorBounds.End.Y + 0.16f;
+            bool indicatorCenterMismatch = buttonIndicators.Length > 0 &&
+                Mathf.Abs(buttonIndicators.Average(indicator => indicator.Position.X) - authoredDoorCenter.X) > 0.001f;
             if (buttonIndicators.Length != floorButtonCount || hasIndicatorHousing != (floorButtonCount > 0))
             {
                 Report(room, $"door has {buttonIndicators.Length} requirement lights for {floorButtonCount} floor buttons");
                 issues++;
             }
-            else if (buttonIndicators.Any(indicator =>
-                Mathf.Abs(indicator.Position.X) > ExitDoor3D.FrameOuterHalfWidth - 0.2f ||
-                indicator.Position.Y < ExitDoor3D.FrameOuterHeight))
+            else if (indicatorCenterMismatch || buttonIndicators.Any(indicator =>
+                Mathf.Abs(indicator.Position.X - authoredDoorCenter.X) > ExitDoor3D.FrameOuterHalfWidth - 0.2f ||
+                Mathf.Abs(indicator.Position.Y - expectedIndicatorY) > 0.001f ||
+                Mathf.Abs((indicator.Position.Z - 0.04f) - 0.39f) > 0.001f) ||
+                (indicatorHousing is not null &&
+                    (Mathf.Abs(indicatorHousing.Position.X - authoredDoorCenter.X) > 0.001f ||
+                     Mathf.Abs(indicatorHousing.Position.Y - expectedIndicatorY) > 0.001f ||
+                     Mathf.Abs((indicatorHousing.Position.Y - 0.16f) - authoredDoorBounds.End.Y) > 0.001f ||
+                     Mathf.Abs((indicatorHousing.Position.Z - 0.08f) - 0.23f) > 0.001f ||
+                     Mathf.Abs((indicatorHousing.Position.Z + 0.08f) - 0.39f) > 0.001f)))
             {
-                Report(room, "door requirement lights are not contained in the housing above the frame");
+                Report(room, "door requirement lights are not wall-mounted below the arrow and directly above the door");
                 issues++;
             }
             bool authoredCorridorIsComplete = authoredCorridorPieces.Length == 5 &&
-                authoredCorridorPieces.All(piece => piece.HasMeta(BlenderRoomEdits.ReferenceCollisionPathMetadata));
+                authoredCorridorPieces.All(piece => HasMatchingReferenceCollision(root, door, piece));
             bool standardCorridorIsComplete = HasCorridorFloorCollision(door) &&
                 HasCollisionBox(door, "ExitCorridorCeiling", new Vector3(ExitDoor3D.CorridorInteriorWidth * 1.29f, 0.24f, ExitDoor3D.CorridorLength * 0.99f)) &&
                 HasCollisionBox(door, "ExitCorridorLeftWall", new Vector3(0.24f, ExitDoor3D.CorridorInteriorHeight + 0.24f, ExitDoor3D.CorridorLength + 0.64f)) &&
@@ -361,6 +391,18 @@ public partial class ExitPresentationSmokeTest : Node
             if (!authoredCorridorIsComplete && !standardCorridorIsComplete)
             {
                 Report(room, "dark corridor is missing one or more authored enclosed surfaces or collisions");
+                issues++;
+            }
+            MeshInstance3D[] canonicalDoorPieces = authoredFramePieces
+                .Concat(authoredCorridorPieces)
+                .Concat(authoredClosedDoor is null ? Array.Empty<MeshInstance3D>() : new[] { authoredClosedDoor })
+                .ToArray();
+            if (canonicalDoorPieces.Length != 8 || canonicalDoorPieces.Any(piece =>
+                !piece.HasMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata) ||
+                piece.GetMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata).AsInt32() != 2) ||
+                authoredBackingPieces.Any(piece => piece.HasMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata)))
+            {
+                Report(room, $"door uses {canonicalDoorPieces.Length}/8 canonical Room 02 frame, blocker and corridor pieces, or copied one of its {authoredBackingPieces.Length} room-authored surrounding-wall pieces");
                 issues++;
             }
             else if (authoredCorridorPieces.Length > 0
@@ -525,7 +567,7 @@ public partial class ExitPresentationSmokeTest : Node
                     float frameBackZ = ExitDoor3D.FrameRoomSideCenterZ - (ExitDoor3D.FrameDepth * 0.5f);
                     bool backingTouchesVisibleFrame = authoredBackingPieces.Length > 0
                         ? authoredBackingPieces.Length == 4 &&
-                            authoredBackingPieces.All(piece => piece.HasMeta(BlenderRoomEdits.ReferenceCollisionPathMetadata))
+                            authoredBackingPieces.All(piece => HasMatchingReferenceCollision(root, door, piece))
                         : door.GetChildren()
                             .OfType<StaticBody3D>()
                             .Where(piece => piece.Name.ToString().StartsWith("ExitDoorBacking", StringComparison.Ordinal))
@@ -673,9 +715,7 @@ public partial class ExitPresentationSmokeTest : Node
                 bool overlapsSideFrame = maximum.Y > 0.0f && minimum.Y < ExitDoor3D.FrameOuterHeight &&
                     maximum.X > -ExitDoor3D.FrameOuterHalfWidth && minimum.X < ExitDoor3D.FrameOuterHalfWidth &&
                     (minimum.X < -ExitDoor3D.FrameOpeningHalfWidth || maximum.X > ExitDoor3D.FrameOpeningHalfWidth);
-                bool overlapsHeader = maximum.Y > 4.18f && minimum.Y < ExitDoor3D.FrameOuterHeight &&
-                    maximum.X > -ExitDoor3D.FrameOuterHalfWidth && minimum.X < ExitDoor3D.FrameOuterHalfWidth;
-                if (overlapsFrameDepth && risesAboveFrameBottom && (overlapsSideFrame || overlapsHeader))
+                if (overlapsFrameDepth && risesAboveFrameBottom && overlapsSideFrame)
                 {
                     Report(room, $"platform/body {body.Name} clips the visible exit-door frame");
                     issues++;
@@ -715,7 +755,12 @@ public partial class ExitPresentationSmokeTest : Node
     private static Aabb BoundsRelativeTo(Node3D space, MeshInstance3D mesh)
     {
         Aabb local = mesh.Mesh?.GetAabb() ?? default;
-        Transform3D transform = space.GlobalTransform.AffineInverse() * mesh.GlobalTransform;
+        return BoundsRelativeTo(space, mesh, local);
+    }
+
+    private static Aabb BoundsRelativeTo(Node3D space, Node3D node, Aabb local)
+    {
+        Transform3D transform = space.GlobalTransform.AffineInverse() * node.GlobalTransform;
         Vector3[] corners =
         {
             local.Position,
@@ -738,6 +783,65 @@ public partial class ExitPresentationSmokeTest : Node
         }
 
         return new Aabb(minimum, maximum - minimum);
+    }
+
+    private static bool HasMatchingReferenceCollision(Node root, Node3D space, MeshInstance3D mesh)
+    {
+        MeshInstance3D collisionSource = mesh;
+        if (mesh.HasMeta(BlenderRoomEdits.CanonicalDoorVisualOnlyMetadata))
+        {
+            collisionSource = root
+                .GetNodeOrNull<Node>("BlenderGeometry/LocalDoorCollisionSources")?
+                .GetChildren()
+                .OfType<MeshInstance3D>()
+                .FirstOrDefault(candidate => candidate.Name == mesh.Name)!;
+        }
+
+        if (collisionSource is null ||
+            !collisionSource.HasMeta(BlenderRoomEdits.ReferenceTargetPathMetadata) ||
+            !collisionSource.HasMeta(BlenderRoomEdits.ReferenceCollisionPathMetadata))
+        {
+            return false;
+        }
+
+        StaticBody3D? body = root.GetNodeOrNull<StaticBody3D>(
+            collisionSource.GetMeta(BlenderRoomEdits.ReferenceTargetPathMetadata).AsNodePath());
+        CollisionShape3D? collision = body?.GetNodeOrNull<CollisionShape3D>(
+            collisionSource.GetMeta(BlenderRoomEdits.ReferenceCollisionPathMetadata).AsNodePath());
+        if (collision is null || collision.Disabled || collision.Shape is null)
+        {
+            return false;
+        }
+
+        if (collision.Shape is ConcavePolygonShape3D)
+        {
+            // The concave shape is generated directly from this mesh with the
+            // same relative transform, so the metadata path is its exact pair.
+            return true;
+        }
+        if (collision.Shape is not BoxShape3D box)
+        {
+            return false;
+        }
+
+        Aabb visualBounds = BoundsRelativeTo(space, collisionSource);
+        Aabb collisionBounds = BoundsRelativeTo(
+            space,
+            collision,
+            new Aabb(-box.Size * 0.5f, box.Size));
+        if (collisionSource.HasMeta(BlenderRoomEdits.SeamSafeCollisionMetadata) &&
+            collisionSource.GetMeta(BlenderRoomEdits.SeamSafeCollisionMetadata).AsBool())
+        {
+            const float tolerance = 0.003f;
+            return collisionBounds.Position.X <= visualBounds.Position.X + tolerance &&
+                collisionBounds.Position.Y <= visualBounds.Position.Y + tolerance &&
+                collisionBounds.Position.Z <= visualBounds.Position.Z + tolerance &&
+                collisionBounds.End.X >= visualBounds.End.X - tolerance &&
+                collisionBounds.End.Y >= visualBounds.End.Y - tolerance &&
+                collisionBounds.End.Z >= visualBounds.End.Z - tolerance;
+        }
+        return visualBounds.Position.DistanceTo(collisionBounds.Position) <= 0.003f &&
+            visualBounds.Size.DistanceTo(collisionBounds.Size) <= 0.003f;
     }
 
     private static bool HasCollisionBox(Node root, string name, Vector3 expectedSize)

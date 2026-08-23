@@ -39,8 +39,17 @@ public partial class PlayerAudioController : Node
                 argument == "--movement-smoke" ||
                 argument == "--room-shell-smoke" ||
                 argument == "--room04-recovery-smoke" ||
+                argument == "--room04-sequence-smoke" ||
+                argument == "--room02-route-feedback-smoke" ||
+                argument == "--low-gravity-restart-smoke" ||
+                argument == "--room11-air-control-smoke" ||
+                argument == "--blender-room-exact-smoke" ||
+                argument == "--door-dimming-smoke" ||
                 argument == "--flight-gate-boost-smoke" ||
                 argument == "--room01-gate-bypass-smoke" ||
+                argument.StartsWith("--exit-presentation-room=", StringComparison.Ordinal) ||
+                argument.StartsWith("--exit-door-capture-room=", StringComparison.Ordinal) ||
+                argument.Contains("button-room=", StringComparison.Ordinal) ||
                 argument.Contains("bypass-room=", StringComparison.Ordinal) ||
                 argument.Contains("solution-smoke", StringComparison.Ordinal)))
         {

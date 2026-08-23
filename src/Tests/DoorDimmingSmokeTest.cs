@@ -123,6 +123,7 @@ public partial class DoorDimmingSmokeTest : Node
         MeshInstance3D? authoredClosedDoor = EnumerateDescendants(room)
             .OfType<MeshInstance3D>()
             .SingleOrDefault(mesh => mesh.HasMeta(BlenderRoomEdits.ReferenceTargetPathMetadata) &&
+                mesh.HasMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata) &&
                 mesh.GetMeta(BlenderRoomEdits.ReferenceTargetPathMetadata)
                     .AsNodePath().ToString().EndsWith("ClosedDoorBlocker", StringComparison.Ordinal));
         if (authoredClosedDoor is null)
@@ -233,7 +234,7 @@ public partial class DoorDimmingSmokeTest : Node
              leftLeaf.Position.X + (leftLeafSize.X * 0.5f) <= authoredPocketBounds[0].End.X + 0.02f &&
              rightLeaf.Position.X - (rightLeafSize.X * 0.5f) >= authoredPocketBounds[1].Position.X - 0.02f);
 
-        if (leftFrame?.Visible != false || rightFrame?.Visible != false || header?.Visible != true ||
+        if (leftFrame?.Visible != false || rightFrame?.Visible != false || header is not null ||
             leftPocket?.Visible != false || rightPocket?.Visible != false ||
             leftLeaf?.Visible != true || rightLeaf?.Visible != true ||
             !leafMeshesMatchAuthoredDoor || !authoredPocketOrderIsValid || !leavesClearOpening ||
@@ -252,7 +253,7 @@ public partial class DoorDimmingSmokeTest : Node
             Mathf.Abs(seamSize.Y - authoredClosedDoorBounds.Size.Y) > 0.02f ||
             blocker is null || blocker.Disabled == expectBlocked)
         {
-            Fail($"Room {roomNumber} door is structurally incomplete at open={expectedOpenAmount:F3}: legacy_side_frames={leftFrame?.Visible}/{rightFrame?.Visible}, header={header?.Visible}, legacy_pockets={leftPocket?.Visible}/{rightPocket?.Visible}, authored_pockets={authoredPocketBounds.Count}, authored_door={authoredClosedDoorBounds}, leaf_meshes={leafMeshesMatchAuthoredDoor} ({leftLeafSize}/{rightLeafSize}), opening_clear={leavesClearOpening}, leaves={leftLeaf?.Position.X:F3}/{rightLeaf?.Position.X:F3}, blocker_disabled={blocker?.Disabled}.");
+            Fail($"Room {roomNumber} door is structurally incomplete at open={expectedOpenAmount:F3}: legacy_side_frames={leftFrame?.Visible}/{rightFrame?.Visible}, removed_header_present={header is not null}, legacy_pockets={leftPocket?.Visible}/{rightPocket?.Visible}, authored_pockets={authoredPocketBounds.Count}, authored_door={authoredClosedDoorBounds}, leaf_meshes={leafMeshesMatchAuthoredDoor} ({leftLeafSize}/{rightLeafSize}), opening_clear={leavesClearOpening}, leaves={leftLeaf?.Position.X:F3}/{rightLeaf?.Position.X:F3}, blocker_disabled={blocker?.Disabled}.");
             return false;
         }
 
@@ -278,9 +279,17 @@ public partial class DoorDimmingSmokeTest : Node
 
     private bool SaveCapture(int roomNumber, string state, bool keepLegacyName = false)
     {
-        string capturePath = keepLegacyName
-            ? $"res://artifacts/door-dimming/room{roomNumber:00}.png"
-            : $"res://artifacts/door-dimming/room{roomNumber:00}-{state}.png";
+        string captureDirectory = ProjectSettings.GlobalizePath("user://door-dimming-smoke");
+        Error directoryError = DirAccess.MakeDirRecursiveAbsolute(captureDirectory);
+        if (directoryError != Error.Ok && directoryError != Error.AlreadyExists)
+        {
+            Fail($"Door dimming capture directory could not be created: {directoryError}.");
+            return false;
+        }
+        string fileName = keepLegacyName
+            ? $"room{roomNumber:00}.png"
+            : $"room{roomNumber:00}-{state}.png";
+        string capturePath = System.IO.Path.Combine(captureDirectory, fileName);
         Error saveError = GetViewport().GetTexture().GetImage().SavePng(capturePath);
         if (saveError == Error.Ok)
         {

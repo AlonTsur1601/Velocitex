@@ -163,16 +163,24 @@ public partial class RouteCheckpoint3D : Area3D
         {
             BodyEntered += OnBodyEntered;
         }
-        _activationAudio = new AudioStreamPlayer3D
+        bool disableAudioForSmoke = Array.Exists(
+            OS.GetCmdlineUserArgs(),
+            argument => argument.Contains("button-room=", StringComparison.Ordinal) ||
+                argument == "--room02-route-feedback-smoke" ||
+                argument == "--room04-sequence-smoke");
+        if (!disableAudioForSmoke)
         {
-            Name = "ActivationClickSfx",
-            Stream = GD.Load<AudioStream>("res://assets/audio/sfx/device_mechanical_click.wav"),
-            Bus = "SFX",
-            VolumeDb = -5.0f,
-            MaxDistance = 24.0f,
-            UnitSize = 5.0f,
-        };
-        AddChild(_activationAudio);
+            _activationAudio = new AudioStreamPlayer3D
+            {
+                Name = "ActivationClickSfx",
+                Stream = GD.Load<AudioStream>("res://assets/audio/sfx/device_mechanical_click.wav"),
+                Bus = "SFX",
+                VolumeDb = -5.0f,
+                MaxDistance = 24.0f,
+                UnitSize = 5.0f,
+            };
+            AddChild(_activationAudio);
+        }
     }
 
     public override void _Process(double delta)

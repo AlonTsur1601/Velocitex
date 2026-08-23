@@ -310,7 +310,7 @@ public partial class MovementTestRoom : RoomRuntime
         {
             if (-_player.LinearVelocity.Z < 20.0f)
             {
-                FailMovementSmoke("Externally supplied momentum was clamped to drive speed.");
+                FailMovementSmoke($"Externally supplied momentum was clamped to drive speed: velocity={_player.LinearVelocity}.");
                 return;
             }
 

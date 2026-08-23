@@ -60,6 +60,8 @@ public partial class Room11Runtime : RoomRuntime
     private int _variationSuccesses;
     private int _respawnStabilizationTicks;
     private float _maximumLateralAirSpeed;
+    private float _airControlForwardSpeed;
+    private float _airControlRightSpeed;
 
     public override void _Ready()
     {
@@ -135,7 +137,7 @@ public partial class Room11Runtime : RoomRuntime
 
         if (_respawnStabilizationTicks > 0)
         {
-            if (--_respawnStabilizationTicks == 0)
+            if (--_respawnStabilizationTicks == 0 && !_player.IsManualRestartStabilizing)
             {
                 _player.Freeze = false;
             }
@@ -220,9 +222,31 @@ public partial class Room11Runtime : RoomRuntime
                     FinishAirControlSmoke(1, "Low-gravity volume did not enable air control while the player was inside.");
                     return;
                 }
+                _player.SimulatedMoveInput = new Vector2(0.0f, -1.0f);
+                break;
+            case 48:
+                _airControlForwardSpeed = -_player.LinearVelocity.Z;
+                _player.SimulatedMoveInput = new Vector2(1.0f, -1.0f);
+                break;
+            case 88:
+                _airControlRightSpeed = _player.LinearVelocity.X;
+                if (_airControlForwardSpeed < 7.0f || _airControlRightSpeed < 5.0f || -_player.LinearVelocity.Z < 7.0f)
+                {
+                    FinishAirControlSmoke(1, $"Adding D while W was held did not independently accelerate both air-control axes: initial_forward={_airControlForwardSpeed:F2}, right={_airControlRightSpeed:F2}, forward={-_player.LinearVelocity.Z:F2}.");
+                    return;
+                }
+                _player.SimulatedMoveInput = new Vector2(-1.0f, -1.0f);
+                break;
+            case 188:
+                if (_airControlRightSpeed < 5.0f || _player.LinearVelocity.X > -3.0f || -_player.LinearVelocity.Z < 5.0f)
+                {
+                    FinishAirControlSmoke(1, $"W+D to W+A locked or weakened an air-control axis: before_right={_airControlRightSpeed:F2}, after_x={_player.LinearVelocity.X:F2}, forward={-_player.LinearVelocity.Z:F2}.");
+                    return;
+                }
+                _player.SimulatedMoveInput = null;
                 _player.ResetTo(new Transform3D(Basis.Identity, new Vector3(0.0f, 12.0f, 18.0f)));
                 break;
-            case 15:
+            case 195:
                 if (_lowGravityVolume.ContainsBody(_player) || _player.AirControlAcceleration > 0.001f)
                 {
                     FinishAirControlSmoke(1, "Air control remained active after leaving the low-gravity volume.");
@@ -230,7 +254,7 @@ public partial class Room11Runtime : RoomRuntime
                 }
                 _player.ResetTo(new Transform3D(Basis.Identity, new Vector3(0.0f, 12.0f, -20.0f)));
                 break;
-            case 22:
+            case 202:
                 if (_player.AirControlAcceleration <= 0.001f)
                 {
                     FinishAirControlSmoke(1, "Low-gravity air control did not reactivate on re-entry.");
@@ -238,13 +262,13 @@ public partial class Room11Runtime : RoomRuntime
                 }
                 RestartRoom();
                 break;
-            case 23:
+            case 203:
                 if (_player.AirControlAcceleration > 0.001f || _player.GlobalPosition.DistanceTo(_spawnTransform.Origin) > 0.15f)
                 {
                     FinishAirControlSmoke(1, "Respawn did not immediately clear air control and restore the spawn transform.");
                     return;
                 }
-                FinishAirControlSmoke(0, "Low-gravity air control enabled only inside the volume and cleared on exit and respawn.");
+                FinishAirControlSmoke(0, $"Low-gravity air control independently drove W+D, reversed to W+A from {_airControlRightSpeed:F2} to leftward motion without losing forward speed, and cleared on exit and respawn.");
                 break;
         }
     }
@@ -276,11 +300,13 @@ public partial class Room11Runtime : RoomRuntime
             _bounceAudio.Stream = null;
         }
         StopAndReleaseAudio(this);
-        for (int frame = 0; frame < 12; frame++)
-        {
-            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-        }
-        GetTree().Quit(exitCode);
+        SceneTree tree = GetTree();
+        QueueFree();
+        await tree.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
+        await tree.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        tree.Quit(exitCode);
     }
 
     private static void StopAndReleaseAudio(Node node)

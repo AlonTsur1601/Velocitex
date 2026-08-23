@@ -1311,7 +1311,6 @@ internal readonly record struct PlatformWallStyle(
         AddVisualBox(door, "RightDoorPocketMask", new Vector3(1.5f, 4.02f, 0.38f), new Vector3(3.1f, 2.13f, ExitDoor3D.FrameRoomSideCenterZ), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, frameMaterial);
         AddVisualBox(door, "LeftFrame", new Vector3(0.5f, 4.46f, 0.58f), new Vector3(-2.1f, 2.35f, ExitDoor3D.FrameRoomSideCenterZ), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, frameMaterial);
         AddVisualBox(door, "RightFrame", new Vector3(0.5f, 4.46f, 0.58f), new Vector3(2.1f, 2.35f, ExitDoor3D.FrameRoomSideCenterZ), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, frameMaterial);
-        AddVisualBox(door, "Header", new Vector3(4.7f, 0.58f, 0.58f), new Vector3(0.0f, 4.55f, ExitDoor3D.FrameRoomSideCenterZ), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, frameMaterial);
         StaticBody3D frameCollision = new()
         {
             Name = "FrameCollision",
@@ -1323,7 +1322,6 @@ internal readonly record struct PlatformWallStyle(
             ("RightPocketHitbox", new Vector3(1.5f, 4.02f, 0.38f), new Vector3(3.1f, 2.13f, ExitDoor3D.FrameRoomSideCenterZ)),
             ("LeftFrameHitbox", new Vector3(0.5f, 4.46f, 0.58f), new Vector3(-2.1f, 2.35f, ExitDoor3D.FrameRoomSideCenterZ)),
             ("RightFrameHitbox", new Vector3(0.5f, 4.46f, 0.58f), new Vector3(2.1f, 2.35f, ExitDoor3D.FrameRoomSideCenterZ)),
-            ("HeaderHitbox", new Vector3(4.7f, 0.58f, 0.58f), new Vector3(0.0f, 4.55f, ExitDoor3D.FrameRoomSideCenterZ)),
         })
         {
             frameCollision.AddChild(new CollisionShape3D
@@ -1337,8 +1335,12 @@ internal readonly record struct PlatformWallStyle(
         AddVisualBox(door, "CenterSeam", new Vector3(0.08f, ExitDoor3D.DoorLeafClosedHeight, 0.08f), new Vector3(0.0f, ExitDoor3D.DoorLeafClosedCenterY, 0.19f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, recessMaterial);
         AddVisualBox(door, "LeftHandle", new Vector3(0.1f, 0.9f, 0.08f), new Vector3(-0.22f, ExitDoor3D.DoorLeafClosedCenterY, 0.21f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, markingMaterial);
         AddVisualBox(door, "RightHandle", new Vector3(0.1f, 0.9f, 0.08f), new Vector3(0.22f, ExitDoor3D.DoorLeafClosedCenterY, 0.21f), Vector3.Zero, string.Empty, Colors.White, 0.0f, 1.0f, markingMaterial);
-        AddVisualBox(door, "ChevronLeft", new Vector3(1.08f, 0.14f, 0.12f), new Vector3(-0.43f, 4.48f, 0.86f), new Vector3(0.0f, 0.0f, Mathf.DegToRad(-30.0f)), string.Empty, Colors.White, 0.0f, 1.0f, markingMaterial);
-        AddVisualBox(door, "ChevronRight", new Vector3(1.08f, 0.14f, 0.12f), new Vector3(0.43f, 4.48f, 0.86f), new Vector3(0.0f, 0.0f, Mathf.DegToRad(30.0f)), string.Empty, Colors.White, 0.0f, 1.0f, markingMaterial);
+        float chevronY = ExitDoor3D.DoorLeafClosedCenterY + (ExitDoor3D.DoorLeafClosedHeight * 0.5f) + 0.70f;
+        const float chevronDepth = 0.12f;
+        float wallRoomSideZ = ExitDoor3D.FrameRoomSideCenterZ - (ExitDoor3D.FrameDepth * 0.5f);
+        float chevronZ = wallRoomSideZ + (chevronDepth * 0.5f);
+        AddVisualBox(door, "ChevronLeft", new Vector3(1.08f, 0.14f, chevronDepth), new Vector3(-0.43f, chevronY, chevronZ), new Vector3(0.0f, 0.0f, Mathf.DegToRad(-30.0f)), string.Empty, Colors.White, 0.0f, 1.0f, markingMaterial);
+        AddVisualBox(door, "ChevronRight", new Vector3(1.08f, 0.14f, chevronDepth), new Vector3(0.43f, chevronY, chevronZ), new Vector3(0.0f, 0.0f, Mathf.DegToRad(30.0f)), string.Empty, Colors.White, 0.0f, 1.0f, markingMaterial);
 
         StaticBody3D closedDoorBlocker = new()
         {
@@ -1517,13 +1519,19 @@ internal readonly record struct PlatformWallStyle(
         float spacing = buttons.Length == 1
             ? 0.0f
             : Mathf.Min(0.56f, 3.7f / (buttons.Length - 1));
-        float firstX = -((buttons.Length - 1) * spacing * 0.5f);
+        float firstX = door.AuthoredDoorCenterX - ((buttons.Length - 1) * spacing * 0.5f);
         float housingWidth = Mathf.Max(0.88f, ((buttons.Length - 1) * spacing) + indicatorWidth + 0.34f);
+        const float housingDepth = 0.16f;
+        const float indicatorDepth = 0.08f;
+        float indicatorY = door.AuthoredDoorTopY + (0.32f * 0.5f);
+        float wallRoomSideZ = ExitDoor3D.FrameRoomSideCenterZ - (ExitDoor3D.FrameDepth * 0.5f);
+        float housingZ = wallRoomSideZ + (housingDepth * 0.5f);
+        float indicatorZ = wallRoomSideZ + housingDepth + (indicatorDepth * 0.5f);
         AddVisualBox(
             door,
             "ButtonIndicatorHousing",
-            new Vector3(housingWidth, 0.32f, 0.16f),
-            new Vector3(0.0f, ExitDoor3D.FrameOuterHeight + 0.16f, 0.80f),
+            new Vector3(housingWidth, 0.32f, housingDepth),
+            new Vector3(door.AuthoredDoorCenterX, indicatorY, housingZ),
             Vector3.Zero,
             string.Empty,
             Colors.White,
@@ -1537,8 +1545,8 @@ internal readonly record struct PlatformWallStyle(
             MeshInstance3D indicator = AddVisualBox(
                 door,
                 $"ButtonRequirementIndicator{index + 1}",
-                new Vector3(indicatorWidth, 0.22f, 0.08f),
-                new Vector3(firstX + (index * spacing), ExitDoor3D.FrameOuterHeight + 0.16f, 0.925f),
+                new Vector3(indicatorWidth, 0.22f, indicatorDepth),
+                new Vector3(firstX + (index * spacing), indicatorY, indicatorZ),
                 Vector3.Zero,
                 string.Empty,
                 Colors.White,
@@ -1551,9 +1559,13 @@ internal readonly record struct PlatformWallStyle(
         door.ConfigureButtonIndicators(indicators, inactiveMaterial, activeMaterial);
     }
 
-    private static void TrimExitPlatformsToThreshold(Node parent, ExitDoor3D door)
+    internal static HashSet<StaticBody3D> TrimExitPlatformsToThreshold(
+        Node parent,
+        ExitDoor3D door,
+        bool preserveBodyTransform = false)
     {
         const float thresholdZ = 0.12f;
+        HashSet<StaticBody3D> trimmedBodies = new();
         Node3D? shell = parent.GetNodeOrNull<Node3D>("RoomShell");
         foreach (StaticBody3D body in EnumerateDescendants(parent).OfType<StaticBody3D>().ToArray())
         {
@@ -1611,10 +1623,18 @@ internal readonly record struct PlatformWallStyle(
                 continue;
             }
 
-            body.GlobalPosition += door.GlobalBasis * new Vector3(0.0f, 0.0f, protrusion * 0.5f);
+            if (preserveBodyTransform)
+            {
+                collision.GlobalPosition += door.GlobalBasis * new Vector3(0.0f, 0.0f, protrusion * 0.5f);
+            }
+            else
+            {
+                body.GlobalPosition += door.GlobalBasis * new Vector3(0.0f, 0.0f, protrusion * 0.5f);
+            }
             box.Size = trimmedSize;
+            trimmedBodies.Add(body);
             MeshInstance3D? mesh = body.GetChildren().OfType<MeshInstance3D>().FirstOrDefault();
-            if (mesh is not null)
+            if (mesh is not null && !preserveBodyTransform)
             {
                 Vector3 trimmedVisualSize = trimmedSize;
                 if (edgeBarrier && body.HasMeta(BarrierBaseSeamSizeMetadata))
@@ -1654,6 +1674,7 @@ internal readonly record struct PlatformWallStyle(
                 }
             }
         }
+        return trimmedBodies;
     }
 
     internal static void AlignExitCorridorFloorToPlatform(Node parent, ExitDoor3D door)
@@ -1808,7 +1829,7 @@ internal readonly record struct PlatformWallStyle(
         {
             return false;
         }
-        if (gap > 0.25f ||
+        if (gap > ExitDoor3D.CorridorTransitionDepth ||
             Mathf.Abs(floorCollision.GlobalBasis.Z.Normalized().Dot(door.GlobalBasis.Z.Normalized())) < 0.995f)
         {
             GD.PushError($"Exit door in {parent.Name} has an unsupported {gap:F3} m corridor collision seam.");

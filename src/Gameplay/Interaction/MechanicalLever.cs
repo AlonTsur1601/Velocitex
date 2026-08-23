@@ -173,16 +173,23 @@ public partial class MechanicalLever : Node3D, IInteractable
         };
         AddChild(_keyLabel);
 
-        _activationAudio = new AudioStreamPlayer3D
+        bool disableAudioForSmoke = Array.Exists(
+            OS.GetCmdlineUserArgs(),
+            argument => argument.Contains("button-room=", StringComparison.Ordinal) ||
+                argument == "--room04-sequence-smoke");
+        if (!disableAudioForSmoke)
         {
-            Name = "ActivationClickSfx",
-            Stream = GD.Load<AudioStream>("res://assets/audio/sfx/device_mechanical_click.wav"),
-            Bus = "SFX",
-            VolumeDb = -4.0f,
-            MaxDistance = 26.0f,
-            UnitSize = 5.0f,
-        };
-        AddChild(_activationAudio);
+            _activationAudio = new AudioStreamPlayer3D
+            {
+                Name = "ActivationClickSfx",
+                Stream = GD.Load<AudioStream>("res://assets/audio/sfx/device_mechanical_click.wav"),
+                Bus = "SFX",
+                VolumeDb = -4.0f,
+                MaxDistance = 26.0f,
+                UnitSize = 5.0f,
+            };
+            AddChild(_activationAudio);
+        }
     }
 
     public override void _ExitTree()
