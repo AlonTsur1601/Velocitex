@@ -432,9 +432,10 @@ public partial class MovementTestRoom : RoomRuntime
 
         if (_smokeTick == 358)
         {
-            if (!_player.TrailColor.IsEqualApprox(_trailColorBeforeGlass))
+            if (!_player.TrailColor.IsEqualApprox(_trailColorBeforeGlass) ||
+                _player.TrailColor.A < 0.999f)
             {
-                FailMovementSmoke($"Frictionless glass changed the configured trail color from {_trailColorBeforeGlass} to {_player.TrailColor}.");
+                FailMovementSmoke($"Frictionless glass changed or translucently blended the configured trail color from {_trailColorBeforeGlass} to {_player.TrailColor}.");
                 return;
             }
 
@@ -449,9 +450,12 @@ public partial class MovementTestRoom : RoomRuntime
         if (_smokeTick == 370)
         {
             CollisionShape3D glassCollision = _timedGlassSmokePad!.GetChildren().OfType<CollisionShape3D>().First();
-            if (!_timedGlassSmokePad.IsBroken || !glassCollision.Disabled)
+            bool glassVisualStillVisible = _timedGlassSmokePad.GetChildren()
+                .OfType<MeshInstance3D>()
+                .Any(visual => visual.Visible);
+            if (!_timedGlassSmokePad.IsBroken || !glassCollision.Disabled || glassVisualStillVisible)
             {
-                FailMovementSmoke($"Timed glass did not break after uninterrupted contact: broken={_timedGlassSmokePad.IsBroken}, collision_disabled={glassCollision.Disabled}, contact={_timedGlassSmokePad.LongestContinuousGlassContactSeconds:F3}, delay={_timedGlassSmokePad.BreakDelaySeconds:F3}.");
+                FailMovementSmoke($"Timed glass did not fully disappear after uninterrupted contact: broken={_timedGlassSmokePad.IsBroken}, collision_disabled={glassCollision.Disabled}, visual_visible={glassVisualStillVisible}, contact={_timedGlassSmokePad.LongestContinuousGlassContactSeconds:F3}, delay={_timedGlassSmokePad.BreakDelaySeconds:F3}.");
                 return;
             }
 

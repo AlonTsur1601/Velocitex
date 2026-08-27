@@ -1,0 +1,35 @@
+Godot_v4.7-stable_mono_win64_console.exe : ERROR: ROOM03_SOLUTION_FAIL: Run 2 touched the hazard floor at (-1.1827992, 
+-4.34988, -99.81712) after 3/4 gates. gate1=radial 0.00 at (0, 14.149367, 9.58855) (required center <= 3.40); 
+gate2=radial 2.51 at (0.89586234, 9.5781555, -24.407242) (required center <= 3.00); gate3=radial 0.29 at (3.1205714, 
+4.6384883, -58.613277) (required center <= 3.40); gate4=radial 3.07 at (-0.42332846, -1.257874, -98.953804) (required 
+center <= 3.00)
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room03Solution.ps1:16 char:11
++ $output = & $godot.FullName --headless --fixed-fps 60 --path $root "r ...
++           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: ROOM03_S...center <= 3.00):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: void Velocitex.Gameplay.Rooms.Room03Runtime.FailSolutionSmoke(string) 
+(res://src/Gameplay/Rooms/Room03Runtime.cs:495)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Velocitex.Gameplay.Rooms.Room03Runtime.FailSolutionSmoke(string) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room03Runtime.cs:495)
+       [2] void Velocitex.Gameplay.Rooms.Room03Runtime.RestartRoom() 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room03Runtime.cs:118)
+       [3] void Velocitex.Gameplay.Rooms.Room03Runtime.<BuildRoom>b__33_0(Godot.Node3D) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room03Runtime.cs:300)
+       [4] void Velocitex.Gameplay.Rooms.RoomGeometry+<>c__DisplayClass42_0.<AddClosedRoomShell>b__0(Godot.Node3D) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\RoomGeometry.cs:1262)
+       [5] void Godot.Area3D.BodyEnteredTrampoline(object, Godot.NativeInterop.NativeVariantPtrArgs, 
+Godot.NativeInterop.godot_variant&) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/GodotObjects/Area3D.cs:941)
+       [6] void Godot.DelegateUtils.InvokeWithVariantArgs(nint, System.Void*, Godot.NativeInterop.godot_variant**, 
+int, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/DelegateUtils.cs:86)
+Room 03 solution smoke test exited with code 1
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room03Solution.ps1:21 char:5
++     throw "Room 03 solution smoke test exited with code $exitCode"
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Room 03 solutio...ted with code 1:String) [], RuntimeException
+    + FullyQualifiedErrorId : Room 03 solution smoke test exited with code 1
+ 

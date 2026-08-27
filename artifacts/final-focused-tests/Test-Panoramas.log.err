@@ -1,0 +1,7 @@
+room01_a.png is stale. Run scripts/Update-Panoramas.ps1 after room or texture changes.
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-Panoramas.ps1:136 char:9
++         throw "$file is stale. Run scripts/Update-Panoramas.ps1 after ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (room01_a.png is...exture changes.:String) [], RuntimeException
+    + FullyQualifiedErrorId : room01_a.png is stale. Run scripts/Update-Panoramas.ps1 after room or texture changes.
+ 

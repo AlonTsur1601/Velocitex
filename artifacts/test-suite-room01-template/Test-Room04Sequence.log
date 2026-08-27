@@ -1,0 +1,3 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM04_SEQUENCE_PASS: the upright lever is required before two ordered floor buttons, wrong input stays solid red, and sequence pips remain attached to the depressed plates.

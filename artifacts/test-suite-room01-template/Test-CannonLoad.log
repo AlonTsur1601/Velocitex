@@ -1,0 +1,8 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+CANNON_LOAD_TRACE: room=17 added
+CANNON_LOAD_TRACE: room=17 first_frame
+CANNON_LOAD_TRACE: room=17 fired
+CANNON_LOAD_ROOM: room=17, build_ms=1073, cannons=924, eager_projectiles=0, fired_pool=2, untouched_pool=0.
+CANNON_LOAD_TRACE: room=17 queued_free
+CANNON_LOAD_PASS: Room 17 loaded with zero eager projectile bodies; each cannon keeps an independent hitbox, schedule and lazy projectile pool.

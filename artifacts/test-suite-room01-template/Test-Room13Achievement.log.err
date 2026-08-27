@@ -1,0 +1,9 @@
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-Room13Achievement.ps1:12 char:16
++ ... gicOutput = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 4 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)

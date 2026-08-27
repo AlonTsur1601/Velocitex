@@ -1,0 +1,5 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+OPENING_SMOKE_READY: opening set built.
+OPENING_SMOKE_START: opening scene instantiated.
+OPENING_SMOKE_PASS: opening sequence reached its handoff and emitted Finished.

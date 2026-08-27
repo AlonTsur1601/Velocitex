@@ -142,9 +142,10 @@ public partial class Room21Runtime : RoomRuntime
 
     private void RunMechanicsSmokeTick()
     {
-        if (++_mechanicsSmokeTick == 1)
+        _mechanicsSmokeTick++;
+        if (_mechanicsSmokeTick == 1)
         {
-            _goal.EmitSignal(Area3D.SignalName.BodyEntered, _player);
+            TryCompleteAtGoal();
             if (IsComplete || IsExitTraversalPending)
             {
                 FailMechanicsSmoke("The direct goal entered before any absorber or button requirement.");
@@ -158,16 +159,28 @@ public partial class Room21Runtime : RoomRuntime
                 return;
             }
 
-            foreach (RouteCheckpoint3D button in _sequenceButtons)
+            return;
+        }
+
+        if (_mechanicsSmokeTick is >= 2 and <= 6)
+        {
+            int index = _mechanicsSmokeTick - 2;
+            _sequenceButtons[index].Press(_player);
+            if (!_sequenceButtons[index].IsActivated || _nextSequenceButton != index + 1)
             {
-                button.Press(_player);
+                FailMechanicsSmoke($"Button {index + 1} did not advance the ordered sequence in its own physics frame; next={_nextSequenceButton}.");
             }
+            return;
+        }
+
+        if (_mechanicsSmokeTick == 7)
+        {
             _touchedAbsorber = true;
             _verifiedAbsorption = true;
-            _goal.EmitSignal(Area3D.SignalName.BodyEntered, _player);
+            TryCompleteAtGoal();
             if (!IsComplete && !IsExitTraversalPending)
             {
-                FailMechanicsSmoke("The complete three-button and precision-stop state did not open the exit.");
+                FailMechanicsSmoke("The complete five-button and precision-stop state did not open the exit.");
                 return;
             }
 
@@ -178,7 +191,7 @@ public partial class Room21Runtime : RoomRuntime
                 return;
             }
 
-            GD.Print("ROOM21_MECHANICS_PASS: wrong order stayed inactive; three ordered foam buttons and the precision absorption stop were all required.");
+            GD.Print("ROOM21_MECHANICS_PASS: wrong order stayed inactive; five ordered foam buttons and the precision absorption stop were all required.");
             GetTree().Quit(0);
         }
     }
@@ -473,12 +486,17 @@ public partial class Room21Runtime : RoomRuntime
         Vector3 position = new(0.0f, 5.85f, -51.0f);
         _goal = new Area3D { Name = "GoalCup", Position = position, CollisionLayer = 0, CollisionMask = 1, Monitoring = true };
         _goal.AddChild(new CollisionShape3D { Shape = new CylinderShape3D { Radius = 2.0f, Height = 3.0f } });
-        _goal.BodyEntered += body =>
-        {
-            if (body is PlayerBall && _verifiedAbsorption && _nextSequenceButton == RequiredButtons) { CompleteRoom(); }
-        };
+        _goal.BodyEntered += body => { if (body is PlayerBall) { TryCompleteAtGoal(); } };
         AddChild(_goal);
         RoomGeometry.AddGoalExitDoor(this, position);
+    }
+
+    private void TryCompleteAtGoal()
+    {
+        if (_verifiedAbsorption && _nextSequenceButton == RequiredButtons)
+        {
+            CompleteRoom();
+        }
     }
 
     private void FailMechanicsSmoke(string message)

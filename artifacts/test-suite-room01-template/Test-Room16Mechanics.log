@@ -1,0 +1,16 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM16_MECHANICS_PASS: the orange control removes a 14-degree target miss, the cannon requires a deliberate fire, the landing latch requires grounded steering, and the compact catch deck ends flush at a carved shell-wall exit.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM16_UNCALIBRATED_FIRE_PASS: firing before pressing the orange aim control missed the target and fell to the maintenance floor.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM16_STRAIGHT_LANDING_PASS: a centered cannon landing hit the target but missed the offset latch and could not complete without grounded steering.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM16_ACHIEVEMENT_POSITIVE_PASS: a 0.20 m target-center pass awarded Bullseye.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM16_ACHIEVEMENT_NEGATIVE_PASS: a valid but 0.30 m off-center target pass completed no Bullseye condition.
+ROOM16_MECHANICS_SUITE_PASS: meaningful physical aim control, deliberate landing choice, compact wall-mounted exit and Bullseye positive/negative cases passed.

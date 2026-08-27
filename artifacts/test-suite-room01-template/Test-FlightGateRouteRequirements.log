@@ -1,0 +1,43 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 01 fell to its hazard when flight gate 1 supplied zero boost.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 01 fell to its hazard when flight gate 2 supplied zero boost.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 03 fell to its hazard when flight gate 1 supplied zero boost.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 03 fell to its hazard when flight gate 2 supplied zero boost.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 03 remained locked when flight gate 3 supplied zero boost; player=(-7.9640493, -1.1013535, -123.426384), gate1=active:True,speed:13.04->20.00, gate2=active:True,speed:16.58->21.58, gate3=active:True,speed:18.86->18.86, gate4=active:True,speed:18.04->23.04.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 03 fell to its hazard when flight gate 4 supplied zero boost.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 05 fell to its hazard when flight gate 1 supplied zero boost.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 05 fell to its hazard when flight gate 2 supplied zero boost.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 06 fell to its hazard when flight gate 1 supplied zero boost.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 09 remained locked when flight gate 1 supplied zero boost; player=(-8.4002905, 3.449645, -112.984726), gate1=active:True,speed:15.40->15.40, gate2=active:False,speed:0.00->0.00.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 09 remained locked when flight gate 2 supplied zero boost; player=(-8.402451, 3.4491222, -128.62047), gate1=active:True,speed:15.40->20.40, gate2=active:True,speed:20.19->20.19.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 10 fell to its hazard when flight gate 1 supplied zero boost.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 20 fell to its hazard when flight gate 1 supplied zero boost.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_ROUTE_REQUIREMENT_PASS: Room 20 fell to its hazard when flight gate 2 supplied zero boost.
+FLIGHT_GATE_ROUTE_REQUIREMENT_SUITE_PASS: every momentum-critical campaign flight gate is physically required to cross its intended route.

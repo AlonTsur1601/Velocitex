@@ -1,0 +1,3 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+MOVEMENT_SMOKE_PASS: grounded and diagonal drive, synchronized linear and visible rotational coasting, external momentum, zero air control, canonical sticky/elastic surfaces, distinct-surface Double Bounce tracking, centered directional materials, timed glass break/restore and momentum-preserving super-elastic bounce work.

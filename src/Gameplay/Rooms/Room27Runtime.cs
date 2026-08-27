@@ -183,32 +183,39 @@ public partial class Room27Runtime : RoomRuntime
 
     private void RunMechanicsSmoke()
     {
-        if (++_mechanicsTick != 1) { return; }
-        _goal.EmitSignal(Area3D.SignalName.BodyEntered, _player);
-        if (IsComplete || IsExitTraversalPending) { FailMechanics("Direct goal entry completed the room."); return; }
-        _leverUsed = true;
-        _goal.EmitSignal(Area3D.SignalName.BodyEntered, _player);
-        if (IsComplete || IsExitTraversalPending) { FailMechanics("The reversal lever alone completed the room."); return; }
-        for (int index = 0; index < _gates.Count; index++)
+        _mechanicsTick++;
+        if (_mechanicsTick == 1)
         {
+            TryCompleteAtGoal();
+            if (IsComplete || IsExitTraversalPending) { FailMechanics("Direct goal entry completed the room."); return; }
+            _leverUsed = true;
+            TryCompleteAtGoal();
+            if (IsComplete || IsExitTraversalPending) { FailMechanics("The reversal lever alone completed the room."); }
+            return;
+        }
+        if (_mechanicsTick is >= 2 and <= 5)
+        {
+            int index = _mechanicsTick - 2;
             _gates[index].Press(_player);
             MeshInstance3D plate = _gates[index].GetNode<MeshInstance3D>("InsetPlate");
             float expectedPressedY = (-_gates[index].TriggerSize.Y * 0.42f) - 0.16f;
             if (!_gates[index].IsActivated || !Mathf.IsEqualApprox(plate.Position.Y, expectedPressedY))
             {
                 FailMechanics($"Button {index + 1} did not depress in the same activation frame.");
-                return;
             }
+            return;
         }
-        _nextGate = RequiredGates;
-        Array.Fill(_railVisits, true);
-        _airRingPassed = true;
-        _minimumX = -6.0f;
-        _maximumX = 6.0f;
-        _goal.EmitSignal(Area3D.SignalName.BodyEntered, _player);
-        if (!IsComplete && !IsExitTraversalPending) { FailMechanics("The complete polarity weave did not open the exit."); return; }
-        GD.Print("ROOM27_MECHANICS_PASS: direct entry and lever-only entry failed; four regular rails, four ordered gates, the low-gravity ring and both lateral extremes were required.");
-        GetTree().Quit(0);
+        if (_mechanicsTick == 6)
+        {
+            Array.Fill(_railVisits, true);
+            _airRingPassed = true;
+            _minimumX = -6.0f;
+            _maximumX = 6.0f;
+            TryCompleteAtGoal();
+            if (!IsComplete && !IsExitTraversalPending) { FailMechanics("The complete polarity weave did not open the exit."); return; }
+            GD.Print("ROOM27_MECHANICS_PASS: direct entry and lever-only entry failed; four regular rails, four ordered gates, the low-gravity ring and both lateral extremes were required.");
+            GetTree().Quit(0);
+        }
     }
 
     private void RunShellSmoke()
@@ -371,9 +378,17 @@ public partial class Room27Runtime : RoomRuntime
         Vector3 position = new(-9.0f, 9.35f, -117.0f);
         _goal = new Area3D { Name = "GoalCup", Position = position, CollisionLayer = 0, CollisionMask = 1, Monitoring = true };
         _goal.AddChild(new CollisionShape3D { Shape = new CylinderShape3D { Radius = 2.0f, Height = 3.0f } });
-        _goal.BodyEntered += body => { if (body is PlayerBall && HasCompletedWeave()) { CompleteRoom(); } };
+        _goal.BodyEntered += body => { if (body is PlayerBall) { TryCompleteAtGoal(); } };
         AddChild(_goal);
         RoomGeometry.AddGoalExitDoor(this, position, Vector3.Forward);
+    }
+
+    private void TryCompleteAtGoal()
+    {
+        if (HasCompletedWeave())
+        {
+            CompleteRoom();
+        }
     }
 
     private void FailMechanics(string message) { GD.PushError($"ROOM27_MECHANICS_FAIL: {message}"); GetTree().Quit(1); }

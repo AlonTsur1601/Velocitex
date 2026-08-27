@@ -1,0 +1,13 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM17_MECHANICS_PASS: 924 unsynchronised cannons tile both side walls from floor to ceiling across thirty-three airborne lanes.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM17_IMPACT_PASS: a foam projectile applied a visible deflecting impulse ((8.5, -2.2, 1.4)).
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM17_ACHIEVEMENT_POSITIVE_PASS: a hit-free grid crossing awarded Clean Crossfire.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM17_ACHIEVEMENT_NEGATIVE_PASS: a projectile hit denied Clean Crossfire but ordinary room completion still succeeded.
+ROOM17_MECHANICS_SUITE_PASS: 924-cannon wall grid, projectile impact, and Clean Crossfire positive/surviving-hit cases passed.

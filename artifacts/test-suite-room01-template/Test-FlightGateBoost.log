@@ -1,0 +1,3 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+FLIGHT_GATE_BOOST_PASS: gate raised speed from 8.00 to 15.00 m/s, accepted a center 0.05 m inside the opening, rejected one 0.05 m outside and kept its four side spikes oriented.

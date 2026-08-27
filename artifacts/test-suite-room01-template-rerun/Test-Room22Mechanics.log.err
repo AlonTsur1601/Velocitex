@@ -1,0 +1,45 @@
+Godot_v4.7-stable_mono_win64_console.exe : ERROR: ROOM22_MECHANICS_FAIL: The complete climb and lever state did not 
+open the exit.
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room22Mechanics.ps1:6 char:11
++ $output = & $godot.FullName --headless --fixed-fps 60 --path $root "r ...
++           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: ROOM22_M... open the exit.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: void Velocitex.Gameplay.Rooms.Room22Runtime.FailMechanicsSmoke(string) 
+(res://src/Gameplay/Rooms/Room22Runtime.cs:385)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Velocitex.Gameplay.Rooms.Room22Runtime.FailMechanicsSmoke(string) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room22Runtime.cs:385)
+       [2] void Velocitex.Gameplay.Rooms.Room22Runtime.RunMechanicsSmokeTick() 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room22Runtime.cs:232)
+       [3] void Velocitex.Gameplay.Rooms.Room22Runtime._PhysicsProcess(double) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room22Runtime.cs:105)
+       [4] bool Godot.Node.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/GodotObjects/Node.cs:2648)
+       [5] bool Godot.Node3D.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/GodotObjects/Node3D.cs:1127)
+       [6] bool Velocitex.Core.Rooms.RoomRuntime.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (C:\Users\alont\OneDrive\诪住诪讻讬诐\Alo
+n\Velocitex\.godot\mono\temp\obj\Debug\Godot.SourceGenerators\Godot.SourceGenerators.ScriptMethodsGenerator\Velocitex.C
+ore.Rooms.RoomRuntime_ScriptMethods.generated.cs:120)
+       [7] bool Velocitex.Gameplay.Rooms.Room22Runtime.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (C:\Users\alont\OneDrive\诪住诪讻讬诐\Alo
+n\Velocitex\.godot\mono\temp\obj\Debug\Godot.SourceGenerators\Godot.SourceGenerators.ScriptMethodsGenerator\Velocitex.G
+ameplay.Rooms.Room22Runtime_ScriptMethods.generated.cs:220)
+       [8] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, 
+Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)
+WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2535)
+Room 22 mechanics smoke test exited with code 1
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room22Mechanics.ps1:10 char:24
++ ... de -ne 0) { throw "Room 22 mechanics smoke test exited with code $exi ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Room 22 mechani...ted with code 1:String) [], RuntimeException
+    + FullyQualifiedErrorId : Room 22 mechanics smoke test exited with code 1
+ 

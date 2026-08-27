@@ -1,0 +1,3 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM02_ROUTE_FEEDBACK_PASS: out-of-order input blinked red, RestartRoom cleared it, the four-button sequence activated in order and Room 02 used the shared exit-door behavior.

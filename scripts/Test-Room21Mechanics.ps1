@@ -8,4 +8,4 @@ $exitCode = $LASTEXITCODE
 $ErrorActionPreference = "Stop"
 $output | Write-Output
 if ($exitCode -ne 0) { throw "Room 21 mechanics smoke test exited with code $exitCode" }
-if (($output -join "`n") -notmatch "ROOM21_MECHANICS_PASS: wrong order stayed inactive; three ordered foam buttons and the precision absorption stop were all required") { throw "Room 21 mechanics smoke test did not prove the complete puzzle contract." }
+if (($output -join "`n") -notmatch "ROOM21_MECHANICS_PASS: wrong order stayed inactive; five ordered foam buttons and the precision absorption stop were all required") { throw "Room 21 mechanics smoke test did not prove the complete puzzle contract." }

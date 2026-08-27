@@ -29,7 +29,7 @@ public static class ReleaseUpdateService
                     return labeledVersion;
             }
 
-            Version assemblyVersion = typeof(ReleaseUpdateService).Assembly.GetName().Version ?? new Version(1, 3, 0);
+            Version assemblyVersion = typeof(ReleaseUpdateService).Assembly.GetName().Version ?? new Version(1, 4, 0);
             Version normalizedAssemblyVersion = new(assemblyVersion.Major, assemblyVersion.Minor, Math.Max(0, assemblyVersion.Build));
             return normalizedAssemblyVersion;
         }
@@ -209,7 +209,7 @@ public static class ReleaseUpdateService
     private static HttpClient CreateClient()
     {
         HttpClient client = new() { Timeout = TimeSpan.FromSeconds(15) };
-        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Velocitex", "1.3.0"));
+        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Velocitex", "1.4.0"));
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
         return client;
     }

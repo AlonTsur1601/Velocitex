@@ -1,0 +1,32 @@
+Godot_v4.7-stable_mono_win64_console.exe : ERROR: ROOM23_SOLUTION_FAIL: Run 1 touched the hazard floor after 0/2 route 
+stages and 0/2 flight gates.
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room23Solution.ps1:7 char:13
++     $output=& $godot.FullName --headless --fixed-fps 60 --path $root  ...
++             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: ROOM23_S...2 flight gates.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: void Velocitex.Gameplay.Rooms.Room23Runtime.FailSolutionSmoke(string) 
+(res://src/Gameplay/Rooms/Room23Runtime.cs:484)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Velocitex.Gameplay.Rooms.Room23Runtime.FailSolutionSmoke(string) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room23Runtime.cs:484)
+       [2] void Velocitex.Gameplay.Rooms.Room23Runtime.RestartRoom() 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room23Runtime.cs:125)
+       [3] void Velocitex.Gameplay.Rooms.Room23Runtime.<BuildRoom>b__46_0(Godot.Node3D) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room23Runtime.cs:335)
+       [4] void Velocitex.Gameplay.Rooms.RoomGeometry+<>c__DisplayClass42_0.<AddClosedRoomShell>b__0(Godot.Node3D) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\RoomGeometry.cs:1262)
+       [5] void Godot.Area3D.BodyEnteredTrampoline(object, Godot.NativeInterop.NativeVariantPtrArgs, 
+Godot.NativeInterop.godot_variant&) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/GodotObjects/Area3D.cs:941)
+       [6] void Godot.DelegateUtils.InvokeWithVariantArgs(nint, System.Void*, Godot.NativeInterop.godot_variant**, 
+int, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/DelegateUtils.cs:86)
+Room 23 solution smoke test run 1 exited with code 1
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room23Solution.ps1:11 char:25
++ ... Code -ne 0){throw "Room 23 solution smoke test run $run exited with c ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Room 23 solutio...ted with code 1:String) [], RuntimeException
+    + FullyQualifiedErrorId : Room 23 solution smoke test run 1 exited with code 1
+ 

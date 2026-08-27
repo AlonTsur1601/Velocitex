@@ -1,0 +1,273 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM11_TRACE: tick=30, position=(0, 9.847606, 31.617348), velocity=(0, -5.662441E-07, -10.19035), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=60, position=(0, 9.847606, 25.677673), velocity=(0, 0, -11.994486), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=90, position=(0, 9.79044, 19.679893), velocity=(0, -0.98000044, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=120, position=(0, 8.034606, 13.679882), velocity=(0, -5.880002, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=150, position=(0, 4.7084227, 7.5450096), velocity=(0, -5.597761, -12.654759), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=180, position=(0, 5.856214, 1.1589355), velocity=(0, 9.763805, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_TRACE: tick=210, position=(-2.0300002, 10.428119, -5.2784944), velocity=(-8.4000025, 8.563807, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_RING_PASS: ring=1/4, tick=218, position=(-3.305, 11.682689, -7.2097235), velocity=(-8.5, 8.203807, -16.721287).
+ROOM11_TRACE: tick=240, position=(-5.8250003, 14.400022, -13.06218), velocity=(-4.5999975, 7.3638077, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=270, position=(-5.799999, 17.771925, -21.422832), velocity=(4.400002, 6.163809, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=300, position=(-1.9833314, 20.54383, -29.783485), velocity=(8.5, 4.96381, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_RING_PASS: ring=2/4, tick=315, position=(0.28333515, 21.776848, -34.242485), velocity=(8.5, 4.3238106, -20.102213).
+ROOM11_TRACE: tick=330, position=(2.2666683, 22.715736, -38.933006), velocity=(8.5, 3.763811, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=360, position=(4.191667, 24.287643, -48.984123), velocity=(-0.50000226, 2.5638123, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=390, position=(1.6533327, 25.259548, -59.03524), velocity=(-8.5, 1.3638134, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_RING_PASS: ring=3/4, tick=411, position=(-1.4633338, 25.590948, -66.40606), velocity=(-8.5, 0.4838135, -23.325602).
+ROOM11_TRACE: tick=420, position=(-2.596667, 25.631456, -69.51617), velocity=(-8.5, 0.16381352, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=450, position=(-6.0816674, 25.403362, -81.17907), velocity=(-3.3999975, -1.0361867, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=480, position=(-5.456666, 24.57527, -92.84197), velocity=(5.600003, -2.2361856, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_RING_PASS: ring=4/4, tick=491, position=(-3.966665, 24.076033, -97.50713), velocity=(8.5, -2.716185, -26.512808).
+ROOM11_TRACE: tick=510, position=(-1.4166653, 23.147177, -105.46096), velocity=(8.5, -3.4361844, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=540, position=(0.94333386, 21.119085, -118.71734), velocity=(0.39999777, -4.6361833, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=570, position=(0.44333255, 18.30394, -131.97372), velocity=(-1.1000023, -7.439517, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=600, position=(-0.10666868, 13.318349, -145.2301), velocity=(-1.1000023, -12.339507, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=630, position=(-0.6566699, 5.8827643, -158.48648), velocity=(-1.1000023, -17.239502, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=660, position=(-1.0900159, 3.5988116, -169.5399), velocity=(-0.77789736, 0, -20.401054), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=690, position=(-1.4761071, 3.5988116, -179.66551), velocity=(-0.76686084, 0, -20.111612), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=30, position=(0, 9.847606, 31.44126), velocity=(0, 0, -10.565259), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=60, position=(0, 9.847606, 25.477766), velocity=(0, 0, -11.994485), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=90, position=(0, 9.771384, 19.479893), velocity=(0, -1.1433338, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=120, position=(0, 7.9338837, 13.479882), velocity=(0, -6.0433354, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=150, position=(0, 4.6124043, 7.334097), velocity=(0, -5.7610946, -12.654759), grounded=False, air_control=18.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=180, position=(0, 6.0182776, 0.94435453), velocity=(0, 9.723805, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_TRACE: tick=210, position=(-2.0300002, 10.570182, -5.4930754), velocity=(-8.4000025, 8.523807, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_RING_PASS: ring=1/4, tick=217, position=(-3.1633334, 11.682689, -7.2097235), velocity=(-8.5, 8.203807, -16.721287).
+ROOM11_TRACE: tick=240, position=(-5.8250003, 14.522085, -13.340868), velocity=(-4.5999975, 7.3238077, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=270, position=(-5.799999, 17.87399, -21.70152), velocity=(4.400002, 6.123809, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=300, position=(-1.9833314, 20.625895, -30.062174), velocity=(8.5, 4.92381, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_RING_PASS: ring=2/4, tick=314, position=(0.14166847, 21.776848, -34.242485), velocity=(8.5, 4.3238106, -20.102213).
+ROOM11_TRACE: tick=330, position=(2.2666683, 22.7778, -39.268044), velocity=(8.5, 3.7238111, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=360, position=(4.191667, 24.329706, -49.31916), velocity=(-0.50000226, 2.5238123, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=390, position=(1.6533327, 25.281612, -59.370277), velocity=(-8.5, 1.3238134, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_RING_PASS: ring=3/4, tick=410, position=(-1.3216672, 25.590948, -66.40606), velocity=(-8.5, 0.4838135, -23.325602).
+ROOM11_TRACE: tick=420, position=(-2.596667, 25.63352, -69.90493), velocity=(-8.5, 0.12381351, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=450, position=(-6.0816674, 25.385426, -81.56783), velocity=(-3.3999975, -1.0761867, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=480, position=(-5.456666, 24.537333, -93.230736), velocity=(5.600003, -2.2761855, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_RING_PASS: ring=4/4, tick=490, position=(-4.1083317, 24.076033, -97.50713), velocity=(8.5, -2.716185, -26.512808).
+ROOM11_TRACE: tick=510, position=(-1.4166653, 23.089241, -105.90284), velocity=(8.5, -3.4761844, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=540, position=(0.94333386, 21.04115, -119.15922), velocity=(0.39999777, -4.676183, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=570, position=(0.44333255, 18.177225, -132.4156), velocity=(-1.1000023, -7.6028504, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=600, position=(-0.10666868, 13.109968, -145.67198), velocity=(-1.1000023, -12.50284, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=630, position=(-0.6566699, 5.592717, -158.92836), velocity=(-1.1000023, -17.402836, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=660, position=(-1.0846413, 3.5988116, -169.87976), velocity=(-0.777527, 0, -20.39134), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=690, position=(-1.4705486, 3.5988116, -180.00055), velocity=(-0.76649576, 0, -20.102036), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=30, position=(0, 9.847606, 31.44126), velocity=(0, 0, -10.565259), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=60, position=(0, 9.847606, 25.477766), velocity=(0, 0, -11.994485), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=90, position=(0, 9.771384, 19.479893), velocity=(0, -1.1433338, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=120, position=(0, 7.9338837, 13.479882), velocity=(0, -6.0433354, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=150, position=(0, 4.6124043, 7.334097), velocity=(0, -5.7610946, -12.654759), grounded=False, air_control=18.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=180, position=(0, 6.0182776, 0.94435453), velocity=(0, 9.723805, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_TRACE: tick=210, position=(-2.0300002, 10.570182, -5.4930754), velocity=(-8.4000025, 8.523807, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_RING_PASS: ring=1/4, tick=217, position=(-3.1633334, 11.682689, -7.2097235), velocity=(-8.5, 8.203807, -16.721287).
+ROOM11_TRACE: tick=240, position=(-5.8250003, 14.522085, -13.340868), velocity=(-4.5999975, 7.3238077, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=270, position=(-5.799999, 17.87399, -21.70152), velocity=(4.400002, 6.123809, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=300, position=(-1.9833314, 20.625895, -30.062174), velocity=(8.5, 4.92381, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_RING_PASS: ring=2/4, tick=314, position=(0.14166847, 21.776848, -34.242485), velocity=(8.5, 4.3238106, -20.102213).
+ROOM11_TRACE: tick=330, position=(2.2666683, 22.7778, -39.268044), velocity=(8.5, 3.7238111, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=360, position=(4.191667, 24.329706, -49.31916), velocity=(-0.50000226, 2.5238123, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=390, position=(1.6533327, 25.281612, -59.370277), velocity=(-8.5, 1.3238134, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_RING_PASS: ring=3/4, tick=410, position=(-1.3216672, 25.590948, -66.40606), velocity=(-8.5, 0.4838135, -23.325602).
+ROOM11_TRACE: tick=420, position=(-2.596667, 25.63352, -69.90493), velocity=(-8.5, 0.12381351, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=450, position=(-6.0816674, 25.385426, -81.56783), velocity=(-3.3999975, -1.0761867, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=480, position=(-5.456666, 24.537333, -93.230736), velocity=(5.600003, -2.2761855, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_RING_PASS: ring=4/4, tick=490, position=(-4.1083317, 24.076033, -97.50713), velocity=(8.5, -2.716185, -26.512808).
+ROOM11_TRACE: tick=510, position=(-1.4166653, 23.089241, -105.90284), velocity=(8.5, -3.4761844, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=540, position=(0.94333386, 21.04115, -119.15922), velocity=(0.39999777, -4.676183, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=570, position=(0.44333255, 18.177225, -132.4156), velocity=(-1.1000023, -7.6028504, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=600, position=(-0.10666868, 13.109968, -145.67198), velocity=(-1.1000023, -12.50284, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=630, position=(-0.6566699, 5.592717, -158.92836), velocity=(-1.1000023, -17.402836, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=660, position=(-1.0846413, 3.5988116, -169.87976), velocity=(-0.777527, 0, -20.39134), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=690, position=(-1.4705486, 3.5988116, -180.00055), velocity=(-0.76649576, 0, -20.102036), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=30, position=(0, 9.847606, 31.44126), velocity=(0, 0, -10.565259), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=60, position=(0, 9.847606, 25.477766), velocity=(0, 0, -11.994485), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=90, position=(0, 9.771384, 19.479893), velocity=(0, -1.1433338, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=120, position=(0, 7.9338837, 13.479882), velocity=(0, -6.0433354, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=150, position=(0, 4.6124043, 7.334097), velocity=(0, -5.7610946, -12.654759), grounded=False, air_control=18.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=180, position=(0, 6.0182776, 0.94435453), velocity=(0, 9.723805, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_TRACE: tick=210, position=(-2.0300002, 10.570182, -5.4930754), velocity=(-8.4000025, 8.523807, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_RING_PASS: ring=1/4, tick=217, position=(-3.1633334, 11.682689, -7.2097235), velocity=(-8.5, 8.203807, -16.721287).
+ROOM11_TRACE: tick=240, position=(-5.8250003, 14.522085, -13.340868), velocity=(-4.5999975, 7.3238077, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=270, position=(-5.799999, 17.87399, -21.70152), velocity=(4.400002, 6.123809, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=300, position=(-1.9833314, 20.625895, -30.062174), velocity=(8.5, 4.92381, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_RING_PASS: ring=2/4, tick=314, position=(0.14166847, 21.776848, -34.242485), velocity=(8.5, 4.3238106, -20.102213).
+ROOM11_TRACE: tick=330, position=(2.2666683, 22.7778, -39.268044), velocity=(8.5, 3.7238111, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=360, position=(4.191667, 24.329706, -49.31916), velocity=(-0.50000226, 2.5238123, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=390, position=(1.6533327, 25.281612, -59.370277), velocity=(-8.5, 1.3238134, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_RING_PASS: ring=3/4, tick=410, position=(-1.3216672, 25.590948, -66.40606), velocity=(-8.5, 0.4838135, -23.325602).
+ROOM11_TRACE: tick=420, position=(-2.596667, 25.63352, -69.90493), velocity=(-8.5, 0.12381351, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=450, position=(-6.0816674, 25.385426, -81.56783), velocity=(-3.3999975, -1.0761867, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=480, position=(-5.456666, 24.537333, -93.230736), velocity=(5.600003, -2.2761855, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_RING_PASS: ring=4/4, tick=490, position=(-4.1083317, 24.076033, -97.50713), velocity=(8.5, -2.716185, -26.512808).
+ROOM11_TRACE: tick=510, position=(-1.4166653, 23.089241, -105.90284), velocity=(8.5, -3.4761844, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=540, position=(0.94333386, 21.04115, -119.15922), velocity=(0.39999777, -4.676183, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=570, position=(0.44333255, 18.177225, -132.4156), velocity=(-1.1000023, -7.6028504, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=600, position=(-0.10666868, 13.109968, -145.67198), velocity=(-1.1000023, -12.50284, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=630, position=(-0.6566699, 5.592717, -158.92836), velocity=(-1.1000023, -17.402836, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=660, position=(-1.0846413, 3.5988116, -169.87976), velocity=(-0.777527, 0, -20.39134), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=690, position=(-1.4705486, 3.5988116, -180.00055), velocity=(-0.76649576, 0, -20.102036), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=30, position=(0, 9.847606, 31.44126), velocity=(0, 0, -10.565259), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=60, position=(0, 9.847606, 25.477766), velocity=(0, 0, -11.994485), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=90, position=(0, 9.771384, 19.479893), velocity=(0, -1.1433338, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=120, position=(0, 7.9338837, 13.479882), velocity=(0, -6.0433354, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=150, position=(0, 4.6124043, 7.334097), velocity=(0, -5.7610946, -12.654759), grounded=False, air_control=18.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=180, position=(0, 6.0182776, 0.94435453), velocity=(0, 9.723805, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_TRACE: tick=210, position=(-2.0300002, 10.570182, -5.4930754), velocity=(-8.4000025, 8.523807, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_RING_PASS: ring=1/4, tick=217, position=(-3.1633334, 11.682689, -7.2097235), velocity=(-8.5, 8.203807, -16.721287).
+ROOM11_TRACE: tick=240, position=(-5.8250003, 14.522085, -13.340868), velocity=(-4.5999975, 7.3238077, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=270, position=(-5.799999, 17.87399, -21.70152), velocity=(4.400002, 6.123809, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=300, position=(-1.9833314, 20.625895, -30.062174), velocity=(8.5, 4.92381, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_RING_PASS: ring=2/4, tick=314, position=(0.14166847, 21.776848, -34.242485), velocity=(8.5, 4.3238106, -20.102213).
+ROOM11_TRACE: tick=330, position=(2.2666683, 22.7778, -39.268044), velocity=(8.5, 3.7238111, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=360, position=(4.191667, 24.329706, -49.31916), velocity=(-0.50000226, 2.5238123, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=390, position=(1.6533327, 25.281612, -59.370277), velocity=(-8.5, 1.3238134, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_RING_PASS: ring=3/4, tick=410, position=(-1.3216672, 25.590948, -66.40606), velocity=(-8.5, 0.4838135, -23.325602).
+ROOM11_TRACE: tick=420, position=(-2.596667, 25.63352, -69.90493), velocity=(-8.5, 0.12381351, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=450, position=(-6.0816674, 25.385426, -81.56783), velocity=(-3.3999975, -1.0761867, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=480, position=(-5.456666, 24.537333, -93.230736), velocity=(5.600003, -2.2761855, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_RING_PASS: ring=4/4, tick=490, position=(-4.1083317, 24.076033, -97.50713), velocity=(8.5, -2.716185, -26.512808).
+ROOM11_TRACE: tick=510, position=(-1.4166653, 23.089241, -105.90284), velocity=(8.5, -3.4761844, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=540, position=(0.94333386, 21.04115, -119.15922), velocity=(0.39999777, -4.676183, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=570, position=(0.44333255, 18.177225, -132.4156), velocity=(-1.1000023, -7.6028504, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=600, position=(-0.10666868, 13.109968, -145.67198), velocity=(-1.1000023, -12.50284, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=630, position=(-0.6566699, 5.592717, -158.92836), velocity=(-1.1000023, -17.402836, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=660, position=(-1.0846413, 3.5988116, -169.87976), velocity=(-0.777527, 0, -20.39134), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=690, position=(-1.4705486, 3.5988116, -180.00055), velocity=(-0.76649576, 0, -20.102036), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=30, position=(0, 9.847606, 31.44126), velocity=(0, 0, -10.565259), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=60, position=(0, 9.847606, 25.477766), velocity=(0, 0, -11.994485), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=90, position=(0, 9.771384, 19.479893), velocity=(0, -1.1433338, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=120, position=(0, 7.9338837, 13.479882), velocity=(0, -6.0433354, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=150, position=(0, 4.6124043, 7.334097), velocity=(0, -5.7610946, -12.654759), grounded=False, air_control=18.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=180, position=(0, 6.0182776, 0.94435453), velocity=(0, 9.723805, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_TRACE: tick=210, position=(-2.0300002, 10.570182, -5.4930754), velocity=(-8.4000025, 8.523807, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_RING_PASS: ring=1/4, tick=217, position=(-3.1633334, 11.682689, -7.2097235), velocity=(-8.5, 8.203807, -16.721287).
+ROOM11_TRACE: tick=240, position=(-5.8250003, 14.522085, -13.340868), velocity=(-4.5999975, 7.3238077, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=270, position=(-5.799999, 17.87399, -21.70152), velocity=(4.400002, 6.123809, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=300, position=(-1.9833314, 20.625895, -30.062174), velocity=(8.5, 4.92381, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_RING_PASS: ring=2/4, tick=314, position=(0.14166847, 21.776848, -34.242485), velocity=(8.5, 4.3238106, -20.102213).
+ROOM11_TRACE: tick=330, position=(2.2666683, 22.7778, -39.268044), velocity=(8.5, 3.7238111, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=360, position=(4.191667, 24.329706, -49.31916), velocity=(-0.50000226, 2.5238123, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=390, position=(1.6533327, 25.281612, -59.370277), velocity=(-8.5, 1.3238134, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_RING_PASS: ring=3/4, tick=410, position=(-1.3216672, 25.590948, -66.40606), velocity=(-8.5, 0.4838135, -23.325602).
+ROOM11_TRACE: tick=420, position=(-2.596667, 25.63352, -69.90493), velocity=(-8.5, 0.12381351, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=450, position=(-6.0816674, 25.385426, -81.56783), velocity=(-3.3999975, -1.0761867, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=480, position=(-5.456666, 24.537333, -93.230736), velocity=(5.600003, -2.2761855, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_RING_PASS: ring=4/4, tick=490, position=(-4.1083317, 24.076033, -97.50713), velocity=(8.5, -2.716185, -26.512808).
+ROOM11_TRACE: tick=510, position=(-1.4166653, 23.089241, -105.90284), velocity=(8.5, -3.4761844, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=540, position=(0.94333386, 21.04115, -119.15922), velocity=(0.39999777, -4.676183, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=570, position=(0.44333255, 18.177225, -132.4156), velocity=(-1.1000023, -7.6028504, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=600, position=(-0.10666868, 13.109968, -145.67198), velocity=(-1.1000023, -12.50284, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=630, position=(-0.6566699, 5.592717, -158.92836), velocity=(-1.1000023, -17.402836, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=660, position=(-1.0846413, 3.5988116, -169.87976), velocity=(-0.777527, 0, -20.39134), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=690, position=(-1.4705486, 3.5988116, -180.00055), velocity=(-0.76649576, 0, -20.102036), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=30, position=(0, 9.847606, 31.44126), velocity=(0, 0, -10.565259), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=60, position=(0, 9.847606, 25.477766), velocity=(0, 0, -11.994485), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=90, position=(0, 9.771384, 19.479893), velocity=(0, -1.1433338, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=120, position=(0, 7.9338837, 13.479882), velocity=(0, -6.0433354, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=150, position=(0, 4.6124043, 7.334097), velocity=(0, -5.7610946, -12.654759), grounded=False, air_control=18.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=180, position=(0, 6.0182776, 0.94435453), velocity=(0, 9.723805, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_TRACE: tick=210, position=(-2.0300002, 10.570182, -5.4930754), velocity=(-8.4000025, 8.523807, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_RING_PASS: ring=1/4, tick=217, position=(-3.1633334, 11.682689, -7.2097235), velocity=(-8.5, 8.203807, -16.721287).
+ROOM11_TRACE: tick=240, position=(-5.8250003, 14.522085, -13.340868), velocity=(-4.5999975, 7.3238077, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=270, position=(-5.799999, 17.87399, -21.70152), velocity=(4.400002, 6.123809, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=300, position=(-1.9833314, 20.625895, -30.062174), velocity=(8.5, 4.92381, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_RING_PASS: ring=2/4, tick=314, position=(0.14166847, 21.776848, -34.242485), velocity=(8.5, 4.3238106, -20.102213).
+ROOM11_TRACE: tick=330, position=(2.2666683, 22.7778, -39.268044), velocity=(8.5, 3.7238111, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=360, position=(4.191667, 24.329706, -49.31916), velocity=(-0.50000226, 2.5238123, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=390, position=(1.6533327, 25.281612, -59.370277), velocity=(-8.5, 1.3238134, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_RING_PASS: ring=3/4, tick=410, position=(-1.3216672, 25.590948, -66.40606), velocity=(-8.5, 0.4838135, -23.325602).
+ROOM11_TRACE: tick=420, position=(-2.596667, 25.63352, -69.90493), velocity=(-8.5, 0.12381351, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=450, position=(-6.0816674, 25.385426, -81.56783), velocity=(-3.3999975, -1.0761867, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=480, position=(-5.456666, 24.537333, -93.230736), velocity=(5.600003, -2.2761855, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_RING_PASS: ring=4/4, tick=490, position=(-4.1083317, 24.076033, -97.50713), velocity=(8.5, -2.716185, -26.512808).
+ROOM11_TRACE: tick=510, position=(-1.4166653, 23.089241, -105.90284), velocity=(8.5, -3.4761844, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=540, position=(0.94333386, 21.04115, -119.15922), velocity=(0.39999777, -4.676183, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=570, position=(0.44333255, 18.177225, -132.4156), velocity=(-1.1000023, -7.6028504, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=600, position=(-0.10666868, 13.109968, -145.67198), velocity=(-1.1000023, -12.50284, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=630, position=(-0.6566699, 5.592717, -158.92836), velocity=(-1.1000023, -17.402836, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=660, position=(-1.0846413, 3.5988116, -169.87976), velocity=(-0.777527, 0, -20.39134), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=690, position=(-1.4705486, 3.5988116, -180.00055), velocity=(-0.76649576, 0, -20.102036), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=30, position=(0, 9.847606, 31.44126), velocity=(0, 0, -10.565259), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=60, position=(0, 9.847606, 25.477766), velocity=(0, 0, -11.994485), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=90, position=(0, 9.771384, 19.479893), velocity=(0, -1.1433338, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=120, position=(0, 7.9338837, 13.479882), velocity=(0, -6.0433354, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=150, position=(0, 4.6124043, 7.334097), velocity=(0, -5.7610946, -12.654759), grounded=False, air_control=18.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=180, position=(0, 6.0182776, 0.94435453), velocity=(0, 9.723805, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_TRACE: tick=210, position=(-2.0300002, 10.570182, -5.4930754), velocity=(-8.4000025, 8.523807, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_RING_PASS: ring=1/4, tick=217, position=(-3.1633334, 11.682689, -7.2097235), velocity=(-8.5, 8.203807, -16.721287).
+ROOM11_TRACE: tick=240, position=(-5.8250003, 14.522085, -13.340868), velocity=(-4.5999975, 7.3238077, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=270, position=(-5.799999, 17.87399, -21.70152), velocity=(4.400002, 6.123809, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=300, position=(-1.9833314, 20.625895, -30.062174), velocity=(8.5, 4.92381, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_RING_PASS: ring=2/4, tick=314, position=(0.14166847, 21.776848, -34.242485), velocity=(8.5, 4.3238106, -20.102213).
+ROOM11_TRACE: tick=330, position=(2.2666683, 22.7778, -39.268044), velocity=(8.5, 3.7238111, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=360, position=(4.191667, 24.329706, -49.31916), velocity=(-0.50000226, 2.5238123, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=390, position=(1.6533327, 25.281612, -59.370277), velocity=(-8.5, 1.3238134, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_RING_PASS: ring=3/4, tick=410, position=(-1.3216672, 25.590948, -66.40606), velocity=(-8.5, 0.4838135, -23.325602).
+ROOM11_TRACE: tick=420, position=(-2.596667, 25.63352, -69.90493), velocity=(-8.5, 0.12381351, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=450, position=(-6.0816674, 25.385426, -81.56783), velocity=(-3.3999975, -1.0761867, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=480, position=(-5.456666, 24.537333, -93.230736), velocity=(5.600003, -2.2761855, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_RING_PASS: ring=4/4, tick=490, position=(-4.1083317, 24.076033, -97.50713), velocity=(8.5, -2.716185, -26.512808).
+ROOM11_TRACE: tick=510, position=(-1.4166653, 23.089241, -105.90284), velocity=(8.5, -3.4761844, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=540, position=(0.94333386, 21.04115, -119.15922), velocity=(0.39999777, -4.676183, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=570, position=(0.44333255, 18.177225, -132.4156), velocity=(-1.1000023, -7.6028504, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=600, position=(-0.10666868, 13.109968, -145.67198), velocity=(-1.1000023, -12.50284, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=630, position=(-0.6566699, 5.592717, -158.92836), velocity=(-1.1000023, -17.402836, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=660, position=(-1.0846413, 3.5988116, -169.87976), velocity=(-0.777527, 0, -20.39134), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=690, position=(-1.4705486, 3.5988116, -180.00055), velocity=(-0.76649576, 0, -20.102036), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=30, position=(0, 9.847606, 31.44126), velocity=(0, 0, -10.565259), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=60, position=(0, 9.847606, 25.477766), velocity=(0, 0, -11.994485), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=90, position=(0, 9.771384, 19.479893), velocity=(0, -1.1433338, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=120, position=(0, 7.9338837, 13.479882), velocity=(0, -6.0433354, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=150, position=(0, 4.6124043, 7.334097), velocity=(0, -5.7610946, -12.654759), grounded=False, air_control=18.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=180, position=(0, 6.0182776, 0.94435453), velocity=(0, 9.723805, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_TRACE: tick=210, position=(-2.0300002, 10.570182, -5.4930754), velocity=(-8.4000025, 8.523807, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_RING_PASS: ring=1/4, tick=217, position=(-3.1633334, 11.682689, -7.2097235), velocity=(-8.5, 8.203807, -16.721287).
+ROOM11_TRACE: tick=240, position=(-5.8250003, 14.522085, -13.340868), velocity=(-4.5999975, 7.3238077, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=270, position=(-5.799999, 17.87399, -21.70152), velocity=(4.400002, 6.123809, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=300, position=(-1.9833314, 20.625895, -30.062174), velocity=(8.5, 4.92381, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_RING_PASS: ring=2/4, tick=314, position=(0.14166847, 21.776848, -34.242485), velocity=(8.5, 4.3238106, -20.102213).
+ROOM11_TRACE: tick=330, position=(2.2666683, 22.7778, -39.268044), velocity=(8.5, 3.7238111, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=360, position=(4.191667, 24.329706, -49.31916), velocity=(-0.50000226, 2.5238123, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=390, position=(1.6533327, 25.281612, -59.370277), velocity=(-8.5, 1.3238134, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_RING_PASS: ring=3/4, tick=410, position=(-1.3216672, 25.590948, -66.40606), velocity=(-8.5, 0.4838135, -23.325602).
+ROOM11_TRACE: tick=420, position=(-2.596667, 25.63352, -69.90493), velocity=(-8.5, 0.12381351, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=450, position=(-6.0816674, 25.385426, -81.56783), velocity=(-3.3999975, -1.0761867, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=480, position=(-5.456666, 24.537333, -93.230736), velocity=(5.600003, -2.2761855, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_RING_PASS: ring=4/4, tick=490, position=(-4.1083317, 24.076033, -97.50713), velocity=(8.5, -2.716185, -26.512808).
+ROOM11_TRACE: tick=510, position=(-1.4166653, 23.089241, -105.90284), velocity=(8.5, -3.4761844, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=540, position=(0.94333386, 21.04115, -119.15922), velocity=(0.39999777, -4.676183, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=570, position=(0.44333255, 18.177225, -132.4156), velocity=(-1.1000023, -7.6028504, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=600, position=(-0.10666868, 13.109968, -145.67198), velocity=(-1.1000023, -12.50284, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=630, position=(-0.6566699, 5.592717, -158.92836), velocity=(-1.1000023, -17.402836, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=660, position=(-1.0846413, 3.5988116, -169.87976), velocity=(-0.777527, 0, -20.39134), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=690, position=(-1.4705486, 3.5988116, -180.00055), velocity=(-0.76649576, 0, -20.102036), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=30, position=(0, 9.847606, 31.44126), velocity=(0, 0, -10.565259), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=60, position=(0, 9.847606, 25.477766), velocity=(0, 0, -11.994485), grounded=True, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=90, position=(0, 9.771384, 19.479893), velocity=(0, -1.1433338, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=120, position=(0, 7.9338837, 13.479882), velocity=(0, -6.0433354, -12), grounded=False, air_control=0.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=150, position=(0, 4.6124043, 7.334097), velocity=(0, -5.7610946, -12.654759), grounded=False, air_control=18.00, gates=0/4, bounces=0.
+ROOM11_TRACE: tick=180, position=(0, 6.0182776, 0.94435453), velocity=(0, 9.723805, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_TRACE: tick=210, position=(-2.0300002, 10.570182, -5.4930754), velocity=(-8.4000025, 8.523807, -12.874858), grounded=False, air_control=18.00, gates=0/4, bounces=1.
+ROOM11_RING_PASS: ring=1/4, tick=217, position=(-3.1633334, 11.682689, -7.2097235), velocity=(-8.5, 8.203807, -16.721287).
+ROOM11_TRACE: tick=240, position=(-5.8250003, 14.522085, -13.340868), velocity=(-4.5999975, 7.3238077, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=270, position=(-5.799999, 17.87399, -21.70152), velocity=(4.400002, 6.123809, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_TRACE: tick=300, position=(-1.9833314, 20.625895, -30.062174), velocity=(8.5, 4.92381, -16.721287), grounded=False, air_control=18.00, gates=1/4, bounces=1.
+ROOM11_RING_PASS: ring=2/4, tick=314, position=(0.14166847, 21.776848, -34.242485), velocity=(8.5, 4.3238106, -20.102213).
+ROOM11_TRACE: tick=330, position=(2.2666683, 22.7778, -39.268044), velocity=(8.5, 3.7238111, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=360, position=(4.191667, 24.329706, -49.31916), velocity=(-0.50000226, 2.5238123, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_TRACE: tick=390, position=(1.6533327, 25.281612, -59.370277), velocity=(-8.5, 1.3238134, -20.102213), grounded=False, air_control=18.00, gates=2/4, bounces=1.
+ROOM11_RING_PASS: ring=3/4, tick=410, position=(-1.3216672, 25.590948, -66.40606), velocity=(-8.5, 0.4838135, -23.325602).
+ROOM11_TRACE: tick=420, position=(-2.596667, 25.63352, -69.90493), velocity=(-8.5, 0.12381351, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=450, position=(-6.0816674, 25.385426, -81.56783), velocity=(-3.3999975, -1.0761867, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_TRACE: tick=480, position=(-5.456666, 24.537333, -93.230736), velocity=(5.600003, -2.2761855, -23.325602), grounded=False, air_control=18.00, gates=3/4, bounces=1.
+ROOM11_RING_PASS: ring=4/4, tick=490, position=(-4.1083317, 24.076033, -97.50713), velocity=(8.5, -2.716185, -26.512808).
+ROOM11_TRACE: tick=510, position=(-1.4166653, 23.089241, -105.90284), velocity=(8.5, -3.4761844, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=540, position=(0.94333386, 21.04115, -119.15922), velocity=(0.39999777, -4.676183, -26.512808), grounded=False, air_control=18.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=570, position=(0.44333255, 18.177225, -132.4156), velocity=(-1.1000023, -7.6028504, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=600, position=(-0.10666868, 13.109968, -145.67198), velocity=(-1.1000023, -12.50284, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=630, position=(-0.6566699, 5.592717, -158.92836), velocity=(-1.1000023, -17.402836, -26.512808), grounded=False, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=660, position=(-1.0846413, 3.5988116, -169.87976), velocity=(-0.777527, 0, -20.39134), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_TRACE: tick=690, position=(-1.4705486, 3.5988116, -180.00055), velocity=(-0.76649576, 0, -20.102036), grounded=True, air_control=0.00, gates=4/4, bounces=1.
+ROOM11_SOLUTION_PASS: SolutionTrace used the canonical SuperElastic launch, steered through all 4 low-gravity rings, and restored normal no-air-control behavior for 10 consecutive completions.

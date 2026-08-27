@@ -1,0 +1,56 @@
+Godot_v4.7-stable_mono_win64_console.exe : ERROR: Node not found: "StartRail-1" (relative to "/root/Room20").
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room20Mechanics.ps1:14 char:15
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: Node not.../root/Room20").:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: get_node (scene/main/node.cpp:1975)
+   C# backtrace (most recent call first):
+       [0] Godot.GodotObject Godot.NativeCalls.godot_icall_1_914(nint, nint, Godot.NativeInterop.godot_node_path) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/NativeCalls.cs:8079)
+       [1] Godot.Node Godot.Node.GetNode(Godot.NodePath) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/GodotObjects/Node.cs:962)
+       [2] T Godot.Node.GetNode<T>(Godot.NodePath) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Extensions/NodeExtensions.cs:47)
+       [3] void Velocitex.Gameplay.Rooms.Room20Runtime.RunRequestedSmoke() 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room20Runtime.cs:778)
+       [4] bool Velocitex.Gameplay.Rooms.Room20Runtime.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (C:\Users\alont\OneDrive\诪住诪讻讬诐\Alo
+n\Velocitex\.godot\mono\temp\obj\Debug\Godot.SourceGenerators\Godot.SourceGenerators.ScriptMethodsGenerator\Velocitex.G
+ameplay.Rooms.Room20Runtime_ScriptMethods.generated.cs:296)
+       [5] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, 
+Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)
+ERROR: System.NullReferenceException: Object reference not set to an instance of an object.
+   at Velocitex.Gameplay.Rooms.Room20Runtime.RunRequestedSmoke() in 
+C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room20Runtime.cs:line 778
+   at Velocitex.Gameplay.Rooms.Room20Runtime.InvokeGodotClassMethod(godot_string_name& method, NativeVariantPtrArgs 
+args, godot_variant& ret) in C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\.godot\mono\temp\obj\Debug\Godot.Sourc
+eGenerators\Godot.SourceGenerators.ScriptMethodsGenerator\Velocitex.Gameplay.Rooms.Room20Runtime_ScriptMethods.generate
+d.cs:line 296
+   at Godot.Bridge.CSharpInstanceBridge.Call(IntPtr godotObjectGCHandle, godot_string_name* method, godot_variant** 
+args, Int32 argCount, godot_variant_call_error* refCallError, godot_variant* ret) in 
+/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:line 24
+   at: void Godot.NativeInterop.ExceptionUtils.LogException(System.Exception) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/NativeInterop/ExceptionUtils.cs:113)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Godot.NativeInterop.ExceptionUtils.LogException(System.Exception) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/NativeInterop/ExceptionUtils.cs:113)
+       [2] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, 
+Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)
+WARNING: 46 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Room 20 mode --room20-mechanics-smoke did not report ROOM20_MECHANICS_PASS.
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room20Mechanics.ps1:19 char:9
++         throw "Room 20 mode $($mode.Argument) did not report $($mode. ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Room 20 mode --...MECHANICS_PASS.:String) [], RuntimeException
+    + FullyQualifiedErrorId : Room 20 mode --room20-mechanics-smoke did not report ROOM20_MECHANICS_PASS.
+ 

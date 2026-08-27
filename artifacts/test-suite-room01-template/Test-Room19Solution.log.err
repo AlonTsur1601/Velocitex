@@ -1,0 +1,37 @@
+Godot_v4.7-stable_mono_win64_console.exe : ERROR: ROOM19_SOLUTION_FAIL: Run 1 hit the maintenance floor at (11.02831, 
+-1.3445364, -19.297657); plates=2/2, lever=True, armed=False, fired=False, launch=0.00, closest_goal=90.95 at 
+(11.0382, -1.2596627, -19.125647).
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room19Solution.ps1:6 char:11
++ $output = & $godot.FullName --headless --fixed-fps 60 --path $root "r ...
++           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: ROOM19_S...7, -19.125647).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: void Velocitex.Gameplay.Rooms.Room19Runtime.FailSolutionSmoke(string) 
+(res://src/Gameplay/Rooms/Room19Runtime.cs:687)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Velocitex.Gameplay.Rooms.Room19Runtime.FailSolutionSmoke(string) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room19Runtime.cs:687)
+       [2] void Velocitex.Gameplay.Rooms.Room19Runtime.RestartRoom() 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room19Runtime.cs:175)
+       [3] void Velocitex.Gameplay.Rooms.Room19Runtime.<BuildRoom>b__54_0(Godot.Node3D) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room19Runtime.cs:301)
+       [4] void Velocitex.Gameplay.Rooms.RoomGeometry+<>c__DisplayClass42_0.<AddClosedRoomShell>b__0(Godot.Node3D) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\RoomGeometry.cs:1262)
+       [5] void Godot.Area3D.BodyEnteredTrampoline(object, Godot.NativeInterop.NativeVariantPtrArgs, 
+Godot.NativeInterop.godot_variant&) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/GodotObjects/Area3D.cs:941)
+       [6] void Godot.DelegateUtils.InvokeWithVariantArgs(nint, System.Void*, Godot.NativeInterop.godot_variant**, 
+int, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/DelegateUtils.cs:86)
+WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Room 19 solution smoke test exited with code 1
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room19Solution.ps1:10 char:24
++ ... de -ne 0) { throw "Room 19 solution smoke test exited with code $exit ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Room 19 solutio...ted with code 1:String) [], RuntimeException
+    + FullyQualifiedErrorId : Room 19 solution smoke test exited with code 1
+ 

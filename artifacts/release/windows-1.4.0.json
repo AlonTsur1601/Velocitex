@@ -1,0 +1,30 @@
+{
+  "version": "1.4.0",
+  "windows_export_pass": true,
+  "release_zip_pass": true,
+  "updater_location_smoke_pass": true,
+  "file_count": 191,
+  "package_total_mib": 1060.4,
+  "exe": {
+    "path": "builds/windows/Velocitex/Velocitex.exe",
+    "file_version": "1.4.0",
+    "product_version": "1.4.0",
+    "bytes": 109369344,
+    "sha256": "68608A7D631CB906CB26170B454FB9ED88C367D18402EDB4CC41CBE565C3C104"
+  },
+  "zip": {
+    "path": "builds/windows/Velocitex/Velocitex.zip",
+    "bytes": 473632324,
+    "sha256": "E7025E6F4E01D56CDFD700E43DAB0ED9C1F6F8D186A68B7DC7A0F302F79A114D"
+  },
+  "pck": {
+    "path": "builds/windows/Velocitex/Velocitex.pck",
+    "bytes": 378981288,
+    "sha256": "EFFDF1D2FE19BA4C538B210BCC108854A286BD73BB950B856ECA46D0AA0526D8"
+  },
+  "updater": {
+    "path": "builds/windows/Velocitex/VelocitexUpdater.exe",
+    "bytes": 67486341,
+    "sha256": "A01C7B3910B2815569E354408987E434BBE8AA864B7F6933F974B2C5D766C2EF"
+  }
+}

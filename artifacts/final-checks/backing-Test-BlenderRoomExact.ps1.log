@@ -1,0 +1,33 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 01 meshes=30, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 02 meshes=35, maximum error=0.000001.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 03 meshes=44, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 04 meshes=21, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 05 meshes=25, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 06 meshes=34, maximum error=0.000002.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 07 meshes=15, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 08 meshes=31, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 09 meshes=27, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 10 meshes=42, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 11 meshes=29, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 12 meshes=26, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 13 meshes=45, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 14 meshes=40, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 15 meshes=51, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 16 meshes=24, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 17 meshes=23, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 18 meshes=27, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 19 meshes=42, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 20 meshes=33, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 21 meshes=29, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 22 meshes=41, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 23 meshes=35, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 24 meshes=39, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 25 meshes=34, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 26 meshes=22, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 27 meshes=34, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 28 meshes=24, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 29 meshes=33, maximum error=0.000000.
+BLENDER_ROOM_EXACT_ROOM_PASS: Room 30 meshes=30, maximum error=0.000000.
+BLENDER_ROOM_EXACT_PASS: All 30 rooms render every mesh directly from their imported Blender scene.

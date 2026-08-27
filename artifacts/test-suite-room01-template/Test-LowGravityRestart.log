@@ -1,0 +1,3 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+LOW_GRAVITY_RESTART_PASS: Room 11 cleared linear and angular momentum on every axis, stayed pinned for 12 physics frames, and suppressed contact bounce for 18 released frames despite a late stale write (drift=0.0000, rise=0.0000, upward_speed=0.0000); adding D after W reached 11.99 m/s sustained 8.48 m/s right and 11.66 m/s forward; W+D to W+A crossed horizontal zero from 8.48 to -8.49 m/s while retaining 11.25 m/s forward; after D release the right component decayed only 0.340 m/s while W remained held, versus 0.876 m/s vector coasting with no keys; WA/WD/SA/SD remained two-axis input for every held frame.

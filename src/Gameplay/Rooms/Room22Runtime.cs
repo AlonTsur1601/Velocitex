@@ -218,17 +218,30 @@ public partial class Room22Runtime : RoomRuntime
         _mechanicsSmokeTick++;
         if (_mechanicsSmokeTick == 1)
         {
-            _goal.EmitSignal(Area3D.SignalName.BodyEntered, _player);
+            TryCompleteAtGoal();
             if (IsComplete || IsExitTraversalPending) { FailMechanicsSmoke("Direct goal entry completed the room."); return; }
             _player.ResetTo(new Transform3D(Basis.Identity, _ratchetReleaseLever.GlobalPosition + new Vector3(0.0f, 0.6f, 2.0f)));
             _ratchetReleaseLever.Interact(_player);
             if (!_ratchetReleased) { FailMechanicsSmoke("The nearby lever did not start the gate release."); return; }
-            _goal.EmitSignal(Area3D.SignalName.BodyEntered, _player);
+            TryCompleteAtGoal();
             if (IsComplete || IsExitTraversalPending) { FailMechanicsSmoke("The lever alone bypassed the three ramp stages."); return; }
             _touchedRatchet = true;
             _maximumRise = 17.0f;
-            foreach (RouteCheckpoint3D stage in _climbStages) { stage.Press(_player); }
-            _goal.EmitSignal(Area3D.SignalName.BodyEntered, _player);
+            return;
+        }
+        if (_mechanicsSmokeTick is >= 2 and <= 4)
+        {
+            int index = _mechanicsSmokeTick - 2;
+            _climbStages[index].Press(_player);
+            if (!_climbStages[index].IsActivated || _nextClimbStage != index + 1)
+            {
+                FailMechanicsSmoke($"Climb stage {index + 1} did not advance in its own physics frame; next={_nextClimbStage}.");
+            }
+            return;
+        }
+        if (_mechanicsSmokeTick == 5)
+        {
+            TryCompleteAtGoal();
             if (!IsComplete && !IsExitTraversalPending) { FailMechanicsSmoke("The complete climb and lever state did not open the exit."); }
             return;
         }
@@ -372,12 +385,17 @@ public partial class Room22Runtime : RoomRuntime
         Vector3 goalPosition = new(0.0f, 22.85f, -85.0f);
         _goal = new Area3D { Name = "GoalCup", Position = goalPosition, CollisionLayer = 0, CollisionMask = 1, Monitoring = true };
         _goal.AddChild(new CollisionShape3D { Shape = new CylinderShape3D { Radius = 2.0f, Height = 3.0f } });
-        _goal.BodyEntered += body =>
-        {
-            if (body is PlayerBall && _touchedRatchet && _maximumRise >= 16.0f && _ratchetReleased && _nextClimbStage == RequiredClimbStages) { CompleteRoom(); }
-        };
+        _goal.BodyEntered += body => { if (body is PlayerBall) { TryCompleteAtGoal(); } };
         AddChild(_goal);
         RoomGeometry.AddGoalExitDoor(this, goalPosition);
+    }
+
+    private void TryCompleteAtGoal()
+    {
+        if (_touchedRatchet && _maximumRise >= 16.0f && _ratchetReleased && _nextClimbStage == RequiredClimbStages)
+        {
+            CompleteRoom();
+        }
     }
 
     private void FailMechanicsSmoke(string message)

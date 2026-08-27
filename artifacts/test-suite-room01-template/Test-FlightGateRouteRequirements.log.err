@@ -1,0 +1,132 @@
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 13 ObjectDB instances were leaked at exit (run with `--verbose` 
+for details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-FlightGateRouteRequirements.ps1:12 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 13 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 4 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 14 ObjectDB instances were leaked at exit (run with `--verbose` 
+for details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-FlightGateRouteRequirements.ps1:12 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 14 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 4 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 14 ObjectDB instances were leaked at exit (run with `--verbose` 
+for details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-FlightGateRouteRequirements.ps1:12 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 14 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 3 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 6 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-FlightGateRouteRequirements.ps1:12 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 6 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 15 ObjectDB instances were leaked at exit (run with `--verbose` 
+for details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-FlightGateRouteRequirements.ps1:12 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 15 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 3 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 17 ObjectDB instances were leaked at exit (run with `--verbose` 
+for details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-FlightGateRouteRequirements.ps1:12 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 17 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 16 ObjectDB instances were leaked at exit (run with `--verbose` 
+for details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-FlightGateRouteRequirements.ps1:12 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 16 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 5 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 11 ObjectDB instances were leaked at exit (run with `--verbose` 
+for details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-FlightGateRouteRequirements.ps1:12 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 11 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 3 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 10 ObjectDB instances were leaked at exit (run with `--verbose` 
+for details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-FlightGateRouteRequirements.ps1:12 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 10 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 3 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 10 ObjectDB instances were leaked at exit (run with `--verbose` 
+for details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-FlightGateRouteRequirements.ps1:12 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 10 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 3 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 22 ObjectDB instances were leaked at exit (run with `--verbose` 
+for details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-FlightGateRouteRequirements.ps1:12 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 22 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 8 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 16 ObjectDB instances were leaked at exit (run with `--verbose` 
+for details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-FlightGateRouteRequirements.ps1:12 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 16 Obj...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

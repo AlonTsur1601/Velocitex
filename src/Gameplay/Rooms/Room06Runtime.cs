@@ -22,8 +22,6 @@ public partial class Room06Runtime : RoomRuntime
     private FlightGate3D _momentumGate = null!;
     private PlayerBall _player = null!;
     private PlayerCameraRig _cameraRig = null!;
-    private StaticBody3D _returnShutter = null!;
-    private CollisionShape3D _returnShutterCollision = null!;
     private Transform3D _spawnTransform;
     private bool _touchedGlassThisRun;
     private bool _maintainedGlassMomentumThisRun;
@@ -144,8 +142,6 @@ public partial class Room06Runtime : RoomRuntime
         _routeProgress = 0;
         Array.Fill(_crossedGlassBridges, false);
         _momentumGate.ResetGate();
-        _returnShutter.Hide();
-        _returnShutterCollision.SetDeferred(CollisionShape3D.PropertyName.Disabled, true);
     }
 
     private void RunShellSmokeTick()
@@ -321,20 +317,6 @@ public partial class Room06Runtime : RoomRuntime
         AddRouteSensor("GlassRoute03", 2, new Vector3(3.1f, 2.15f, -54.0f), new Vector3(4.9f, 2.8f, 2.0f));
         AddRouteSensor("GlassRoute04", 3, new Vector3(0.0f, 2.15f, -72.0f), new Vector3(4.9f, 2.8f, 2.0f));
 
-        _returnShutter = RoomGeometry.AddBox(
-            this,
-            "SpentRingReturnShutter",
-            new Vector3(6.4f, 4.5f, 0.45f),
-            new Vector3(0.0f, 2.0f, 4.25f),
-            Vector3.Zero,
-            metal,
-            blueFrame.Darkened(0.22f),
-            0.48f,
-            0.6f);
-        _returnShutterCollision = _returnShutter.GetChildren().OfType<CollisionShape3D>().First();
-        _returnShutter.Hide();
-        _returnShutterCollision.Disabled = true;
-
         SurfaceDetail.AddOverlay(this, "StartScuffs", new Vector3(-1.6f, 3.015f, 37.0f), new Vector3(-Mathf.Pi / 2.0f, 0.0f, Mathf.DegToRad(8.0f)), new Vector2(3.0f, 1.8f), "res://assets/textures/overlays/edge_scuffs.svg", new Color("e0e3df"), 0.3f);
         SurfaceDetail.AddOverlay(this, "ExitScratches", new Vector3(2.0f, 1.515f, -79.0f), new Vector3(-Mathf.Pi / 2.0f, 0.0f, Mathf.DegToRad(-17.0f)), new Vector2(3.4f, 2.0f), "res://assets/textures/overlays/scratches.svg", new Color("d5dfdc"), 0.35f);
     }
@@ -475,11 +457,6 @@ public partial class Room06Runtime : RoomRuntime
 
             _crossedGlassBridges[index] = true;
             _routeProgress++;
-            if (index == 0)
-            {
-                _returnShutter.Show();
-                _returnShutterCollision.SetDeferred(CollisionShape3D.PropertyName.Disabled, false);
-            }
         };
         AddChild(sensor);
     }

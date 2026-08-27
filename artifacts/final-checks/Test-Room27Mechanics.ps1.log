@@ -1,0 +1,14 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM27_MECHANICS_PASS: direct entry and lever-only entry failed; four regular rails, four ordered gates, the low-gravity ring and both lateral extremes were required.
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 9 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\scripts\Test-Room27Mechanics.ps1:6 char:11
++ $output = & $godot.FullName --headless --fixed-fps 60 --path $root "r ...
++           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 9 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

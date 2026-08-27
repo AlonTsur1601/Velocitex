@@ -1,0 +1,172 @@
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 2 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 2 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 2 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 6 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 6 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 3 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 2 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: [Physics interpolation] Interpolated Camera3D triggered from 
+outside physics process: "/root/RoomBypassSmokeTest/Room17/CameraRig/YawPivot/PitchPivot/SpringArm3D/Camera3D" 
+(possibly benign).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: [Physi...ssibly benign).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: _notification (scene/3d/camera_3d.cpp:218)
+WARNING: [Physics interpolation] Interpolated Camera3D triggered from outside physics process: 
+"/root/RoomBypassSmokeTest/Room17/CameraRig/YawPivot/PitchPivot/SpringArm3D/Camera3D" (possibly benign).
+   at: _notification (scene/3d/camera_3d.cpp:218)
+WARNING: [Physics interpolation] Interpolated Camera3D triggered from outside physics process: 
+"/root/RoomBypassSmokeTest/Room17/CameraRig/YawPivot/PitchPivot/SpringArm3D/Camera3D" (possibly benign).
+   at: _notification (scene/3d/camera_3d.cpp:218)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 4 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: [Physics interpolation] Interpolated Camera3D triggered from 
+outside physics process: "/root/RoomBypassSmokeTest/Room20/CameraRig/YawPivot/PitchPivot/SpringArm3D/Camera3D" 
+(possibly benign).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: [Physi...ssibly benign).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: _notification (scene/3d/camera_3d.cpp:218)
+WARNING: [Physics interpolation] Interpolated Camera3D triggered from outside physics process: 
+"/root/RoomBypassSmokeTest/Room20/CameraRig/YawPivot/PitchPivot/SpringArm3D/Camera3D" (possibly benign).
+   at: _notification (scene/3d/camera_3d.cpp:218)
+WARNING: [Physics interpolation] Interpolated Camera3D triggered from outside physics process: 
+"/root/RoomBypassSmokeTest/Room20/CameraRig/YawPivot/PitchPivot/SpringArm3D/Camera3D" (possibly benign).
+   at: _notification (scene/3d/camera_3d.cpp:218)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 2 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 2 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: [Physics interpolation] Interpolated Camera3D triggered from 
+outside physics process: "/root/RoomBypassSmokeTest/Room26/CameraRig/YawPivot/PitchPivot/SpringArm3D/Camera3D" 
+(possibly benign).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: [Physi...ssibly benign).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: _notification (scene/3d/camera_3d.cpp:218)
+WARNING: [Physics interpolation] Interpolated Camera3D triggered from outside physics process: 
+"/root/RoomBypassSmokeTest/Room26/CameraRig/YawPivot/PitchPivot/SpringArm3D/Camera3D" (possibly benign).
+   at: _notification (scene/3d/camera_3d.cpp:218)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 3 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 3 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 2 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: [Physics interpolation] Interpolated Camera3D triggered from 
+outside physics process: "/root/RoomBypassSmokeTest/Room30/CameraRig/YawPivot/PitchPivot/SpringArm3D/Camera3D" 
+(possibly benign).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-RoomBypasses.ps1:13 char:19
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: [Physi...ssibly benign).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: _notification (scene/3d/camera_3d.cpp:218)
+WARNING: [Physics interpolation] Interpolated Camera3D triggered from outside physics process: 
+"/root/RoomBypassSmokeTest/Room30/CameraRig/YawPivot/PitchPivot/SpringArm3D/Camera3D" (possibly benign).
+   at: _notification (scene/3d/camera_3d.cpp:218)
+WARNING: 62 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

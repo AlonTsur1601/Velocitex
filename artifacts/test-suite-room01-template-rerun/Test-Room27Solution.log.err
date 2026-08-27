@@ -1,0 +1,31 @@
+Godot_v4.7-stable_mono_win64_console.exe : ERROR: ROOM27_SOLUTION_FAIL: The route left the room at (14.982305, 
+-1.6114006, -8.606552); gates=1/4, lever=True, x=[0.00,16.24].
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room27Solution.ps1:7 char:15
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: ROOM27_S...x=[0.00,16.24].:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: void Velocitex.Gameplay.Rooms.Room27Runtime.FailSolution(string) (res://src/Gameplay/Rooms/Room27Runtime.cs:380)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Velocitex.Gameplay.Rooms.Room27Runtime.FailSolution(string) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room27Runtime.cs:380)
+       [2] void Velocitex.Gameplay.Rooms.Room27Runtime.RestartRoom() 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room27Runtime.cs:114)
+       [3] void Velocitex.Gameplay.Rooms.Room27Runtime.<BuildRoom>b__40_0(Godot.Node3D) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room27Runtime.cs:231)
+       [4] void Velocitex.Gameplay.Rooms.RoomGeometry+<>c__DisplayClass42_0.<AddClosedRoomShell>b__0(Godot.Node3D) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\RoomGeometry.cs:1262)
+       [5] void Godot.Area3D.BodyEnteredTrampoline(object, Godot.NativeInterop.NativeVariantPtrArgs, 
+Godot.NativeInterop.godot_variant&) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/GodotObjects/Area3D.cs:941)
+       [6] void Godot.DelegateUtils.InvokeWithVariantArgs(nint, System.Void*, Godot.NativeInterop.godot_variant**, 
+int, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/DelegateUtils.cs:86)
+Room 27 solution smoke run 1 failed with 1
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room27Solution.ps1:11 char:28
++ ... de -ne 0) { throw "Room 27 solution smoke run $run failed with $exitC ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Room 27 solutio...1 failed with 1:String) [], RuntimeException
+    + FullyQualifiedErrorId : Room 27 solution smoke run 1 failed with 1
+ 

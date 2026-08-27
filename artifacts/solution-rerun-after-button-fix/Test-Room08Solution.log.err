@@ -1,0 +1,43 @@
+Godot_v4.7-stable_mono_win64_console.exe : ERROR: ROOM08_SOLUTION_FAIL: Run 1 timed out at (-12.400736, 5.647621, 
+3.8424911); speed=0.00, touched=1, verified=1, next=1, active=-1, streak=False.
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room08Solution.ps1:16 char:11
++ $output = & $godot.FullName --headless --fixed-fps 60 --path $root "r ...
++           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: ROOM08_S..., streak=False.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: void Velocitex.Gameplay.Rooms.Room08Runtime.FailSolutionSmoke(string) 
+(res://src/Gameplay/Rooms/Room08Runtime.cs:729)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Velocitex.Gameplay.Rooms.Room08Runtime.FailSolutionSmoke(string) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room08Runtime.cs:729)
+       [2] void Velocitex.Gameplay.Rooms.Room08Runtime.RunSolutionTick() 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room08Runtime.cs:275)
+       [3] void Velocitex.Gameplay.Rooms.Room08Runtime._PhysicsProcess(double) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room08Runtime.cs:168)
+       [4] bool Godot.Node.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/GodotObjects/Node.cs:2648)
+       [5] bool Godot.Node3D.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/GodotObjects/Node3D.cs:1127)
+       [6] bool Velocitex.Core.Rooms.RoomRuntime.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (C:\Users\alont\OneDrive\诪住诪讻讬诐\Alo
+n\Velocitex\.godot\mono\temp\obj\Debug\Godot.SourceGenerators\Godot.SourceGenerators.ScriptMethodsGenerator\Velocitex.C
+ore.Rooms.RoomRuntime_ScriptMethods.generated.cs:120)
+       [7] bool Velocitex.Gameplay.Rooms.Room08Runtime.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (C:\Users\alont\OneDrive\诪住诪讻讬诐\Alo
+n\Velocitex\.godot\mono\temp\obj\Debug\Godot.SourceGenerators\Godot.SourceGenerators.ScriptMethodsGenerator\Velocitex.G
+ameplay.Rooms.Room08Runtime_ScriptMethods.generated.cs:250)
+       [8] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, 
+Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)
+Room 08 solution smoke test exited with code 1
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room08Solution.ps1:21 char:5
++     throw "Room 08 solution smoke test exited with code $exitCode"
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Room 08 solutio...ted with code 1:String) [], RuntimeException
+    + FullyQualifiedErrorId : Room 08 solution smoke test exited with code 1
+ 

@@ -1,0 +1,43 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM09_SEQUENCE_TRACE: button=1/2, tick=38, position=(-3.2684422, 12.324263, 28.691011).
+ROOM09_GATE_TRACE: gate=1, tick=410, position=(0.57985985, 20.337444, -28.732302), velocity=(-1.3701794, 3.2839425, -20.219).
+ROOM09_GATE_TRACE: gate=2, tick=546, position=(-2.5233543, 26.03181, -74.489655), velocity=(-1.3689015, 2.3970094, -22.21705).
+ROOM09_SEQUENCE_TRACE: button=2/2, tick=870, position=(5.7728906, 3.4490862, -125.42009).
+ROOM09_SEQUENCE_TRACE: button=1/2, tick=37, position=(-3.275886, 12.324263, 28.691078).
+ROOM09_GATE_TRACE: gate=1, tick=416, position=(-0.29043183, 20.066933, -28.85554), velocity=(-1.5415162, 2.8103306, -20.143578).
+ROOM09_GATE_TRACE: gate=2, tick=552, position=(-3.7812757, 25.208675, -74.44052), velocity=(-1.540074, 0.58146566, -22.13081).
+ROOM09_SEQUENCE_TRACE: button=2/2, tick=850, position=(5.6764, 3.4399986, -126.22162).
+ROOM09_SEQUENCE_TRACE: button=1/2, tick=37, position=(-3.2758744, 12.324263, 28.691078).
+ROOM09_GATE_TRACE: gate=1, tick=416, position=(-0.2903872, 20.066916, -28.855555), velocity=(-1.5415057, 2.8103197, -20.143587).
+ROOM09_GATE_TRACE: gate=2, tick=552, position=(-3.781201, 25.20869, -74.44054), velocity=(-1.5400636, 0.5814838, -22.130817).
+ROOM09_SEQUENCE_TRACE: button=2/2, tick=850, position=(5.676421, 3.4399986, -126.22171).
+ROOM09_SEQUENCE_TRACE: button=1/2, tick=37, position=(-3.2758744, 12.324263, 28.691078).
+ROOM09_GATE_TRACE: gate=1, tick=416, position=(-0.2903872, 20.066916, -28.855555), velocity=(-1.5415057, 2.8103197, -20.143587).
+ROOM09_GATE_TRACE: gate=2, tick=552, position=(-3.781201, 25.20869, -74.44054), velocity=(-1.5400636, 0.5814838, -22.130817).
+ROOM09_SEQUENCE_TRACE: button=2/2, tick=850, position=(5.676421, 3.4399986, -126.22171).
+ROOM09_SEQUENCE_TRACE: button=1/2, tick=37, position=(-3.2758744, 12.324263, 28.691078).
+ROOM09_GATE_TRACE: gate=1, tick=416, position=(-0.2903872, 20.066916, -28.855555), velocity=(-1.5415057, 2.8103197, -20.143587).
+ROOM09_GATE_TRACE: gate=2, tick=552, position=(-3.781201, 25.20869, -74.44054), velocity=(-1.5400636, 0.5814838, -22.130817).
+ROOM09_SEQUENCE_TRACE: button=2/2, tick=850, position=(5.676421, 3.4399986, -126.22171).
+ROOM09_SEQUENCE_TRACE: button=1/2, tick=37, position=(-3.2758744, 12.324263, 28.691078).
+ROOM09_GATE_TRACE: gate=1, tick=416, position=(-0.2903872, 20.066916, -28.855555), velocity=(-1.5415057, 2.8103197, -20.143587).
+ROOM09_GATE_TRACE: gate=2, tick=552, position=(-3.781201, 25.20869, -74.44054), velocity=(-1.5400636, 0.5814838, -22.130817).
+ROOM09_SEQUENCE_TRACE: button=2/2, tick=850, position=(5.676421, 3.4399986, -126.22171).
+ROOM09_SEQUENCE_TRACE: button=1/2, tick=37, position=(-3.2758744, 12.324263, 28.691078).
+ROOM09_GATE_TRACE: gate=1, tick=416, position=(-0.2903872, 20.066916, -28.855555), velocity=(-1.5415057, 2.8103197, -20.143587).
+ROOM09_GATE_TRACE: gate=2, tick=552, position=(-3.781201, 25.20869, -74.44054), velocity=(-1.5400636, 0.5814838, -22.130817).
+ROOM09_SEQUENCE_TRACE: button=2/2, tick=850, position=(5.676421, 3.4399986, -126.22171).
+ROOM09_SEQUENCE_TRACE: button=1/2, tick=37, position=(-3.2758744, 12.324263, 28.691078).
+ROOM09_GATE_TRACE: gate=1, tick=416, position=(-0.2903872, 20.066916, -28.855555), velocity=(-1.5415057, 2.8103197, -20.143587).
+ROOM09_GATE_TRACE: gate=2, tick=552, position=(-3.781201, 25.20869, -74.44054), velocity=(-1.5400636, 0.5814838, -22.130817).
+ROOM09_SEQUENCE_TRACE: button=2/2, tick=850, position=(5.676421, 3.4399986, -126.22171).
+ROOM09_SEQUENCE_TRACE: button=1/2, tick=37, position=(-3.2758744, 12.324263, 28.691078).
+ROOM09_GATE_TRACE: gate=1, tick=416, position=(-0.2903872, 20.066916, -28.855555), velocity=(-1.5415057, 2.8103197, -20.143587).
+ROOM09_GATE_TRACE: gate=2, tick=552, position=(-3.781201, 25.20869, -74.44054), velocity=(-1.5400636, 0.5814838, -22.130817).
+ROOM09_SEQUENCE_TRACE: button=2/2, tick=850, position=(5.676421, 3.4399986, -126.22171).
+ROOM09_SEQUENCE_TRACE: button=1/2, tick=37, position=(-3.2758744, 12.324263, 28.691078).
+ROOM09_GATE_TRACE: gate=1, tick=416, position=(-0.2903872, 20.066916, -28.855555), velocity=(-1.5415057, 2.8103197, -20.143587).
+ROOM09_GATE_TRACE: gate=2, tick=552, position=(-3.781201, 25.20869, -74.44054), velocity=(-1.5400636, 0.5814838, -22.130817).
+ROOM09_SEQUENCE_TRACE: button=2/2, tick=850, position=(5.676421, 3.4399986, -126.22171).
+ROOM09_SOLUTION_PASS: SolutionTrace used two distinct super-elastic bodies, both centered flight gates and the ordered start sequence for 10 consecutive completions; double_bounce=True.

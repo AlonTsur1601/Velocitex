@@ -18,6 +18,7 @@ public partial class ExitDoor3D : Node3D
     public const float FrameOpeningHalfWidth = 1.85f;
     public const float FrameOuterHeight = 4.84f;
     public const float FrameBottomY = 0.12f;
+    public const float AuthoredApproachFloorHeight = 0.1863f;
     public const float FrameDepth = 0.58f;
     public const float FrameRoomSideCenterZ = 0.52f;
     public const float DoorLeafClosedWidth = FrameOpeningHalfWidth;

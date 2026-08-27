@@ -1,0 +1,33 @@
+Godot_v4.7-stable_mono_win64_console.exe : ERROR: ROOM20_SOLUTION_FAIL: Run 1 hit the maintenance floor at (10.025918, 
+-1.9167476, -47.39294); cannon=True, gauntlet=14/14, hits=6, boarded=False, stayed=False, lever=False, progress=0.00, 
+arrived=False, plates=0/2, piston=False, gates=0/2.
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room20Solution.ps1:7 char:15
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: ROOM20_S...lse, gates=0/2.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: void Velocitex.Gameplay.Rooms.Room20Runtime.FailSolutionSmoke(string) 
+(res://src/Gameplay/Rooms/Room20Runtime.cs:856)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Velocitex.Gameplay.Rooms.Room20Runtime.FailSolutionSmoke(string) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room20Runtime.cs:856)
+       [2] void Velocitex.Gameplay.Rooms.Room20Runtime.RestartRoom() 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room20Runtime.cs:242)
+       [3] void Velocitex.Gameplay.Rooms.Room20Runtime.<BuildRoom>b__60_0(Godot.Node3D) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room20Runtime.cs:388)
+       [4] void Velocitex.Gameplay.Rooms.RoomGeometry+<>c__DisplayClass42_0.<AddClosedRoomShell>b__0(Godot.Node3D) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\RoomGeometry.cs:1262)
+       [5] void Godot.Area3D.BodyEnteredTrampoline(object, Godot.NativeInterop.NativeVariantPtrArgs, 
+Godot.NativeInterop.godot_variant&) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/GodotObjects/Area3D.cs:941)
+       [6] void Godot.DelegateUtils.InvokeWithVariantArgs(nint, System.Void*, Godot.NativeInterop.godot_variant**, 
+int, Godot.NativeInterop.godot_variant*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/DelegateUtils.cs:86)
+Room 20 solution smoke run 1 exited with code 1
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room20Solution.ps1:11 char:28
++ ... de -ne 0) { throw "Room 20 solution smoke run $run exited with code $ ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Room 20 solutio...ted with code 1:String) [], RuntimeException
+    + FullyQualifiedErrorId : Room 20 solution smoke run 1 exited with code 1
+ 

@@ -1562,7 +1562,8 @@ internal readonly record struct PlatformWallStyle(
     internal static HashSet<StaticBody3D> TrimExitPlatformsToThreshold(
         Node parent,
         ExitDoor3D door,
-        bool preserveBodyTransform = false)
+        bool preserveBodyTransform = false,
+        float expectedFloorHeight = ExitDoor3D.FrameBottomY)
     {
         const float thresholdZ = 0.12f;
         HashSet<StaticBody3D> trimmedBodies = new();
@@ -1588,7 +1589,7 @@ internal readonly record struct PlatformWallStyle(
             (Vector3 minimum, Vector3 maximum) = GetBoxBoundsInDoorSpace(door, collision, box.Size);
             bool crossesThreshold = minimum.Z < thresholdZ - 0.01f && maximum.Z > thresholdZ + 0.25f;
             bool adjoiningExitFloor = crossesThreshold &&
-                Mathf.Abs(maximum.Y - thresholdZ) <= 0.06f &&
+                Mathf.Abs(maximum.Y - expectedFloorHeight) <= 0.06f &&
                 maximum.X >= -ExitDoor3D.CorridorInteriorWidth * 0.5f &&
                 minimum.X <= ExitDoor3D.CorridorInteriorWidth * 0.5f;
             if (!adjoiningExitFloor && !(edgeBarrier && crossesThreshold))
@@ -1793,7 +1794,7 @@ internal readonly record struct PlatformWallStyle(
                 }
 
                 (Vector3 minimum, Vector3 maximum) = GetBoxBoundsInDoorSpace(door, collision, box.Size);
-                if (Mathf.Abs(maximum.Y - 0.12f) > 0.06f ||
+                if (Mathf.Abs(maximum.Y - ExitDoor3D.AuthoredApproachFloorHeight) > 0.025f ||
                     maximum.X < -0.45f || minimum.X > 0.45f)
                 {
                     continue;

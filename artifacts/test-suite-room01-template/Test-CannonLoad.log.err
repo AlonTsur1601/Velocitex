@@ -1,0 +1,8 @@
+Godot_v4.7-stable_mono_win64_console.exe : WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for 
+details).
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-CannonLoad.ps1:6 char:15
++ ...   $output = & $godot.FullName --headless --path $root "res://scenes/C ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: 4 Obje...` for details).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

@@ -1,0 +1,7 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM27_TRACE: tick=120, position=(4.688004, 7.9259186, 27.888487), gates=0/4, lever=False.
+ROOM27_GATE_TRACE: gate=1/4, tick=199, position=(8.880681, 9.089999, 15.272226).
+ROOM27_TRACE: tick=240, position=(8.880681, 9.089999, 7.275896), gates=1/4, lever=True.
+ROOM27_TRACE: tick=360, position=(9.4734745, 9.098173, 7.148321), gates=1/4, lever=True.
+ROOM27_TRACE: tick=480, position=(15.71559, 9.179401, -2.938323), gates=1/4, lever=True.

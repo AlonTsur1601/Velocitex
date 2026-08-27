@@ -1,0 +1,3 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+SAVE_SMOKE_PASS: loading a save discards later snapshots, preserves room-select unlocks, and New Game clears all campaign saves.

@@ -1,0 +1,8 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM26_TRACE: tick=120, position=(-4.6765914, 19.356668, 19.994492), velocity=(-3.6104064, 11.476669, -14.005514), input=(0.70710677, -0.70710677), air=18.00, gates=0/4.
+ROOM26_GATE_TRACE: gate=1/4, tick=146, position=(-4.4112744, 24.269173, 13.692013).
+ROOM26_TRACE: tick=240, position=(-2.0062218, 34.515293, -9.498715), velocity=(5.0217195, -3.1890666, -11.770917), input=(0.70710677, -0.70710677), air=18.00, gates=1/4.
+ROOM26_GATE_TRACE: gate=2/4, tick=244, position=(-1.6249623, 34.29602, -10.283444).
+ROOM26_TRACE: tick=360, position=(9.830975, 21.612848, -39.054726), velocity=(-0.7212486, -6.061291, -10.656036), input=(0, -1), air=18.00, gates=2/4.
+ROOM26_TRACE: tick=480, position=(7.3509912, 3.6536322, -57.38235), velocity=(-3.1135828, -11.668502, -5.9462137), input=(0, -1), air=18.00, gates=2/4.

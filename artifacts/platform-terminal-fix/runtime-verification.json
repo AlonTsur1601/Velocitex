@@ -1,0 +1,53 @@
+{
+  "version": "1.4.0",
+  "geometry": {
+    "changed_rooms": 27,
+    "adjacent_wall_terminal_edits": 49,
+    "platform_overlap_edits": 4,
+    "remaining_wall_mismatches": 0,
+    "remaining_platform_overlaps": 0,
+    "protected_doorway_digest_differences": 0,
+    "door_contact_digest_differences": 0,
+    "room02_file_unchanged": true
+  },
+  "tests": [
+    "BUILD_PASS: 0 warnings, 0 errors",
+    "BLENDER_ROOM_EXACT_PASS: All 30 rooms render every mesh directly from their imported Blender scene.",
+    "SURFACE_CONNECTION_PASS: all adjoining platform and slope edges in Rooms 01-30 are flush and connected.",
+    "EXIT_PRESENTATION_PASS: Rooms 01-30 use wall-proud threshold-free frames, level lever bases, sealed corridors and requirement-locked doors.",
+    "ROOM_SHELL_CONTAINMENT_SUITE_PASS: all relevant meshes and collision shapes stay inside the shell in 30 room(s).",
+    "BLENDER_DELETION_PASS: Room 01 deletion and edited door-frame rendering are correct."
+  ],
+  "representative_runtime_captures": [
+    {
+      "room": 4,
+      "path": "artifacts/exit-door/room04.png",
+      "sha256": "FAB9809BE1732ED0E85753C35A348D7F7338FEB2ED75B72D60BABF531D539E9C",
+      "capture_errors": 0
+    },
+    {
+      "room": 8,
+      "path": "artifacts/exit-door/room08.png",
+      "sha256": "948CD15215D014E916BA44B7EC416A0DF2F2918C909B2292C35DF92054990AA7",
+      "capture_errors": 0
+    },
+    {
+      "room": 11,
+      "path": "artifacts/exit-door/room11.png",
+      "sha256": "03904D8C08081E25FAA175574A0B80779EB914BC72C55FADBAFFC72C02A07500",
+      "capture_errors": 0
+    },
+    {
+      "room": 24,
+      "path": "artifacts/exit-door/room24.png",
+      "sha256": "CCA59EE78EBBE5EF688BDC07D15F1E6C8CCA1B3F1CE021CCF12CA97BD17DAA15",
+      "capture_errors": 0
+    },
+    {
+      "room": 30,
+      "path": "artifacts/exit-door/room30.png",
+      "sha256": "2DB7E3375DDE7A8774A4B06A504921E125029A949F16195B557D1EA6CD60B709",
+      "capture_errors": 0
+    }
+  ]
+}

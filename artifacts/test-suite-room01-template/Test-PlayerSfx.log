@@ -1,0 +1,6 @@
+ROLL_SOURCE_AUDIO_PASS: all five rolling loops, including sticky/slimy movement, contain audible PCM data and laptop-audible texture.
+METAL_IMPACT_SOURCE_PASS: five non-silent metal impact tiers are present.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+PLAYER_SFX_SMOKE_PASS: caramel contact selects distinct sticky/slimy entry and rolling SFX, ordinary rolling stays audible, five monotonic metal-impact tiers and four pooled voices load through the SFX bus.
+GAMEPLAY_MUSIC_SCOPE_PASS: gameplay code contains no Music-bus playback.

@@ -1,0 +1,10 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM17_ACHIEVEMENT_NEGATIVE_PASS: a projectile hit denied Clean Crossfire but ordinary room completion still succeeded.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM20_ACHIEVEMENT_NEGATIVE_PASS: a projectile hit denied Clean Assembly but ordinary room completion still succeeded.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM30_HIT_SURVIVAL_PASS: all 840 cannons remain optional hazards; a surviving hit denies Final Inspection but does not block completion.
+CANNON_HIT_SURVIVAL_PASS: Rooms 17, 20 and 30 remain completable after a projectile hit; only their clean-run achievements are denied.

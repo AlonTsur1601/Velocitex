@@ -1,0 +1,33 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM07_BUTTON_TRACE: activated=1/2, tick=124, position=(-2.4063134, 4.597154, -0.24217033), speed=7.75.
+ROOM07_BUTTON_TRACE: activated=2/2, tick=204, position=(2.3469832, 4.597154, -8.122209), speed=8.69.
+ROOM07_STOP_TRACE: tick=377, position=(-0.30654454, 4.597154, -16.357117), speed=0.00, perfect_ticks=30, overshot=False.
+ROOM07_BUTTON_TRACE: activated=1/2, tick=124, position=(-2.3859792, 4.596775, -0.32616118), speed=7.63.
+ROOM07_BUTTON_TRACE: activated=2/2, tick=204, position=(2.3799458, 4.596775, -8.130455), speed=8.68.
+ROOM07_STOP_TRACE: tick=377, position=(-0.27214748, 4.5967746, -16.357084), speed=0.00, perfect_ticks=30, overshot=False.
+ROOM07_BUTTON_TRACE: activated=1/2, tick=124, position=(-2.3859792, 4.5967736, -0.32616246), speed=7.63.
+ROOM07_BUTTON_TRACE: activated=2/2, tick=204, position=(2.3799448, 4.5967736, -8.130456), speed=8.68.
+ROOM07_STOP_TRACE: tick=377, position=(-0.27214822, 4.596773, -16.357088), speed=0.00, perfect_ticks=30, overshot=False.
+ROOM07_BUTTON_TRACE: activated=1/2, tick=124, position=(-2.3859792, 4.5967746, -0.32616347), speed=7.63.
+ROOM07_BUTTON_TRACE: activated=2/2, tick=204, position=(2.379945, 4.5967746, -8.130457), speed=8.68.
+ROOM07_STOP_TRACE: tick=377, position=(-0.27214992, 4.596774, -16.357086), speed=0.00, perfect_ticks=30, overshot=False.
+ROOM07_BUTTON_TRACE: activated=1/2, tick=124, position=(-2.3859792, 4.5967736, -0.32616246), speed=7.63.
+ROOM07_BUTTON_TRACE: activated=2/2, tick=204, position=(2.3799448, 4.5967736, -8.130456), speed=8.68.
+ROOM07_STOP_TRACE: tick=377, position=(-0.27214822, 4.596773, -16.357088), speed=0.00, perfect_ticks=30, overshot=False.
+ROOM07_BUTTON_TRACE: activated=1/2, tick=124, position=(-2.3859792, 4.5967746, -0.32616347), speed=7.63.
+ROOM07_BUTTON_TRACE: activated=2/2, tick=204, position=(2.379945, 4.5967746, -8.130457), speed=8.68.
+ROOM07_STOP_TRACE: tick=377, position=(-0.27214992, 4.596774, -16.357086), speed=0.00, perfect_ticks=30, overshot=False.
+ROOM07_BUTTON_TRACE: activated=1/2, tick=124, position=(-2.3859792, 4.5967736, -0.32616246), speed=7.63.
+ROOM07_BUTTON_TRACE: activated=2/2, tick=204, position=(2.3799448, 4.5967736, -8.130456), speed=8.68.
+ROOM07_STOP_TRACE: tick=377, position=(-0.27214822, 4.596773, -16.357088), speed=0.00, perfect_ticks=30, overshot=False.
+ROOM07_BUTTON_TRACE: activated=1/2, tick=124, position=(-2.3859792, 4.5967746, -0.32616347), speed=7.63.
+ROOM07_BUTTON_TRACE: activated=2/2, tick=204, position=(2.379945, 4.5967746, -8.130457), speed=8.68.
+ROOM07_STOP_TRACE: tick=377, position=(-0.27214992, 4.596774, -16.357086), speed=0.00, perfect_ticks=30, overshot=False.
+ROOM07_BUTTON_TRACE: activated=1/2, tick=124, position=(-2.3859792, 4.5967736, -0.32616246), speed=7.63.
+ROOM07_BUTTON_TRACE: activated=2/2, tick=204, position=(2.3799448, 4.5967736, -8.130456), speed=8.68.
+ROOM07_STOP_TRACE: tick=377, position=(-0.27214822, 4.596773, -16.357088), speed=0.00, perfect_ticks=30, overshot=False.
+ROOM07_BUTTON_TRACE: activated=1/2, tick=124, position=(-2.3859792, 4.5967746, -0.32616347), speed=7.63.
+ROOM07_BUTTON_TRACE: activated=2/2, tick=204, position=(2.379945, 4.5967746, -8.130457), speed=8.68.
+ROOM07_STOP_TRACE: tick=377, position=(-0.27214992, 4.596774, -16.357086), speed=0.00, perfect_ticks=30, overshot=False.
+ROOM07_SOLUTION_PASS: SolutionTrace used both ordered buttons, measured sticky momentum loss, and held the inner precision target for 10 consecutive completions.

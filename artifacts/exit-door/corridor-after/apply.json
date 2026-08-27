@@ -1,0 +1,932 @@
+[
+  {
+    "room": 1,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025237157940864563,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 2,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025240972638130188,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 0.0,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 3,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 4,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025240972638130188,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 0.0,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 5,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 6,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 7,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025240972638130188,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 0.0,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 8,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025240972638130188,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 0.0,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 4.76837158203125e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 4.76837158203125e-07
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 4.76837158203125e-07
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 9,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 10,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 4.76837158203125e-07,
+      "top": 0.0,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 7.152557373046875e-07,
+      "top": 4.76837158203125e-07,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 11,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 12,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 13,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 4.76837158203125e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 14,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 15,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 9.5367431640625e-07,
+      "top": 9.5367431640625e-07,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 1.1920928955078125e-06,
+      "top": 9.5367431640625e-07,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 16,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025240972638130188,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 0.0,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 4.76837158203125e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 7.152557373046875e-07,
+      "top": 4.76837158203125e-07,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 17,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025237157940864563,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 18,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025240972638130188,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 0.0,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 9.5367431640625e-07,
+      "top": 9.5367431640625e-07,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 1.1920928955078125e-06,
+      "top": 9.5367431640625e-07,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 19,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025237157940864563,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 9.5367431640625e-07,
+      "top": 9.5367431640625e-07,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 1.1920928955078125e-06,
+      "top": 9.5367431640625e-07,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 20,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 9.5367431640625e-07,
+      "top": 9.5367431640625e-07,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 7.152557373046875e-07,
+      "top": 9.5367431640625e-07,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 21,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025240972638130188,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 0.0,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 22,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 23,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 24,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025240972638130188,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 0.0,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 25,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 4.76837158203125e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 4.76837158203125e-07
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 4.76837158203125e-07
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 26,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 7.152557373046875e-07,
+      "top": 1.5258789076710855e-07,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 4.76837158203125e-07,
+      "top": 8.010864256391415e-07,
+      "rear": 7.897615432739258e-07,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 27,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025244787335395813,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 7.450580596923828e-08,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 4.76837158203125e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 4.76837158203125e-07
+    },
+    "pockets_after": {
+      "bottom": 7.152557373046875e-07,
+      "top": 4.76837158203125e-07,
+      "rear": 7.897615432739258e-07,
+      "side": 4.76837158203125e-07
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 28,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025240972638130188,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 0.0,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 4.76837158203125e-07
+    },
+    "pockets_after": {
+      "bottom": 2.384185791015625e-07,
+      "top": 0.0,
+      "rear": 7.897615432739258e-07,
+      "side": 4.76837158203125e-07
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 29,
+    "door_front": -0.1400025635957718,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.025198161602020264,
+      "ExitCorridorRightWall": 0.025236785411834717,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.0,
+      "ExitCorridorRightWall": 6.556510925292969e-07,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 7.152557373046875e-07,
+      "top": 4.76837158203125e-07,
+      "rear": 1.475214958190918e-06,
+      "side": 1.1920928955078125e-06
+    },
+    "pockets_after": {
+      "bottom": 4.76837158203125e-07,
+      "top": 9.5367431640625e-07,
+      "rear": 1.475214958190918e-06,
+      "side": 1.1920928955078125e-06
+    },
+    "changed_vertices": 8
+  },
+  {
+    "room": 30,
+    "door_front": -0.14000122249126434,
+    "corridor_before": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 0.02519853413105011,
+      "ExitCorridorRightWall": 0.025229528546333313,
+      "ExitCorridorEndWall": 0.0
+    },
+    "corridor_after": {
+      "ExitCorridorFloor": 0.0,
+      "ExitCorridorCeiling": 0.0,
+      "ExitCorridorLeftWall": 7.450580596923828e-08,
+      "ExitCorridorRightWall": 0.0,
+      "ExitCorridorEndWall": 0.0
+    },
+    "pockets_before": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "pockets_after": {
+      "bottom": 0.0,
+      "top": 0.0,
+      "rear": 6.839632987976074e-06,
+      "side": 0.0
+    },
+    "changed_vertices": 8
+  }
+]

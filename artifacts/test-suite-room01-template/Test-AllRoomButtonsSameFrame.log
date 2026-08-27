@@ -1,0 +1,204 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 01: 0 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 01: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 01, verified 0 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 02 / BasinEntryLatch.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 02 / RightChargeLatch.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 02 / LeftReturnLatch.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 02 / ExitCommitLatch.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 02: 4 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 02: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 02, verified 4 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 03: 0 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 03: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 03, verified 0 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 04 / SequenceButtonOne.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 04 / SequenceButtonTwo.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 04: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 04: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 04, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 05 / ChapterButtonOne.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 05 / ChapterButtonTwo.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 05 / ChapterButtonThree.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 05: 3 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 05: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 05, verified 3 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 06: 0 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 06: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 06, verified 0 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 07 / BrakeButtonOne.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 07 / BrakeButtonTwo.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 07: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 07: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 07, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 08: 0 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 08: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 08, verified 0 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 09 / StartSequenceLeft.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 09 / FinalSequenceRight.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 09: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 09: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 09, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 10 / StickySequenceOne.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 10 / StickySequenceTwo.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 10: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 10: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 10, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 11: 0 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 11: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 11, verified 0 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 12 / ArmingPadOne.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 12 / ArmingPadTwo.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 12: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 12: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 12, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 13: 0 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 13: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 13, verified 0 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 14 / FinalSwitchOne.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 14 / FinalSwitchTwo.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 14 / FinalSwitchThree.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 14: 3 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 14: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 14, verified 3 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 15 / WindAlignmentPad.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 15 / FinalRailLatch.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 15: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 15: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 15, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 16 / OrangeAimButton.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 16 / OffsetLandingLatch.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 16: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 16: player=1, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 16, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 17: 0 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 17: player=1, interference=924.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 17, verified 0 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 18 / BalancePlateLeft.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 18 / BalancePlateRight.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 18: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 18: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 18, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 19 / TrajectoryPlateLeft.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 19 / TrajectoryPlateRight.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 19: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 19: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 19, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 20 / BalancePlateRight.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 20 / BalancePlateLeft.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 20: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 20: player=1, interference=720.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 20, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 21 / FoamButtonOne.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 21 / FoamButtonTwo.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 21 / FoamButtonThree.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 21 / FoamButtonFour.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 21 / FoamButtonFive.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 21: 5 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 21: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 21, verified 5 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 22 / RatchetStageOne.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 22 / RatchetStageTwo.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 22 / RatchetStageThree.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 22: 3 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 22: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 22, verified 3 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 23 / DescentStageOne.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 23 / DescentStageThree.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 23: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 23: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 23, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 24: 0 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 24: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 24, verified 0 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 25 / AcceleratorStage.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 25 / StickyStageRight.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 25 / StickyStageLeft.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 25 / ExitDeckStage.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 25: 4 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 25: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 25, verified 4 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 26: 0 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 26: player=1, interference=726.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 26, verified 0 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 27 / GateOne.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 27 / GateTwo.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 27 / GateThree.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 27 / GateFour.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 27: 4 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 27: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 27, verified 4 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 28 / LeftBalanceButton.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 28 / RightBalanceButton.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 28: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 28: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 28, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 29 / PlatformStartButton.
+ROOM_BUTTON_SAME_FRAME_ITEM_PASS: Room 29 / FinalCalibrationLatch.
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 29: 2 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 29: player=0, interference=0.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 29, verified 2 buttons through real floor contact.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_BUTTON_SAME_FRAME_COUNT: Room 30: 0 buttons.
+ROOM_CANNON_HITBOX_COUNT: Room 30: player=1, interference=840.
+ROOM_BUTTON_SAME_FRAME_ROOM_PASS: Room 30, verified 0 buttons through real floor contact.
+ALL_ROOM_BUTTON_SAME_FRAME_PASS: verified 52 buttons across Rooms 01-30 through real floor contact.
+ALL_CANNON_HITBOX_PASS: verified complete solid hitboxes on 5 player cannons and 3210 interference cannons across Rooms 01-30.

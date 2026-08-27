@@ -1,0 +1,10 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM19_MECHANICS_PASS: the piston base stays level, two ordered plates arm it, and two visible magnetic fields cross a bounded low-gravity course before the wall-mounted exit.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM19_ACHIEVEMENT_POSITIVE_PASS: entering the piston promptly after the ordered setup awarded Piston Perfect.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM19_ACHIEVEMENT_NEGATIVE_PASS: a delayed piston entry denied Piston Perfect without blocking completion.
+ROOM19_MECHANICS_SUITE_PASS: level piston base, ordered setup barrier, wall exit, and Piston Perfect positive/negative cases passed.

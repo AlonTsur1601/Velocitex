@@ -1,0 +1,47 @@
+Godot_v4.7-stable_mono_win64_console.exe : ERROR: ROOM04_SOLUTION_FAIL: Run 2 attempted E outside the lever hitbox at 
+(-9.3497, 4.3490086, 2.665985); distance=3.44, radius=3.20.
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room04Solution.ps1:16 char:11
++ $output = & $godot.FullName --headless --fixed-fps 60 --path $root "r ...
++           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: ROOM04_S...4, radius=3.20.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: void Velocitex.Gameplay.Rooms.Room04Runtime.FailSolutionSmoke(string) 
+(res://src/Gameplay/Rooms/Room04Runtime.cs:687)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Velocitex.Gameplay.Rooms.Room04Runtime.FailSolutionSmoke(string) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room04Runtime.cs:687)
+       [2] void Velocitex.Gameplay.Rooms.Room04Runtime.RunSolutionTick() 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room04Runtime.cs:487)
+       [3] void Velocitex.Gameplay.Rooms.Room04Runtime._PhysicsProcess(double) 
+(C:\Users\alont\OneDrive\诪住诪讻讬诐\Alon\Velocitex\src\Gameplay\Rooms\Room04Runtime.cs:139)
+       [4] bool Godot.Node.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/GodotObjects/Node.cs:2648)
+       [5] bool Godot.Node3D.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Generated/GodotObjects/Node3D.cs:1127)
+       [6] bool Velocitex.Core.Rooms.RoomRuntime.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (C:\Users\alont\OneDrive\诪住诪讻讬诐\Alo
+n\Velocitex\.godot\mono\temp\obj\Debug\Godot.SourceGenerators\Godot.SourceGenerators.ScriptMethodsGenerator\Velocitex.C
+ore.Rooms.RoomRuntime_ScriptMethods.generated.cs:120)
+       [7] bool Velocitex.Gameplay.Rooms.Room04Runtime.InvokeGodotClassMethod(Godot.NativeInterop.godot_string_name&, 
+Godot.NativeInterop.NativeVariantPtrArgs, Godot.NativeInterop.godot_variant&) (C:\Users\alont\OneDrive\诪住诪讻讬诐\Alo
+n\Velocitex\.godot\mono\temp\obj\Debug\Godot.SourceGenerators\Godot.SourceGenerators.ScriptMethodsGenerator\Velocitex.G
+ameplay.Rooms.Room04Runtime_ScriptMethods.generated.cs:220)
+       [8] Godot.NativeInterop.godot_bool Godot.Bridge.CSharpInstanceBridge.Call(nint, 
+Godot.NativeInterop.godot_string_name*, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_variant_call_error*, Godot.NativeInterop.godot_variant*) 
+(/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/Bridge/CSharpInstanceBridge.cs:24)
+WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+Room 04 solution smoke test exited with code 1
+At C:\Users\alont\OneDrive\帒帇墠\Alon\Velocitex\scripts\Test-Room04Solution.ps1:21 char:5
++     throw "Room 04 solution smoke test exited with code $exitCode"
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Room 04 solutio...ted with code 1:String) [], RuntimeException
+    + FullyQualifiedErrorId : Room 04 solution smoke test exited with code 1
+ 

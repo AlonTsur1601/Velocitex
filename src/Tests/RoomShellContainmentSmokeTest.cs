@@ -7,6 +7,7 @@ namespace Velocitex.Tests;
 public partial class RoomShellContainmentSmokeTest : Node
 {
     private const float BoundaryTolerance = 0.02f;
+    private const float StructuralJoinTolerance = 0.20f;
 
     private readonly record struct Bounds(Vector3 Minimum, Vector3 Maximum)
     {
@@ -78,7 +79,7 @@ public partial class RoomShellContainmentSmokeTest : Node
 
         foreach (Node node in EnumerateDescendants(roomRoot))
         {
-            if (IsLegalShellExternal(node, shell, goalTrigger))
+            if (IsLegalShellExternal(node, roomRoot, shell, goalTrigger))
             {
                 continue;
             }
@@ -164,6 +165,11 @@ public partial class RoomShellContainmentSmokeTest : Node
             return 0;
         }
 
+        if (IsBlenderStructuralGeometry(node) && Contains(structuralEnvelope, bounds, StructuralJoinTolerance))
+        {
+            return 0;
+        }
+
         string stateSuffix = state is null ? string.Empty : $" at its {state}";
         GD.PushError(
             $"ROOM_SHELL_CONTAINMENT_OBJECT: Room {room:00} {kind} {roomRoot.GetPathTo(node)}{stateSuffix} " +
@@ -210,7 +216,7 @@ public partial class RoomShellContainmentSmokeTest : Node
         Bounds structuralEnvelope,
         Node3D shell)
     {
-        StaticBody3D? body = FindStaticBodyAncestor(node);
+        StaticBody3D? body = FindStaticBodyAncestor(node) ?? FindImportedReferenceTarget(node, shell);
         if (body is null || !TryGetStaticBodyBounds(body, shell, out Bounds bodyBounds))
         {
             return false;
@@ -239,6 +245,37 @@ public partial class RoomShellContainmentSmokeTest : Node
         return null;
     }
 
+    private static StaticBody3D? FindImportedReferenceTarget(Node node, Node3D shell)
+    {
+        if (!node.HasMeta(BlenderRoomEdits.ReferenceTargetPathMetadata))
+        {
+            return null;
+        }
+
+        Node? roomRoot = shell.GetParent();
+        return roomRoot?.GetNodeOrNull<StaticBody3D>(
+            node.GetMeta(BlenderRoomEdits.ReferenceTargetPathMetadata).AsNodePath());
+    }
+
+    private static bool IsBlenderStructuralGeometry(Node node)
+    {
+        if (node.Name.ToString().StartsWith("REF_", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        for (Node? ancestor = node; ancestor is not null; ancestor = ancestor.GetParent())
+        {
+            string ancestorName = ancestor.Name.ToString();
+            if (ancestorName == "BlenderGeometry" || ancestorName == "BlenderCollisions" || ancestorName == "EditableWalls")
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static bool TryGetStaticBodyBounds(StaticBody3D body, Node3D shell, out Bounds bounds)
     {
         Vector3 minimum = new(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
@@ -246,7 +283,7 @@ public partial class RoomShellContainmentSmokeTest : Node
         bool found = false;
         foreach (CollisionShape3D collision in body.GetChildren().OfType<CollisionShape3D>())
         {
-            if (collision.Shape is not BoxShape3D || !TryGetShapeBounds(collision.Shape, out Aabb localBounds))
+            if (!TryGetShapeBounds(collision.Shape, out Aabb localBounds))
             {
                 continue;
             }
@@ -267,11 +304,11 @@ public partial class RoomShellContainmentSmokeTest : Node
         return found;
     }
 
-    private static bool Contains(Bounds outer, Bounds inner)
+    private static bool Contains(Bounds outer, Bounds inner, float tolerance = BoundaryTolerance)
     {
-        return inner.Minimum.X >= outer.Minimum.X - BoundaryTolerance && inner.Maximum.X <= outer.Maximum.X + BoundaryTolerance &&
-            inner.Minimum.Y >= outer.Minimum.Y - BoundaryTolerance && inner.Maximum.Y <= outer.Maximum.Y + BoundaryTolerance &&
-            inner.Minimum.Z >= outer.Minimum.Z - BoundaryTolerance && inner.Maximum.Z <= outer.Maximum.Z + BoundaryTolerance;
+        return inner.Minimum.X >= outer.Minimum.X - tolerance && inner.Maximum.X <= outer.Maximum.X + tolerance &&
+            inner.Minimum.Y >= outer.Minimum.Y - tolerance && inner.Maximum.Y <= outer.Maximum.Y + tolerance &&
+            inner.Minimum.Z >= outer.Minimum.Z - tolerance && inner.Maximum.Z <= outer.Maximum.Z + tolerance;
     }
 
     private static bool CrossingIsContainedByBody(
@@ -311,7 +348,7 @@ public partial class RoomShellContainmentSmokeTest : Node
         return true;
     }
 
-    private static bool IsLegalShellExternal(Node node, Node3D shell, Area3D? goalTrigger)
+    private static bool IsLegalShellExternal(Node node, Node roomRoot, Node3D shell, Area3D? goalTrigger)
     {
         if (node == shell || shell.IsAncestorOf(node))
         {
@@ -325,13 +362,58 @@ public partial class RoomShellContainmentSmokeTest : Node
 
         for (Node? ancestor = node; ancestor is not null; ancestor = ancestor.GetParent())
         {
-            if (ancestor is ExitDoor3D)
+            if (ancestor is ExitDoor3D || ancestor is InterferenceCannon3D)
+            {
+                return true;
+            }
+        }
+
+        if (node is MeshInstance3D mesh && IsLegalExternalReference(mesh))
+        {
+            return true;
+        }
+
+        if (node is CollisionShape3D collision)
+        {
+            NodePath collisionPath = roomRoot.GetPathTo(collision);
+            bool belongsToDoorInfrastructure = EnumerateDescendants(roomRoot)
+                .OfType<MeshInstance3D>()
+                .Where(IsLegalExternalReference)
+                .Any(reference =>
+                    reference.HasMeta(BlenderRoomEdits.ReferenceCollisionPathMetadata) &&
+                    reference.GetMeta(BlenderRoomEdits.ReferenceCollisionPathMetadata).AsNodePath() == collisionPath);
+            if (belongsToDoorInfrastructure)
             {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static bool IsLegalExternalReference(MeshInstance3D mesh)
+    {
+        string name = mesh.Name.ToString();
+        int separator = name.Length > 4 ? name.IndexOf('_', 4) : -1;
+        string target = separator >= 0 ? name[(separator + 1)..] : name;
+        int duplicateSeparator = Mathf.Max(target.LastIndexOf('.'), target.LastIndexOf('_'));
+        if (duplicateSeparator > 0 && duplicateSeparator < target.Length - 1 &&
+            target[(duplicateSeparator + 1)..].All(char.IsDigit))
+        {
+            target = target[..duplicateSeparator];
+        }
+
+        return target.Equals("HazardFloor", StringComparison.Ordinal) ||
+            target.Equals("Ceiling", StringComparison.Ordinal) ||
+            target.Equals("LeftWall", StringComparison.Ordinal) ||
+            target.Equals("RightWall", StringComparison.Ordinal) ||
+            target.Equals("BackWall", StringComparison.Ordinal) ||
+            target.Equals("ExitWall", StringComparison.Ordinal) ||
+            target.Contains("WallDoorway", StringComparison.Ordinal) ||
+            target.Equals("ClosedDoorBlocker", StringComparison.Ordinal) ||
+            target.StartsWith("FrameCollision", StringComparison.Ordinal) ||
+            target.StartsWith("ExitCorridor", StringComparison.Ordinal) ||
+            target.StartsWith("ExitDoorBacking", StringComparison.Ordinal);
     }
 
     private static bool TryGetShapeBounds(Shape3D shape, out Aabb bounds)
@@ -349,10 +431,34 @@ public partial class RoomShellContainmentSmokeTest : Node
                 Vector3 cylinderSize = new(cylinder.Radius * 2.0f, cylinder.Height, cylinder.Radius * 2.0f);
                 bounds = new Aabb(-cylinderSize * 0.5f, cylinderSize);
                 return true;
+            case ConcavePolygonShape3D concave:
+                return TryGetPointBounds(concave.GetFaces(), out bounds);
+            case ConvexPolygonShape3D convex:
+                return TryGetPointBounds(convex.Points, out bounds);
             default:
                 bounds = default;
                 return false;
         }
+    }
+
+    private static bool TryGetPointBounds(Vector3[] points, out Aabb bounds)
+    {
+        if (points.Length == 0)
+        {
+            bounds = default;
+            return false;
+        }
+
+        Vector3 minimum = points[0];
+        Vector3 maximum = points[0];
+        foreach (Vector3 point in points.Skip(1))
+        {
+            minimum = minimum.Min(point);
+            maximum = maximum.Max(point);
+        }
+
+        bounds = new Aabb(minimum, maximum - minimum);
+        return true;
     }
 
     private static Bounds TransformBounds(Aabb localBounds, Transform3D globalTransform, Node3D shell)

@@ -1,0 +1,424 @@
+Godot_v4.7-stable_mono_win64_console.exe : ERROR: ROOM_SHELL_CONTAINMENT_OBJECT: Room 01 mesh 
+BlenderGeometry/REF_026_ExitDoorBackingLeft crosses the shell by (0.575, 0.600, 0.000) m; object=[(-9.85, -5.0999994, 
+-80.68001)..(-2.3500001, 16.600002, -80.26001)], interior=[(-9.275, -4.5, -80.775)..(9.275, 16, 80.775)].
+At C:\Users\alont\OneDrive\������\Alon\Velocitex\scripts\Test-RoomShellContainment.ps1:17 char:15
++ ...   $output = & $godot.FullName --headless --fixed-fps 60 --path $root  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: ROOM_SHE..., 16, 80.775)].:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   at: int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:168)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:168)
+       [2] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:90)
+       [3] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [4] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [5] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [6] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_OBJECT: Room 01 mesh BlenderGeometry/REF_027_ExitDoorBackingRight crosses the shell by 
+(0.575, 0.600, 0.000) m; object=[(2.3500001, -5.0999994, -80.68001)..(9.85, 16.600002, -80.26001)], interior=[(-9.275, 
+-4.5, -80.775)..(9.275, 16, 80.775)].
+   at: int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:168)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:168)
+       [2] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:90)
+       [3] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [4] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [5] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [6] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_OBJECT: Room 01 mesh BlenderGeometry/REF_028_ExitDoorBackingBelow crosses the shell by 
+(0.000, 0.600, 0.000) m; object=[(-2.35, -5.1000004, -80.68001)..(2.35, -2.4099998, -80.26001)], interior=[(-9.275, 
+-4.5, -80.775)..(9.275, 16, 80.775)].
+   at: int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:168)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:168)
+       [2] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:90)
+       [3] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [4] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [5] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [6] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_OBJECT: Room 01 mesh BlenderGeometry/REF_029_ExitDoorBackingAbove crosses the shell by 
+(0.000, 0.600, 0.000) m; object=[(-2.35, 1.7552452, -80.68)..(2.35, 16.59991, -80.26)], interior=[(-9.275, -4.5, 
+-80.775)..(9.275, 16, 80.775)].
+   at: int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:168)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:168)
+       [2] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:90)
+       [3] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [4] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [5] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [6] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_OBJECT: Room 01 mesh BlenderGeometry/REF_020_ExitCorridorCeiling crosses the shell by 
+(0.000, 0.000, 9.377) m; object=[(-2.35425, 1.760003, -90.15201)..(2.35425, 2.0000029, -80.68)], interior=[(-9.275, 
+-4.5, -80.775)..(9.275, 16, 80.775)].
+   at: int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:168)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:168)
+       [2] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:90)
+       [3] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [4] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [5] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [6] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_OBJECT: Room 01 mesh BlenderGeometry/REF_023_ExitCorridorEndWall crosses the shell by 
+(0.000, 0.000, 9.545) m; object=[(-2.3541, -2.4942, -90.32001)..(2.3541, 1.8941996, -90.08002)], interior=[(-9.275, 
+-4.5, -80.775)..(9.275, 16, 80.775)].
+   at: int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:168)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:168)
+       [2] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:90)
+       [3] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [4] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [5] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [6] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_OBJECT: Room 01 mesh BlenderGeometry/REF_019_ExitCorridorFloor crosses the shell by 
+(0.000, 0.000, 9.376) m; object=[(-2.35425, -2.4899998, -90.1508)..(2.35425, -2.25, -80.68)], interior=[(-9.275, -4.5, 
+-80.775)..(9.275, 16, 80.775)].
+   at: int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:168)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:168)
+       [2] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:90)
+       [3] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [4] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [5] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [6] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_OBJECT: Room 01 mesh BlenderGeometry/REF_021_ExitCorridorLeftWall crosses the shell by 
+(0.000, 0.000, 9.370) m; object=[(-2.5879998, -2.3700001, -90.1452)..(-2.348, 1.7699993, -80.68)], interior=[(-9.275, 
+-4.5, -80.775)..(9.275, 16, 80.775)].
+   at: int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:168)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:168)
+       [2] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:90)
+       [3] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [4] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [5] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [6] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_OBJECT: Room 01 mesh BlenderGeometry/REF_022_ExitCorridorRightWall crosses the shell by 
+(0.000, 0.000, 9.370) m; object=[(2.348, -2.3700001, -90.14517)..(2.5879998, 1.7699993, -80.68001)], 
+interior=[(-9.275, -4.5, -80.775)..(9.275, 16, 80.775)].
+   at: int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:168)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] int Velocitex.Tests.RoomShellContainmentSmokeTest.ReportIfOutside(int, Godot.Node, string, Godot.Node, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, 
+Velocitex.Tests.RoomShellContainmentSmokeTest+Bounds, Godot.Node3D, string) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:168)
+       [2] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:90)
+       [3] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [4] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [5] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [6] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_UNSUPPORTED: Room 01 collision 
+BlenderCollisions/_StaticBody3D_83_Collision/BlenderWallCollision uses unsupported shape ConcavePolygonShape3D.
+   at: Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:97)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:97)
+       [2] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [3] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [4] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [5] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_UNSUPPORTED: Room 01 collision 
+BlenderCollisions/_StaticBody3D_84_Collision/BlenderWallCollision uses unsupported shape ConcavePolygonShape3D.
+   at: Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:97)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:97)
+       [2] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [3] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [4] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [5] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_UNSUPPORTED: Room 01 collision 
+BlenderCollisions/_StaticBody3D_85_Collision/BlenderWallCollision uses unsupported shape ConcavePolygonShape3D.
+   at: Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:97)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:97)
+       [2] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [3] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [4] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [5] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_UNSUPPORTED: Room 01 collision 
+BlenderCollisions/_StaticBody3D_86_Collision/BlenderWallCollision uses unsupported shape ConcavePolygonShape3D.
+   at: Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:97)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:97)
+       [2] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [3] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [4] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [5] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_UNSUPPORTED: Room 01 collision 
+BlenderCollisions/_StaticBody3D_87_Collision/BlenderWallCollision uses unsupported shape ConcavePolygonShape3D.
+   at: Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:97)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:97)
+       [2] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [3] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [4] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [5] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_UNSUPPORTED: Room 01 collision 
+BlenderCollisions/_StaticBody3D_88_Collision/BlenderWallCollision uses unsupported shape ConcavePolygonShape3D.
+   at: Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:97)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:97)
+       [2] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [3] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [4] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [5] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_UNSUPPORTED: Room 01 collision 
+BlenderCollisions/_StaticBody3D_89_Collision/BlenderWallCollision uses unsupported shape ConcavePolygonShape3D.
+   at: Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:97)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:97)
+       [2] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [3] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [4] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [5] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_UNSUPPORTED: Room 01 collision 
+BlenderCollisions/_StaticBody3D_90_Collision/BlenderWallCollision uses unsupported shape ConcavePolygonShape3D.
+   at: Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:97)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:97)
+       [2] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [3] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [4] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [5] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_UNSUPPORTED: Room 01 collision 
+BlenderCollisions/FinalRail7_67_Collision/BlenderWallCollision uses unsupported shape ConcavePolygonShape3D.
+   at: Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:97)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:97)
+       [2] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [3] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [4] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [5] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_UNSUPPORTED: Room 01 collision 
+BlenderCollisions/SecondSlopeRail7_67_Collision/BlenderWallCollision uses unsupported shape ConcavePolygonShape3D.
+   at: Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:97)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] Velocitex.Tests.RoomShellContainmentSmokeTest+AuditResult 
+Velocitex.Tests.RoomShellContainmentSmokeTest.AuditRoom(int, Godot.Node) 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:97)
+       [2] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:40)
+       [3] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [4] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [5] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+ERROR: ROOM_SHELL_CONTAINMENT_FAIL: found 19 object(s) crossing a room wall, floor or ceiling.
+   at: void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(res://src/Tests/RoomShellContainmentSmokeTest.cs:56)
+   C# backtrace (most recent call first):
+       [0] void Godot.GD.PushError(string) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/GD.cs:366)
+       [1] void Velocitex.Tests.RoomShellContainmentSmokeTest+<_Ready>d__3.MoveNext() 
+(C:\Users\alont\OneDrive\מסמכים\Alon\Velocitex\src\Tests\RoomShellContainmentSmokeTest.cs:56)
+       [2] void System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, 
+System.Threading.ContextCallback, object)
+       [3] void 
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1.MoveNext(System.Threading.Thread)
+       [4] void Godot.SignalAwaiter.SignalCallback(nint, Godot.NativeInterop.godot_variant**, int, 
+Godot.NativeInterop.godot_bool*) (/root/godot/modules/mono/glue/GodotSharp/GodotSharp/Core/SignalAwaiter.cs:65)
+WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2535)
+Room shell containment smoke failed for Room 01 with code 1.
+At C:\Users\alont\OneDrive\������\Alon\Velocitex\scripts\Test-RoomShellContainment.ps1:24 char:9
++         throw "Room shell containment smoke failed for Room $($room.T ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Room shell cont...01 with code 1.:String) [], RuntimeException
+    + FullyQualifiedErrorId : Room shell containment smoke failed for Room 01 with code 1.
+ 

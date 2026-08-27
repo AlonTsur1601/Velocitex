@@ -1,0 +1,75 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM01_GATE_TRACE: gate=1, tick=138, position=(-2.4336276, 6.657172, 6.322257), velocity=(-1.3582784, -1.1433334, -41.96246).
+ROOM01_GATE_TRACE: gate=2, tick=247, position=(0.5643971, 4.077776, -60.34447), velocity=(0.5708773, -3.1033337, -55.91103).
+ROOM01_GATE_TRACE: gate=1, tick=138, position=(-2.4336255, 6.657172, 6.322257), velocity=(-1.3582773, -1.1433336, -41.96246).
+ROOM01_GATE_TRACE: gate=2, tick=247, position=(0.56440896, 4.077776, -60.344475), velocity=(0.5708786, -3.1033337, -55.91103).
+ROOM01_GATE_TRACE: gate=1, tick=138, position=(-2.4336255, 6.657172, 6.322257), velocity=(-1.3582773, -1.1433336, -41.96246).
+ROOM01_GATE_TRACE: gate=2, tick=247, position=(0.56440896, 4.077776, -60.344475), velocity=(0.5708786, -3.1033337, -55.91103).
+ROOM01_GATE_TRACE: gate=1, tick=138, position=(-2.4336255, 6.657172, 6.322257), velocity=(-1.3582773, -1.1433336, -41.96246).
+ROOM01_GATE_TRACE: gate=2, tick=247, position=(0.56440896, 4.077776, -60.344475), velocity=(0.5708786, -3.1033337, -55.91103).
+ROOM01_GATE_TRACE: gate=1, tick=138, position=(-2.4336255, 6.657172, 6.322257), velocity=(-1.3582773, -1.1433336, -41.96246).
+ROOM01_GATE_TRACE: gate=2, tick=247, position=(0.56440896, 4.077776, -60.344475), velocity=(0.5708786, -3.1033337, -55.91103).
+ROOM01_GATE_TRACE: gate=1, tick=138, position=(-2.4336255, 6.657172, 6.322257), velocity=(-1.3582773, -1.1433336, -41.96246).
+ROOM01_GATE_TRACE: gate=2, tick=247, position=(0.56440896, 4.077776, -60.344475), velocity=(0.5708786, -3.1033337, -55.91103).
+ROOM01_GATE_TRACE: gate=1, tick=138, position=(-2.4336255, 6.657172, 6.322257), velocity=(-1.3582773, -1.1433336, -41.96246).
+ROOM01_GATE_TRACE: gate=2, tick=247, position=(0.56440896, 4.077776, -60.344475), velocity=(0.5708786, -3.1033337, -55.91103).
+ROOM01_GATE_TRACE: gate=1, tick=138, position=(-2.4336255, 6.657172, 6.322257), velocity=(-1.3582773, -1.1433336, -41.96246).
+ROOM01_GATE_TRACE: gate=2, tick=247, position=(0.56440896, 4.077776, -60.344475), velocity=(0.5708786, -3.1033337, -55.91103).
+ROOM01_GATE_TRACE: gate=1, tick=138, position=(-2.4336255, 6.657172, 6.322257), velocity=(-1.3582773, -1.1433336, -41.96246).
+ROOM01_GATE_TRACE: gate=2, tick=247, position=(0.56440896, 4.077776, -60.344475), velocity=(0.5708786, -3.1033337, -55.91103).
+ROOM01_GATE_TRACE: gate=1, tick=138, position=(-2.4336255, 6.657172, 6.322257), velocity=(-1.3582773, -1.1433336, -41.96246).
+ROOM01_GATE_TRACE: gate=2, tick=247, position=(0.56440896, 4.077776, -60.344475), velocity=(0.5708786, -3.1033337, -55.91103).
+ROOM01_SOLUTION_PASS: SolutionTrace completed Room 01 10 consecutive times.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM02_TRACE_POINT: route=1/4, tick=119, position=(0.037964143, 6.344793, 9.483866), velocity=(1.1387434, 0, -11.97736).
+ROOM02_TRACE_POINT: route=2/4, tick=327, position=(20.850231, 11.424552, 0.09835911), velocity=(-1.3136806, -6.049019, 2.3474066).
+ROOM02_TRACE_POINT: route=3/4, tick=638, position=(-20.791061, 11.391769, 2.4713895), velocity=(1.2879744, -6.5111117, -0.054083854).
+ROOM02_TRACE_POINT: route=4/4, tick=898, position=(1.595429, 6.3481207, -9.954957), velocity=(-2.1786585, 0, -11.994486).
+ROOM02_TRACE_POINT: route=1/4, tick=119, position=(0.03796414, 6.344793, 9.483221), velocity=(1.1387434, 0, -11.977358).
+ROOM02_TRACE_POINT: route=2/4, tick=327, position=(20.850231, 11.424534, 0.097713515), velocity=(-1.3136816, -6.0490303, 2.3474052).
+ROOM02_TRACE_POINT: route=3/4, tick=638, position=(-20.790936, 11.391766, 2.4707422), velocity=(1.2879753, -6.511114, -0.05408424).
+ROOM02_TRACE_POINT: route=4/4, tick=898, position=(1.5953584, 6.3478775, -9.955631), velocity=(-2.1786575, 0, -11.994487).
+ROOM02_TRACE_POINT: route=1/4, tick=119, position=(0.03796414, 6.344793, 9.483221), velocity=(1.1387434, 0, -11.977358).
+ROOM02_TRACE_POINT: route=2/4, tick=327, position=(20.850231, 11.424552, 0.09771384), velocity=(-1.3136806, -6.049019, 2.3474057).
+ROOM02_TRACE_POINT: route=3/4, tick=638, position=(-20.790936, 11.391766, 2.4707425), velocity=(1.2879753, -6.5111136, -0.054083973).
+ROOM02_TRACE_POINT: route=4/4, tick=898, position=(1.5953604, 6.3478785, -9.955629), velocity=(-2.178655, 0, -11.994486).
+ROOM02_TRACE_POINT: route=1/4, tick=119, position=(0.03796414, 6.344793, 9.483221), velocity=(1.1387434, 0, -11.977358).
+ROOM02_TRACE_POINT: route=2/4, tick=327, position=(20.850231, 11.424552, 0.09771384), velocity=(-1.3136806, -6.049019, 2.3474057).
+ROOM02_TRACE_POINT: route=3/4, tick=638, position=(-20.790936, 11.391766, 2.4707425), velocity=(1.2879753, -6.5111136, -0.054083973).
+ROOM02_TRACE_POINT: route=4/4, tick=898, position=(1.5953604, 6.3478785, -9.955629), velocity=(-2.178655, 0, -11.994486).
+ROOM02_TRACE_POINT: route=1/4, tick=119, position=(0.03796414, 6.344793, 9.483221), velocity=(1.1387434, 0, -11.977358).
+ROOM02_TRACE_POINT: route=2/4, tick=327, position=(20.850231, 11.424552, 0.09771384), velocity=(-1.3136806, -6.049019, 2.3474057).
+ROOM02_TRACE_POINT: route=3/4, tick=638, position=(-20.790936, 11.391766, 2.4707425), velocity=(1.2879753, -6.5111136, -0.054083973).
+ROOM02_TRACE_POINT: route=4/4, tick=898, position=(1.5953604, 6.3478785, -9.955629), velocity=(-2.178655, 0, -11.994486).
+ROOM02_TRACE_POINT: route=1/4, tick=119, position=(0.03796414, 6.344793, 9.483221), velocity=(1.1387434, 0, -11.977358).
+ROOM02_TRACE_POINT: route=2/4, tick=327, position=(20.850231, 11.424552, 0.09771384), velocity=(-1.3136806, -6.049019, 2.3474057).
+ROOM02_TRACE_POINT: route=3/4, tick=638, position=(-20.790936, 11.391766, 2.4707425), velocity=(1.2879753, -6.5111136, -0.054083973).
+ROOM02_TRACE_POINT: route=4/4, tick=898, position=(1.5953604, 6.3478785, -9.955629), velocity=(-2.178655, 0, -11.994486).
+ROOM02_TRACE_POINT: route=1/4, tick=119, position=(0.03796414, 6.344793, 9.483221), velocity=(1.1387434, 0, -11.977358).
+ROOM02_TRACE_POINT: route=2/4, tick=327, position=(20.850231, 11.424552, 0.09771384), velocity=(-1.3136806, -6.049019, 2.3474057).
+ROOM02_TRACE_POINT: route=3/4, tick=638, position=(-20.790936, 11.391766, 2.4707425), velocity=(1.2879753, -6.5111136, -0.054083973).
+ROOM02_TRACE_POINT: route=4/4, tick=898, position=(1.5953604, 6.3478785, -9.955629), velocity=(-2.178655, 0, -11.994486).
+ROOM02_TRACE_POINT: route=1/4, tick=119, position=(0.03796414, 6.344793, 9.483221), velocity=(1.1387434, 0, -11.977358).
+ROOM02_TRACE_POINT: route=2/4, tick=327, position=(20.850231, 11.424552, 0.09771384), velocity=(-1.3136806, -6.049019, 2.3474057).
+ROOM02_TRACE_POINT: route=3/4, tick=638, position=(-20.790936, 11.391766, 2.4707425), velocity=(1.2879753, -6.5111136, -0.054083973).
+ROOM02_TRACE_POINT: route=4/4, tick=898, position=(1.5953604, 6.3478785, -9.955629), velocity=(-2.178655, 0, -11.994486).
+ROOM02_TRACE_POINT: route=1/4, tick=119, position=(0.03796414, 6.344793, 9.483221), velocity=(1.1387434, 0, -11.977358).
+ROOM02_TRACE_POINT: route=2/4, tick=327, position=(20.850231, 11.424552, 0.09771384), velocity=(-1.3136806, -6.049019, 2.3474057).
+ROOM02_TRACE_POINT: route=3/4, tick=638, position=(-20.790936, 11.391766, 2.4707425), velocity=(1.2879753, -6.5111136, -0.054083973).
+ROOM02_TRACE_POINT: route=4/4, tick=898, position=(1.5953604, 6.3478785, -9.955629), velocity=(-2.178655, 0, -11.994486).
+ROOM02_TRACE_POINT: route=1/4, tick=119, position=(0.03796414, 6.344793, 9.483221), velocity=(1.1387434, 0, -11.977358).
+ROOM02_TRACE_POINT: route=2/4, tick=327, position=(20.850231, 11.424552, 0.09771384), velocity=(-1.3136806, -6.049019, 2.3474057).
+ROOM02_TRACE_POINT: route=3/4, tick=638, position=(-20.790936, 11.391766, 2.4707425), velocity=(1.2879753, -6.5111136, -0.054083973).
+ROOM02_TRACE_POINT: route=4/4, tick=898, position=(1.5953604, 6.3478785, -9.955629), velocity=(-2.178655, 0, -11.994486).
+ROOM02_SOLUTION_PASS: SolutionTrace completed Room 02 10 consecutive times.
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM03_GATE_TRACE: gate=1, tick=140, position=(0, 14.343257, 10.907935), velocity=(0, -2.5, -19.790758).
+ROOM03_GATE_TRACE: gate=2, tick=261, position=(0.86446714, 9.716078, -22.57517), velocity=(1.8184025, -1.1433352, -21.489536).
+ROOM03_GATE_TRACE: gate=3, tick=366, position=(2.0725956, 4.7257648, -57.066936), velocity=(0.056401595, -0.9800001, -23.8086).
+ROOM03_GATE_TRACE: gate=4, tick=476, position=(-2.8501666, -0.60097224, -97.77551), velocity=(-3.4899445, -2.5, -28.257998).
+ROOM03_GATE_TRACE: gate=1, tick=136, position=(0, 14.343257, 10.907935), velocity=(0, -2.5, -19.790758).
+ROOM03_GATE_TRACE: gate=2, tick=257, position=(0.7432241, 9.714762, -22.609194), velocity=(1.8316588, -1.1492764, -21.576618).
+ROOM03_GATE_TRACE: gate=3, tick=362, position=(3.0539086, 4.7310433, -57.03198), velocity=(0.9999392, -0.9800001, -23.719458).

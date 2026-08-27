@@ -43,6 +43,7 @@ public partial class Room23Runtime : RoomRuntime
     private int _shellSmokeTick;
     private int _previewFrames;
     private int _mechanicsSmokeTick;
+    private float _fullChargeFarRingY;
     private float _storedSpeed;
     private float _releaseSpeed;
     private float _halfChargeFarRingY;
@@ -237,7 +238,7 @@ public partial class Room23Runtime : RoomRuntime
         _mechanicsSmokeTick++;
         if (_mechanicsSmokeTick == 1)
         {
-            _goal.EmitSignal(Area3D.SignalName.BodyEntered, _player);
+            TryCompleteAtGoal();
             if (IsComplete || IsExitTraversalPending) { FailMechanicsSmoke("Direct goal entry completed the room."); return; }
             Area3D capture = _bank.GetNode<Area3D>("CaptureArea");
             capture.EmitSignal(Area3D.SignalName.BodyEntered, _player);
@@ -272,23 +273,32 @@ public partial class Room23Runtime : RoomRuntime
         if (_mechanicsSmokeTick == 1140)
         {
             if (!_bank.IsFullyCharged || !_capturedFullCharge) { FailMechanicsSmoke("The eight top charge segments did not finish after the timed wait."); return; }
-            if (!PassesFarRingNearCenter(_bank.PreviewImpulse(_player), out float fullChargeFarRingY))
+            if (!PassesFarRingNearCenter(_bank.PreviewImpulse(_player), out _fullChargeFarRingY))
             {
-                FailMechanicsSmoke($"The full-charge arc missed the far ring. projectedY={fullChargeFarRingY:F2}, ringY={_flightGates[1].GlobalPosition.Y:F2}.");
+                FailMechanicsSmoke($"The full-charge arc missed the far ring. projectedY={_fullChargeFarRingY:F2}, ringY={_flightGates[1].GlobalPosition.Y:F2}.");
                 return;
             }
             _bank.Interact(_player);
             if (!_released || _releaseSpeed < 31.9f || !CompletedAdvancementIds.Contains("full-account")) { FailMechanicsSmoke("The full-power release did not reach maximum speed or award Full Account."); return; }
-            foreach (RouteCheckpoint3D stage in _routeStages) { stage.Press(_player); }
+            _routeStages[0].Press(_player);
+            return;
+        }
+        if (_mechanicsSmokeTick == 1141)
+        {
+            _routeStages[1].Press(_player);
+            return;
+        }
+        if (_mechanicsSmokeTick == 1142)
+        {
             foreach (FlightGate3D gate in _flightGates)
             {
                 _player.ResetTo(new Transform3D(Basis.Identity, gate.GlobalPosition));
                 gate.EmitSignal(Area3D.SignalName.BodyEntered, _player);
             }
             _landedHigh = true;
-            _goal.EmitSignal(Area3D.SignalName.BodyEntered, _player);
+            TryCompleteAtGoal();
             if (!IsComplete && !IsExitTraversalPending) { FailMechanicsSmoke("The complete timed-charge route did not open the exit."); return; }
-            GD.Print($"ROOM23_MECHANICS_PASS: sub-half charge fell short, both half ({_halfChargeFarRingY:F2} m) and full ({fullChargeFarRingY:F2} m) charge arcs crossed the far ring, and the twelve-second full charge uniquely awarded Full Account.");
+            GD.Print($"ROOM23_MECHANICS_PASS: sub-half charge fell short, both half ({_halfChargeFarRingY:F2} m) and full ({_fullChargeFarRingY:F2} m) charge arcs crossed the far ring, and the twelve-second full charge uniquely awarded Full Account.");
             GetTree().Quit(0);
         }
     }
@@ -462,15 +472,17 @@ public partial class Room23Runtime : RoomRuntime
         Vector3 goalPosition = new(0.0f, 10.85f, -77.0f);
         _goal = new Area3D { Name = "GoalCup", Position = goalPosition, CollisionLayer = 0, CollisionMask = 1, Monitoring = true };
         _goal.AddChild(new CollisionShape3D { Shape = new CylinderShape3D { Radius = 2.0f, Height = 3.0f } });
-        _goal.BodyEntered += body =>
-        {
-            if (body is PlayerBall && _released && _landedHigh && _nextRouteStage == RequiredRouteStages && _nextFlightGate == _flightGates.Count)
-            {
-                CompleteRoom();
-            }
-        };
+        _goal.BodyEntered += body => { if (body is PlayerBall) { TryCompleteAtGoal(); } };
         AddChild(_goal);
         RoomGeometry.AddGoalExitDoor(this, goalPosition);
+    }
+
+    private void TryCompleteAtGoal()
+    {
+        if (_released && _landedHigh && _nextRouteStage == RequiredRouteStages && _nextFlightGate == _flightGates.Count)
+        {
+            CompleteRoom();
+        }
     }
 
     private void FailMechanicsSmoke(string message)

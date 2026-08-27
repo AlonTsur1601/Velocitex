@@ -1,0 +1,3 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM12_MECHANICS_PASS: wrong order stayed closed; both positive prerequisites and both negative missing-mechanic cases behaved correctly.

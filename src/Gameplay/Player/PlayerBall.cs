@@ -397,7 +397,7 @@ public partial class PlayerBall : RigidBody3D
         }
 
         Color trailColor = CandyVisualStyle.ResolveTrailColor(profile.TrailId);
-        trailColor.A = 0.62f;
+        trailColor.A = 1.0f;
         ApplyTrailColor(trailColor);
     }
 
@@ -427,6 +427,8 @@ public partial class PlayerBall : RigidBody3D
 
     private void ApplyTrailColor(Color color)
     {
+        _trailMaterial.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
+        _trailMaterial.Transparency = BaseMaterial3D.TransparencyEnum.Disabled;
         _trailMaterial.AlbedoColor = color;
         _trailMaterial.Emission = new Color(color.R, color.G, color.B, 1.0f);
     }

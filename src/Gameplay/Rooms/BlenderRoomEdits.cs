@@ -1,5 +1,6 @@
 using Godot;
 using System.Text.Json;
+using Velocitex.Gameplay.Physics;
 using Velocitex.Gameplay.Visual;
 
 namespace Velocitex.Gameplay.Rooms;
@@ -14,7 +15,6 @@ internal static class BlenderRoomEdits
 
     private static readonly string[] CanonicalDoorReferenceTargets =
     {
-        "FrameCollision",
         "ClosedDoorBlocker",
         "ExitCorridorFloor",
         "ExitCorridorCeiling",
@@ -23,9 +23,9 @@ internal static class BlenderRoomEdits
         "ExitCorridorEndWall",
     };
 
-    private static readonly Transform3D Room02CanonicalDoorSpace = new(
+    private static readonly Transform3D ClosedDoorBlockerLocal = new(
         Basis.Identity,
-        new Vector3(0.0f, 5.63f, -37.75f));
+        new Vector3(0.0f, 2.19f, -0.03f));
 
     internal const string ReferenceTargetPathMetadata = "blender_reference_target_path";
     internal const string ReferenceCollisionPathMetadata = "blender_reference_collision_path";
@@ -62,7 +62,8 @@ internal static class BlenderRoomEdits
 
         importedRoot.Name = "BlenderGeometry";
         room.AddChild(importedRoot);
-        importedMeshes = ApplyCanonicalDoorGeometry(room, roomNumber, importedRoot, importedMeshes);
+        AlignExitDoorToAuthoredBlocker(room, importedMeshes);
+        importedMeshes = MarkCanonicalDoorGeometry(importedMeshes);
 
         BlenderReferenceBinding referenceBinding = new(room)
         {
@@ -183,7 +184,11 @@ internal static class BlenderRoomEdits
             // final Blender-derived hitboxes so the runtime collision cannot
             // protrude back through the canonical Room 02 entrance.
             HashSet<StaticBody3D> trimmedImportedTargets =
-                RoomGeometry.TrimExitPlatformsToThreshold(room, exitDoor, preserveBodyTransform: true);
+                RoomGeometry.TrimExitPlatformsToThreshold(
+                    room,
+                    exitDoor,
+                    preserveBodyTransform: true,
+                    expectedFloorHeight: ExitDoor3D.AuthoredApproachFloorHeight);
             foreach (MeshInstance3D importedReference in importedMeshes.Where(mesh =>
                 IsReferenceMesh(mesh) && mesh.HasMeta(ReferenceTargetPathMetadata)))
             {
@@ -254,103 +259,35 @@ internal static class BlenderRoomEdits
     private static bool IsReferenceMesh(MeshInstance3D mesh) =>
         mesh.Name.ToString().StartsWith("REF_", StringComparison.Ordinal);
 
-    private static MeshInstance3D[] ApplyCanonicalDoorGeometry(
+    private static void AlignExitDoorToAuthoredBlocker(
         Node3D room,
-        int roomNumber,
-        Node3D importedRoot,
         IReadOnlyCollection<MeshInstance3D> roomMeshes)
     {
         ExitDoor3D? door = room.GetNodeOrNull<ExitDoor3D>("ExitDoor");
-        if (door is null)
+        MeshInstance3D? authoredBlocker = roomMeshes.FirstOrDefault(mesh =>
+            IsReferenceMesh(mesh) &&
+            RemoveNumericDuplicateSuffix(ReferenceTargetName(mesh)) == "ClosedDoorBlocker");
+        if (door is null || authoredBlocker is null)
         {
-            return roomMeshes.ToArray();
+            return;
         }
 
-        MeshInstance3D[] existingDoorReferences = roomMeshes
+        Transform3D rigidBlocker = authoredBlocker.GlobalTransform.Orthonormalized();
+        door.GlobalTransform = rigidBlocker * ClosedDoorBlockerLocal.AffineInverse();
+    }
+
+    private static MeshInstance3D[] MarkCanonicalDoorGeometry(
+        IReadOnlyCollection<MeshInstance3D> roomMeshes)
+    {
+        MeshInstance3D[] meshes = roomMeshes.ToArray();
+        foreach (MeshInstance3D reference in meshes
             .Where(mesh => IsReferenceMesh(mesh) &&
                 IsCanonicalDoorReference(mesh))
-            .ToArray();
-        if (roomNumber == 2)
+            .ToArray())
         {
-            foreach (MeshInstance3D reference in existingDoorReferences)
-            {
-                reference.SetMeta(CanonicalDoorSourceRoomMetadata, 2);
-            }
-            return roomMeshes.ToArray();
+            reference.SetMeta(CanonicalDoorSourceRoomMetadata, 2);
         }
-
-        PackedScene? canonicalScene = GD.Load<PackedScene>(
-            "res://assets/models/EditableWallsBlender/Room02Walls.blend");
-        if (canonicalScene?.Instantiate() is not Node3D canonicalRoot)
-        {
-            GD.PushError("BLENDER_ROOM_EDIT_FAIL: unable to load the Room 02 canonical door geometry");
-            return roomMeshes.ToArray();
-        }
-
-        MeshInstance3D[] canonicalReferences = canonicalRoot.GetChildren()
-            .OfType<MeshInstance3D>()
-            .Where(mesh => IsReferenceMesh(mesh) &&
-                IsCanonicalDoorReference(mesh))
-            .ToArray();
-        Dictionary<string, Queue<string>> namesByTarget = existingDoorReferences
-            .GroupBy(CanonicalDoorTargetName, StringComparer.Ordinal)
-            .ToDictionary(
-                group => group.Key,
-                group => new Queue<string>(group
-                    .OrderBy(mesh => mesh.Transform.Origin.X)
-                    .Select(mesh => mesh.Name.ToString())),
-                StringComparer.Ordinal);
-        HashSet<string> localCollisionTargets = existingDoorReferences
-            .Select(CanonicalDoorTargetName)
-            .ToHashSet(StringComparer.Ordinal);
-        Node3D localCollisionSources = new()
-        {
-            Name = "LocalDoorCollisionSources",
-            Visible = false,
-        };
-        importedRoot.AddChild(localCollisionSources);
-        foreach (MeshInstance3D oldReference in existingDoorReferences)
-        {
-            Transform3D globalTransform = oldReference.GlobalTransform;
-            importedRoot.RemoveChild(oldReference);
-            localCollisionSources.AddChild(oldReference);
-            oldReference.GlobalTransform = globalTransform;
-            oldReference.Visible = false;
-            oldReference.SetMeta(LocalDoorCollisionSourceMetadata, true);
-        }
-
-        foreach (MeshInstance3D canonicalReference in canonicalReferences
-            .OrderBy(CanonicalDoorTargetName, StringComparer.Ordinal)
-            .ThenBy(mesh => mesh.Transform.Origin.X))
-        {
-            string targetName = CanonicalDoorTargetName(canonicalReference);
-            string cloneName = namesByTarget.TryGetValue(targetName, out Queue<string>? availableNames) &&
-                availableNames.Count > 0
-                ? availableNames.Dequeue()
-                : canonicalReference.Name.ToString();
-            MeshInstance3D clone = new()
-            {
-                Name = cloneName,
-                Mesh = canonicalReference.Mesh,
-                CastShadow = canonicalReference.CastShadow,
-                Layers = canonicalReference.Layers,
-                Visible = canonicalReference.Visible,
-            };
-            importedRoot.AddChild(clone);
-            Transform3D canonicalRelative = Room02CanonicalDoorSpace.AffineInverse() *
-                canonicalReference.Transform;
-            clone.GlobalTransform = door.GlobalTransform * canonicalRelative;
-            clone.SetMeta(CanonicalDoorSourceRoomMetadata, 2);
-            if (localCollisionTargets.Contains(targetName))
-            {
-                clone.SetMeta(CanonicalDoorVisualOnlyMetadata, true);
-            }
-        }
-
-        canonicalRoot.Free();
-        return importedRoot.GetChildren().OfType<MeshInstance3D>()
-            .Concat(localCollisionSources.GetChildren().OfType<MeshInstance3D>())
-            .ToArray();
+        return meshes;
     }
 
     private static bool IsCanonicalDoorReference(MeshInstance3D mesh) =>
@@ -791,6 +728,11 @@ internal static class BlenderRoomEdits
 
     internal static bool IsVisibleThrough(Node3D target, Node3D room)
     {
+        if (target is ProfiledSurfaceBody { IsBroken: true })
+        {
+            return false;
+        }
+
         for (Node? current = target; current is not null; current = current.GetParent())
         {
             if (current is Node3D spatial && !spatial.Visible)
@@ -879,8 +821,8 @@ internal static class BlenderRoomEdits
             mesh.SetMeta(ReferenceCollisionPathMetadata, body.GetPathTo(collision));
         }
 
-        // FrameCollision is authored as a complete collision envelope in the
-        // canonical Room 02 Blender model. Do not leave any generated frame
+        // FrameCollision is authored as a complete collision envelope in each
+        // room's Blender model. Do not leave any generated frame
         // boxes active behind that imported envelope: those stale shapes are
         // invisible and can otherwise block the player where the latest model
         // is open.

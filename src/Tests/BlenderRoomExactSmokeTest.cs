@@ -1,12 +1,18 @@
 using Godot;
+using System.Reflection;
+using Velocitex.Core.Physics;
+using Velocitex.Gameplay.Physics;
 using Velocitex.Gameplay.Rooms;
 
 namespace Velocitex.Tests;
 
 public partial class BlenderRoomExactSmokeTest : Node
 {
-    private const int CanonicalRoom02DoorReferenceCount = 8;
+    private const int CanonicalRoom02DoorReferenceCount = 6;
     private const float Tolerance = 0.0005f;
+    private static readonly Transform3D ClosedDoorBlockerLocal = new(
+        Basis.Identity,
+        new Vector3(0.0f, 2.19f, -0.03f));
 
     public override async void _Ready()
     {
@@ -251,6 +257,7 @@ public partial class BlenderRoomExactSmokeTest : Node
         failures += AuditLegacyVisuals(room, blenderGeometry, actual, roomNumber);
         failures += AuditDoorEntrance(room, actual, roomNumber);
         failures += AuditLighting(room, roomNumber);
+        failures += AuditBrokenGlassBinding(room, actual, roomNumber);
 
         if (failures == 0)
         {
@@ -259,6 +266,51 @@ public partial class BlenderRoomExactSmokeTest : Node
 
         importedRoot.Free();
         return failures;
+    }
+
+    private static int AuditBrokenGlassBinding(
+        Node3D room,
+        IReadOnlyDictionary<string, MeshInstance3D> importedMeshes,
+        int roomNumber)
+    {
+        if (roomNumber != 6)
+        {
+            return 0;
+        }
+
+        ProfiledSurfaceBody? glass = EnumerateDescendants(room)
+            .OfType<ProfiledSurfaceBody>()
+            .FirstOrDefault(surface => surface.Profile.Kind == SurfaceKind.Frictionless);
+        MeshInstance3D? importedGlass = glass is null
+            ? null
+            : importedMeshes.Values.FirstOrDefault(mesh =>
+                mesh.HasMeta(BlenderRoomEdits.ReferenceTargetPathMetadata) &&
+                room.GetNodeOrNull<Node3D>(mesh.GetMeta(BlenderRoomEdits.ReferenceTargetPathMetadata).AsNodePath()) == glass);
+        Node? binding = room.GetNodeOrNull<Node>("BlenderReferenceBindings");
+        MethodInfo? breakGlass = typeof(ProfiledSurfaceBody).GetMethod(
+            "BreakGlass",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        if (glass is null || importedGlass is null || binding is null || breakGlass is null)
+        {
+            GD.PushError("BLENDER_ROOM_EXACT_FAIL: Room 06 could not locate a Blender-bound timed-glass surface for the break-visibility audit.");
+            return 1;
+        }
+
+        breakGlass.Invoke(glass, null);
+        binding._Process(0.0);
+        bool hiddenWhenBroken = glass.IsBroken && !importedGlass.Visible;
+        glass.RestoreGlass();
+        binding._Process(0.0);
+        bool restoredAfterReset = !glass.IsBroken && importedGlass.Visible;
+        if (!hiddenWhenBroken || !restoredAfterReset)
+        {
+            GD.PushError(
+                $"BLENDER_ROOM_EXACT_FAIL: Room 06 imported glass visibility did not follow break/reset state: " +
+                $"hidden={hiddenWhenBroken}, restored={restoredAfterReset}.");
+            return 1;
+        }
+
+        return 0;
     }
 
     private static int AuditDoorEntrance(
@@ -330,7 +382,7 @@ public partial class BlenderRoomExactSmokeTest : Node
                 !mesh.HasMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata) ||
                 mesh.GetMeta(BlenderRoomEdits.CanonicalDoorSourceRoomMetadata).AsInt32() != 2))
         {
-            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} uses {canonicalDoorMeshes.Length}/{CanonicalRoom02DoorReferenceCount} exact Room 02 canonical frame, blocker and corridor references.");
+            GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} uses {canonicalDoorMeshes.Length}/{CanonicalRoom02DoorReferenceCount} exact Room 02 canonical blocker and corridor references.");
             failures++;
         }
 
@@ -397,7 +449,17 @@ public partial class BlenderRoomExactSmokeTest : Node
             return 1;
         }
 
-        Transform3D sourceDoorSpace = new(Basis.Identity, new Vector3(0.0f, 5.63f, -37.75f));
+        MeshInstance3D? sourceBlocker = sourceRoot.GetChildren()
+            .OfType<MeshInstance3D>()
+            .FirstOrDefault(mesh => CanonicalDoorTargetName(mesh.Name.ToString()) == "ClosedDoorBlocker");
+        if (sourceBlocker is null)
+        {
+            sourceRoot.Free();
+            GD.PushError("BLENDER_ROOM_EXACT_FAIL: Room 02 canonical source has no ClosedDoorBlocker.");
+            return 1;
+        }
+        Transform3D sourceDoorSpace = sourceBlocker.Transform.Orthonormalized() *
+            ClosedDoorBlockerLocal.AffineInverse();
         Dictionary<string, MeshInstance3D[]> expectedByTarget = sourceRoot.GetChildren()
             .OfType<MeshInstance3D>()
             .Where(mesh => IsCanonicalDoorReference(mesh.Name.ToString()))
@@ -431,14 +493,18 @@ public partial class BlenderRoomExactSmokeTest : Node
                 Transform3D actualRelative = door.GlobalTransform.AffineInverse() * actualParts[index].GlobalTransform;
                 Aabb expectedMeshBounds = expectedParts[index].Mesh?.GetAabb() ?? default;
                 Aabb actualMeshBounds = actualParts[index].Mesh?.GetAabb() ?? default;
-                float error = Mathf.Max(
-                    TransformError(actualRelative, expectedRelative),
-                    Mathf.Max(
-                        actualMeshBounds.Position.DistanceTo(expectedMeshBounds.Position),
-                        actualMeshBounds.Size.DistanceTo(expectedMeshBounds.Size)));
+                float error = TransformedMeshError(
+                    actualParts[index],
+                    actualRelative,
+                    expectedParts[index],
+                    expectedRelative);
                 if (error > Tolerance)
                 {
-                    GD.PushError($"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} canonical target {target}[{index}] differs numerically from Room 02 by {error:F6}.");
+                    GD.PushError(
+                        $"BLENDER_ROOM_EXACT_FAIL: Room {roomNumber:00} canonical target {target}[{index}] " +
+                        $"differs numerically from Room 02 by {error:F6}; " +
+                        $"expectedTransform={expectedRelative}, actualTransform={actualRelative}, " +
+                        $"expectedBounds={expectedMeshBounds}, actualBounds={actualMeshBounds}.");
                     failures++;
                 }
             }
@@ -784,7 +850,7 @@ public partial class BlenderRoomExactSmokeTest : Node
     private static bool IsCanonicalDoorReference(string name)
     {
         string target = CanonicalDoorTargetName(name);
-        return target is "FrameCollision" or "ClosedDoorBlocker" or
+        return target is "ClosedDoorBlocker" or
             "ExitCorridorFloor" or "ExitCorridorCeiling" or
             "ExitCorridorLeftWall" or "ExitCorridorRightWall" or
             "ExitCorridorEndWall";
@@ -851,6 +917,30 @@ public partial class BlenderRoomExactSmokeTest : Node
                 Mathf.Max(
                     actual.Transform.Basis.Y.DistanceTo(expected.Transform.Basis.Y),
                     actual.Transform.Basis.Z.DistanceTo(expected.Transform.Basis.Z))));
+    }
+
+    private static float TransformedMeshError(
+        MeshInstance3D actual,
+        Transform3D actualTransform,
+        MeshInstance3D expected,
+        Transform3D expectedTransform)
+    {
+        Vector3[] actualFaces = actual.Mesh?.GetFaces() ?? Array.Empty<Vector3>();
+        Vector3[] expectedFaces = expected.Mesh?.GetFaces() ?? Array.Empty<Vector3>();
+        if (actualFaces.Length != expectedFaces.Length || actualFaces.Length == 0)
+        {
+            return float.PositiveInfinity;
+        }
+
+        float maximum = 0.0f;
+        for (int index = 0; index < actualFaces.Length; index++)
+        {
+            maximum = Mathf.Max(
+                maximum,
+                (actualTransform * actualFaces[index]).DistanceTo(
+                    expectedTransform * expectedFaces[index]));
+        }
+        return maximum;
     }
 
     private static float TransformError(Transform3D actual, Transform3D expected) =>

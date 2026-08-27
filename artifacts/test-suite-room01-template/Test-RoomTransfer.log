@@ -1,0 +1,3 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ROOM_TRANSFER_SMOKE_PASS: room handoff preserved first-person mode, while a main-menu restart restored the configured default; the full loading screen remained startup-only.

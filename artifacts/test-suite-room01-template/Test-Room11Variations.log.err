@@ -1,0 +1,7 @@
+Room 11 varied-input smoke failed.
+At C:\Users\alont\OneDrive\éëéãâç\Alon\Velocitex\scripts\Test-Room11Variations.ps1:20 char:5
++     throw "Room 11 varied-input smoke failed."
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Room 11 varied-input smoke failed.:String) [], RuntimeException
+    + FullyQualifiedErrorId : Room 11 varied-input smoke failed.
+ 

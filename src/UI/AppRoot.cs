@@ -4405,8 +4405,8 @@ public partial class AppRoot : Node
         Vector2 viewportSize = GetViewport().GetVisibleRect().Size;
         if (!_settingsMenu.Visible || tabs.GetTabCount() != 6 ||
             _updateVersionLabel.Text != $"Current version: v{ReleaseUpdateService.CurrentVersion}" ||
-            !ReleaseUpdateService.TryParseVersion("v1.3.1", out Version? laterVersion) || laterVersion is null || laterVersion <= ReleaseUpdateService.CurrentVersion ||
-            !ReleaseUpdateService.TryParseVersion("1.3.0", out Version? sameVersion) || sameVersion is null || sameVersion != ReleaseUpdateService.CurrentVersion ||
+            !ReleaseUpdateService.TryParseVersion("v1.4.1", out Version? laterVersion) || laterVersion is null || laterVersion <= ReleaseUpdateService.CurrentVersion ||
+            !ReleaseUpdateService.TryParseVersion("1.4.0", out Version? sameVersion) || sameVersion is null || sameVersion != ReleaseUpdateService.CurrentVersion ||
             ReleaseUpdateService.TryParseVersion("invalid", out _) ||
             _subtitlesCheck.ButtonPressed ||
             settingsPanel.Size.X > viewportSize.X || settingsPanel.Size.Y > viewportSize.Y)

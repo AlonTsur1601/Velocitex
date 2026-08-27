@@ -1,0 +1,3 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+UI_SMOKE_PASS: visual menu, loading, main-menu-only load/customization, room-start and final-main-menu achievement notifications, mode-specific restart labels, silent room transfer, pause boundary, complete settings, rebinding and 120 FPS work.

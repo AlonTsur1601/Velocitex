@@ -1,0 +1,8 @@
+Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org
+
+ENDING_SMOKE_READY: ending set built with no skip input.
+ENDING_SMOKE_START: ending scene instantiated.
+ENDING_FREEZE_FRAME: candy reached the child's mouth and all scene motion stopped.
+ENDING_CREDITS_COMPLETE: blackout and large credits completed; coverage=0.84x0.69.
+ENDING_SMOKE_PASS: mouth blackout, large fading credits, startup loading screen and main-menu return all completed in order.
+ENDING_TEST_PASS: mouth blackout, large fading credits, startup loading and menu return verified.

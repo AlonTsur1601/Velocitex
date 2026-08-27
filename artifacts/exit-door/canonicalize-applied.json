@@ -1,0 +1,1177 @@
+{
+  "dry_run": false,
+  "source_room02": {
+    "blend": [
+      125471,
+      1787672433701286500,
+      "5027A31DEEA863A6F6EC6F208A2256ED9D9339A9D5BB011332B7459453EC5418"
+    ],
+    "blend1": [
+      125677,
+      1787672419536311400,
+      "8875BCDE19AF5CF6654F57BD8DA0FD08A0D0D8F24839C38E45BEC68C6B4DCDD6"
+    ]
+  },
+  "rooms": [
+    {
+      "room": 1,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_016_SecondLanding",
+          "bounds": [
+            [
+              -7.5,
+              -14.599943,
+              -0.418
+            ],
+            [
+              7.5,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -9.850000381469727,
+          "min_z": -2.667999267578125,
+          "max_z": 19.032001495361328
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 19.031909942626953
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 9.850000381469727,
+          "min_z": -2.667999267578125,
+          "max_z": 19.032001495361328
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -2.710233211517334
+        }
+      }
+    },
+    {
+      "room": 3,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_023_ExitRunout",
+          "bounds": [
+            [
+              -8.5,
+              -13.250019,
+              -0.429999
+            ],
+            [
+              8.5,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -9.95000171661377,
+          "min_z": -4.729999542236328,
+          "max_z": 26.470001220703125
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 26.524559020996094
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 16.75,
+          "min_z": -4.729999542236328,
+          "max_z": 26.470001220703125
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -4.804416656494141
+        }
+      }
+    },
+    {
+      "room": 4,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_011_ExitRun",
+          "bounds": [
+            [
+              -9.0,
+              -14.478541,
+              -0.329999
+            ],
+            [
+              9.0,
+              -0.220005,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -13.850000381469727,
+          "min_z": -6.179999351501465,
+          "max_z": 9.520001411437988
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 9.455910682678223
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 13.850000381469727,
+          "min_z": -6.179999351501465,
+          "max_z": 9.520001411437988
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -6.277181625366211
+        }
+      }
+    },
+    {
+      "room": 5,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_017_ExitRun",
+          "bounds": [
+            [
+              -8.5,
+              -17.773624,
+              -0.429999
+            ],
+            [
+              8.5,
+              -0.220008,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -10.850000381469727,
+          "min_z": -5.179998397827148,
+          "max_z": 17.520002365112305
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 17.511913299560547
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 10.850000381469727,
+          "min_z": -5.179998397827148,
+          "max_z": 17.520002365112305
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -5.261482238769531
+        }
+      }
+    },
+    {
+      "room": 6,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_019_ExitDeck",
+          "bounds": [
+            [
+              -6.0,
+              -6.779997,
+              -0.329999
+            ],
+            [
+              6.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -10.350000381469727,
+          "min_z": -3.929999351501465,
+          "max_z": 13.770001411437988
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 13.735660552978516
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 10.350000381469727,
+          "min_z": -3.929999351501465,
+          "max_z": 13.770001411437988
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -3.9918575286865234
+        }
+      }
+    },
+    {
+      "room": 7,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_013_ExitDeck",
+          "bounds": [
+            [
+              -8.775,
+              -11.91135,
+              -0.329999
+            ],
+            [
+              8.775,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -9.350000381469727,
+          "min_z": -6.829998970031738,
+          "max_z": 9.770001411437988
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 9.707663536071777
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 9.350000381469727,
+          "min_z": -6.829998970031738,
+          "max_z": 9.770001411437988
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -6.937387466430664
+        }
+      }
+    },
+    {
+      "room": 8,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_016_ExitRun",
+          "bounds": [
+            [
+              -3.0,
+              -24.03928,
+              -0.329999
+            ],
+            [
+              3.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -30.350000381469727,
+          "min_z": -8.280000686645508,
+          "max_z": 11.719999313354492
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 11.611307144165039
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 6.350000381469727,
+          "min_z": -8.280000686645508,
+          "max_z": 11.719999313354492
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -8.410152435302734
+        }
+      }
+    },
+    {
+      "room": 9,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_015_LandingDeck",
+          "bounds": [
+            [
+              -9.0,
+              -54.780838,
+              -0.329999
+            ],
+            [
+              9.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -12.350000381469727,
+          "min_z": -6.079999923706055,
+          "max_z": 39.91999816894531
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 40.06871032714844
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 12.350000381469727,
+          "min_z": -6.079999923706055,
+          "max_z": 39.91999816894531
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -6.17561149597168
+        }
+      }
+    },
+    {
+      "room": 10,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_019_FinalRunout",
+          "bounds": [
+            [
+              -7.0,
+              -63.000004,
+              -0.329998
+            ],
+            [
+              7.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -14.350000381469727,
+          "min_z": -13.229997634887695,
+          "max_z": 32.769996643066406
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 32.86865997314453
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 14.350000381469727,
+          "min_z": -13.229997634887695,
+          "max_z": 32.769996643066406
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -13.437865257263184
+        }
+      }
+    },
+    {
+      "room": 11,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_013_LandingDeck",
+          "bounds": [
+            [
+              -7.0,
+              -47.479988,
+              -0.329999
+            ],
+            [
+              7.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -14.350000381469727,
+          "min_z": -6.630000114440918,
+          "max_z": 33.77000045776367
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 33.87565994262695
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 14.350000381469727,
+          "min_z": -6.630000114440918,
+          "max_z": 33.77000045776367
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -6.734248161315918
+        }
+      }
+    },
+    {
+      "room": 12,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_014_ExitDeck",
+          "bounds": [
+            [
+              -9.0,
+              -70.580002,
+              -0.329999
+            ],
+            [
+              9.0,
+              -0.220009,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -13.350000381469727,
+          "min_z": -7.679997444152832,
+          "max_z": 32.52000045776367
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 32.616912841796875
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 13.350000381469727,
+          "min_z": -7.679997444152832,
+          "max_z": 32.52000045776367
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -7.800731658935547
+        }
+      }
+    },
+    {
+      "room": 13,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_016_CenteredRecoveryRun",
+          "bounds": [
+            [
+              -7.0,
+              -23.000004,
+              -0.329999
+            ],
+            [
+              7.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -15.350000381469727,
+          "min_z": -7.679998397827148,
+          "max_z": 30.51999855041504
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 30.6029052734375
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 15.350000381469727,
+          "min_z": -7.679998397827148,
+          "max_z": 30.51999855041504
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -7.800731658935547
+        }
+      }
+    },
+    {
+      "room": 14,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_017_FinalDeck",
+          "bounds": [
+            [
+              -13.0,
+              -48.0,
+              -0.329998
+            ],
+            [
+              5.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -24.350000381469727,
+          "min_z": -23.429996490478516,
+          "max_z": 20.770000457763672
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 20.784664154052734
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 16.350000381469727,
+          "min_z": -23.429996490478516,
+          "max_z": 20.770000457763672
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -23.79800796508789
+        }
+      }
+    },
+    {
+      "room": 15,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_018_FinalDeck",
+          "bounds": [
+            [
+              -8.0,
+              -32.699997,
+              -0.329998
+            ],
+            [
+              8.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -20.350000381469727,
+          "min_z": -22.179996490478516,
+          "max_z": 22.020000457763672
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 22.043411254882812
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 20.350000381469727,
+          "min_z": -22.179996490478516,
+          "max_z": 22.020000457763672
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -22.52838134765625
+        }
+      }
+    },
+    {
+      "room": 16,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_011_CompactLandingDeck",
+          "bounds": [
+            [
+              -4.75,
+              -19.775,
+              -0.329998
+            ],
+            [
+              4.75,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -14.350000381469727,
+          "min_z": -13.679998397827148,
+          "max_z": 20.520002365112305
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 20.532917022705078
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 14.350000381469727,
+          "min_z": -13.679998397827148,
+          "max_z": 20.520002365112305
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -13.89493179321289
+        }
+      }
+    },
+    {
+      "room": 17,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_011_LandingDeck",
+          "bounds": [
+            [
+              -7.0,
+              -32.980003,
+              -0.329998
+            ],
+            [
+              7.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -12.350000381469727,
+          "min_z": -11.679996490478516,
+          "max_z": 37.52000427246094
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 37.65191650390625
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 12.350000381469727,
+          "min_z": -11.679996490478516,
+          "max_z": 37.52000427246094
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -11.863531112670898
+        }
+      }
+    },
+    {
+      "room": 18,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_011_ExitDeck",
+          "bounds": [
+            [
+              -7.0,
+              -20.980005,
+              -0.329998
+            ],
+            [
+              7.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -12.350000381469727,
+          "min_z": -20.679996490478516,
+          "max_z": 21.520000457763672
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 21.539913177490234
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 12.350000381469727,
+          "min_z": -20.679996490478516,
+          "max_z": 21.520000457763672
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -21.004831314086914
+        }
+      }
+    },
+    {
+      "room": 19,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_013_ExitDeck",
+          "bounds": [
+            [
+              -10.0,
+              -35.980003,
+              -0.329998
+            ],
+            [
+              10.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -12.350000381469727,
+          "min_z": -17.679996490478516,
+          "max_z": 22.520000457763672
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 22.54690933227539
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 12.350000381469727,
+          "min_z": -17.679996490478516,
+          "max_z": 22.520000457763672
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -17.957731246948242
+        }
+      }
+    },
+    {
+      "room": 20,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_013_FinalDeck",
+          "bounds": [
+            [
+              -7.5,
+              -49.980003,
+              -0.329996
+            ],
+            [
+              7.5,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -13.350000381469727,
+          "min_z": -33.67999267578125,
+          "max_z": 20.520002365112305
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 20.532917022705078
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 13.350000381469727,
+          "min_z": -33.67999267578125,
+          "max_z": 20.520002365112305
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -34.20893096923828
+        }
+      }
+    },
+    {
+      "room": 21,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_013_ExitRunout",
+          "bounds": [
+            [
+              -9.75,
+              -26.080002,
+              -0.329999
+            ],
+            [
+              9.75,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -10.350000381469727,
+          "min_z": -8.429997444152832,
+          "max_z": 33.77000045776367
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 33.87565994262695
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 10.350000381469727,
+          "min_z": -8.429997444152832,
+          "max_z": 33.77000045776367
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -8.562507629394531
+        }
+      }
+    },
+    {
+      "room": 22,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_016_HighDeck",
+          "bounds": [
+            [
+              -12.75,
+              -26.079998,
+              -0.329998
+            ],
+            [
+              12.75,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -13.350000381469727,
+          "min_z": -25.429996490478516,
+          "max_z": 16.770000457763672
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 16.756664276123047
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 13.350000381469727,
+          "min_z": -25.429996490478516,
+          "max_z": 16.770000457763672
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -25.829410552978516
+        }
+      }
+    },
+    {
+      "room": 23,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_015_HighCatch",
+          "bounds": [
+            [
+              -11.0,
+              -20.08,
+              -0.329998
+            ],
+            [
+              11.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -15.350000381469727,
+          "min_z": -13.429998397827148,
+          "max_z": 26.76999855041504
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 26.826662063598633
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 15.350000381469727,
+          "min_z": -13.429998397827148,
+          "max_z": 26.76999855041504
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -13.641006469726562
+        }
+      }
+    },
+    {
+      "room": 24,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_016_ExitDeck",
+          "bounds": [
+            [
+              -20.75,
+              -16.080004,
+              -0.329999
+            ],
+            [
+              10.75,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -21.350000381469727,
+          "min_z": -7.929998397827148,
+          "max_z": 30.26999855041504
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 30.351160049438477
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 11.350000381469727,
+          "min_z": -7.929998397827148,
+          "max_z": 30.26999855041504
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -8.054656982421875
+        }
+      }
+    },
+    {
+      "room": 25,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_015_HighExitDeck",
+          "bounds": [
+            [
+              -11.0,
+              -22.08,
+              -0.329999
+            ],
+            [
+              6.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -20.850000381469727,
+          "min_z": -7.929998397827148,
+          "max_z": 26.270002365112305
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 26.323162078857422
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 9.850000381469727,
+          "min_z": -7.929998397827148,
+          "max_z": 26.270002365112305
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -8.054656982421875
+        }
+      }
+    },
+    {
+      "room": 26,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_007_ExitDeck",
+          "bounds": [
+            [
+              -8.0,
+              -34.080002,
+              -0.329998
+            ],
+            [
+              12.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -23.350000381469727,
+          "min_z": -10.163700103759766,
+          "max_z": 17.036300659179688
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 17.0362548828125
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 23.350000381469727,
+          "min_z": -10.163700103759766,
+          "max_z": 17.036300659179688
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -10.32368278503418
+        }
+      }
+    },
+    {
+      "room": 27,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_014_FinalDeck",
+          "bounds": [
+            [
+              -6.0,
+              -18.08,
+              -0.329998
+            ],
+            [
+              6.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -8.350000381469727,
+          "min_z": -11.929998397827148,
+          "max_z": 26.26999855041504
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 26.323165893554688
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 26.350000381469727,
+          "min_z": -11.929998397827148,
+          "max_z": 26.26999855041504
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -12.117456436157227
+        }
+      }
+    },
+    {
+      "room": 28,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_011_HighDeck",
+          "bounds": [
+            [
+              -15.5,
+              -41.580002,
+              -0.329998
+            ],
+            [
+              2.5,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -21.850000381469727,
+          "min_z": -27.929996490478516,
+          "max_z": 24.270000457763672
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 24.309162139892578
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 8.850000381469727,
+          "min_z": -27.929996490478516,
+          "max_z": 24.270000457763672
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -28.368656158447266
+        }
+      }
+    },
+    {
+      "room": 29,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_019_BounceLandingDeck",
+          "bounds": [
+            [
+              -15.500003,
+              -16.579996,
+              -0.329998
+            ],
+            [
+              8.500009,
+              -0.220006,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -91.35001373291016,
+          "min_z": -10.929998397827148,
+          "max_z": 23.270002365112305
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 23.302162170410156
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 51.350013732910156,
+          "min_z": -10.929998397827148,
+          "max_z": 23.270002365112305
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -11.10175609588623
+        }
+      }
+    },
+    {
+      "room": 30,
+      "created": 12,
+      "approaches": [
+        {
+          "name": "REF_855_FinalExitDeck",
+          "bounds": [
+            [
+              -7.0,
+              -20.079998,
+              -0.329999
+            ],
+            [
+              7.0,
+              -0.220007,
+              0.1863
+            ]
+          ]
+        }
+      ],
+      "intrusions": [],
+      "backing_extents": {
+        "ExitDoorBackingLeft": {
+          "min_x": -17.350000381469727,
+          "min_z": -7.929998397827148,
+          "max_z": 30.26999855041504
+        },
+        "ExitDoorBackingAbove": {
+          "max_z": 30.351160049438477
+        },
+        "ExitDoorBackingRight": {
+          "max_x": 17.350000381469727,
+          "min_z": -7.929998397827148,
+          "max_z": 30.26999855041504
+        },
+        "ExitDoorBackingBelow": {
+          "min_z": -8.054656982421875
+        }
+      }
+    }
+  ]
+}

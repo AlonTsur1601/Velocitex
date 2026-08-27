@@ -775,8 +775,8 @@ public partial class Room20Runtime : RoomRuntime
     {
         if (_runMechanicsSmoke)
         {
-            bool startRailsReachBackWall = GetNode<StaticBody3D>("StartRail-1").Position.Z + 11.3875f >= 64.7f &&
-                GetNode<StaticBody3D>("StartRail1").Position.Z + 11.3875f >= 64.7f;
+            bool startRailsReachBackWall = GetNode<StaticBody3D>("EditableWalls/StartRail-1").Position.Z + 11.3875f >= 64.7f &&
+                GetNode<StaticBody3D>("EditableWalls/StartRail1").Position.Z + 11.3875f >= 64.7f;
             bool cannonGrid = _interferenceCannons.Count == 720 &&
                 _interferenceCannons.Max(cannon => cannon.InitialDelayTicks) <= 189 &&
                 _interferenceCannons.Select(cannon => cannon.ScheduledFirstFireTick).Distinct().Count() >= 100 &&
